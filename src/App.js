@@ -1,15 +1,51 @@
 import React, { useState } from "react";
 import "./App.css";
 
+function Navbar({ mobile, open, onOpen, onClose }) {
+  return (
+    <>
+      {!mobile && (
+        <nav className="nav">
+          <a href="#catalogs">Каталоги</a>
+          <a href="#constructor">Собрать слайд-шоу</a>
+          <a href="#contact">Написать нам</a>
+        </nav>
+      )}
+      {mobile && (
+        <>
+          <button className="burger" onClick={onOpen} aria-label="Открыть меню">
+            <span />
+            <span />
+            <span />
+          </button>
+          {open && (
+            <div className="mobile-menu">
+              <button className="mobile-menu-close" onClick={onClose} aria-label="Закрыть меню">×</button>
+              <a href="#catalogs" onClick={onClose}>Каталоги</a>
+              <a href="#constructor" onClick={onClose}>Собрать слайд-шоу</a>
+              <a href="#contact" onClick={onClose}>Написать нам</a>
+            </div>
+          )}
+        </>
+      )}
+    </>
+  );
+}
+
 function Header() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 700;
+  React.useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth >= 700 && menuOpen) setMenuOpen(false);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [menuOpen]);
   return (
     <header className="header">
       <div className="logo">Wedding SlideShow</div>
-      <nav className="nav">
-        <a href="#catalogs">Каталоги</a>
-        <a href="#constructor">Собрать слайд-шоу</a>
-        <a href="#contact">Написать нам</a>
-      </nav>
+      <Navbar mobile={isMobile} open={menuOpen} onOpen={() => setMenuOpen(true)} onClose={() => setMenuOpen(false)} />
     </header>
   );
 }
