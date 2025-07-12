@@ -75,17 +75,13 @@ function Hero() {
       </div>
       <div className="hero-content hero-content-minimal">
         <h1>Фейро — свадебные слайд‑шоу с фейерверком эмоций</h1>
-        
         <div className="hero-subtitle">WOW-эффект, индивидуальный подход и настоящая магия праздника для вашей свадьбы</div>
-        <button className="hero-btn hero-btn-minimal" onClick={()=>window.scrollTo({top:document.getElementById('catalogs').offsetTop-60,behavior:'smooth'})}>
-          Собрать своё слайд-шоу
-        </button>
       </div>
     </section>
   );
 }
 
-function Catalog({ title, badge, description, icon }) {
+function Catalog({ title, badge, description, icon, info }) {
   return (
     <div className="catalog-window wow-catalog">
       <div className="catalog-title-row">
@@ -100,47 +96,78 @@ function Catalog({ title, badge, description, icon }) {
           Ваш браузер не поддерживает видео.
         </video>
       </div>
-      <select className="catalog-select">
-        <option>Шаблон 1</option>
-        <option>Шаблон 2</option>
-        <option>Шаблон 3</option>
-      </select>
-      <select className="catalog-duration">
-        <option>2 минуты</option>
-        <option>5 минут</option>
-        <option>10 минут</option>
-      </select>
+      <div className="catalog-info-line">{info}</div>
       <button className="catalog-order-btn"><span className="firework-emoji">🎆</span> Заказать</button>
     </div>
   );
 }
 
-function Catalogs() {
-  const catalogData = [
-    {
-      title: 'Love',
-      badge: 'Хит',
-      description: 'Романтический шаблон с кольцами и лепестками.',
-      icon: <RiHeart2Line size={28} color="#BFD7ED" />
-    },
-    {
-      title: 'Modern',
-      badge: 'Новинка',
-      description: 'Современный стиль с динамикой и графикой.',
-      icon: <MdOutlinePhotoCamera size={28} color="#BFD7ED" />
-    },
-    {
-      title: 'Classic',
-      badge: 'Топ',
-      description: 'Классика с сердцем и голубями.',
-      icon: <MdFavorite size={28} color="#BFD7ED" />
+function CatalogCarousel({ title, items }) {
+  const scrollRef = React.useRef();
+  const [scroll, setScroll] = useState(0);
+  const cardWidth = 340 + 32; // ширина карточки + gap
+  const visibleCount = 3;
+  const canScrollLeft = scroll > 0;
+  const canScrollRight = scroll < items.length - visibleCount;
+
+  const scrollLeft = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+      setScroll(s => Math.max(0, s - 1));
     }
+  };
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: cardWidth, behavior: 'smooth' });
+      setScroll(s => Math.min(items.length - visibleCount, s + 1));
+    }
+  };
+
+  return (
+    <div className="catalog-carousel">
+      <div className="catalog-carousel-header">
+        <div className="catalog-carousel-title">{title}</div>
+        <div className="catalog-carousel-arrows">
+          <button className="carousel-arrow" onClick={scrollLeft} disabled={!canScrollLeft} aria-label="Влево">&#8592;</button>
+          <button className="carousel-arrow" onClick={scrollRight} disabled={!canScrollRight} aria-label="Вправо">&#8594;</button>
+        </div>
+      </div>
+      <div className="catalog-carousel-list" ref={scrollRef} tabIndex={0}>
+        {items.map((cat, i) => <Catalog key={cat.title + i} {...cat} />)}
+      </div>
+    </div>
+  );
+}
+
+function Catalogs() {
+  const invites = [
+    { title: 'Love Invite', badge: 'Хит', description: 'Романтическое приглашение с кольцами.', icon: <RiHeart2Line size={28} color="#a18fff" />, info: 'Шаблон 1 · 1 минута' },
+    { title: 'Classic Invite', badge: '', description: 'Классика с голубями.', icon: <MdFavorite size={28} color="#a18fff" />, info: 'Шаблон 2 · 1 минута' },
+    { title: 'Elegant Invite', badge: '', description: 'Элегантное приглашение с лепестками.', icon: <FiGift size={28} color="#a18fff" />, info: 'Шаблон 3 · 1 минута' },
+    { title: 'Fun Invite', badge: '', description: 'Весёлое приглашение для гостей.', icon: <FiSmile size={28} color="#a18fff" />, info: 'Шаблон 4 · 1 минута' },
+  ];
+  const presentations = [
+    { title: 'Modern Presentation', badge: 'Новинка', description: 'Современная презентация с динамикой.', icon: <MdOutlinePhotoCamera size={28} color="#a18fff" />, info: 'Шаблон 1 · 2 минуты' },
+    { title: 'Elegant Presentation', badge: '', description: 'Элегантный стиль с лепестками.', icon: <FiGift size={28} color="#a18fff" />, info: 'Шаблон 2 · 2 минуты' },
+    { title: 'Classic Presentation', badge: '', description: 'Классика с сердцем и голубями.', icon: <MdFavorite size={28} color="#a18fff" />, info: 'Шаблон 3 · 2 минуты' },
+    { title: 'Bright Presentation', badge: '', description: 'Яркая презентация для праздника.', icon: <RiSparkling2Line size={28} color="#a18fff" />, info: 'Шаблон 4 · 2 минуты' },
+  ];
+  const welcomes = [
+    { title: 'Welcome Party', badge: 'Топ', description: 'Яркое welcome-видео для гостей.', icon: <RiSparkling2Line size={28} color="#a18fff" />, info: 'Шаблон 1 · 1.5 минуты' },
+    { title: 'Fun Welcome', badge: '', description: 'Весёлое приветствие.', icon: <FiSmile size={28} color="#a18fff" />, info: 'Шаблон 2 · 1.5 минуты' },
+    { title: 'Elegant Welcome', badge: '', description: 'Элегантное приветствие.', icon: <FiGift size={28} color="#a18fff" />, info: 'Шаблон 3 · 1.5 минуты' },
+    { title: 'Classic Welcome', badge: '', description: 'Классика для встречи гостей.', icon: <MdFavorite size={28} color="#a18fff" />, info: 'Шаблон 4 · 1.5 минуты' },
   ];
   return (
-    <section className="catalogs" id="catalogs">
-      {catalogData.map((cat, i) => (
-        <Catalog key={cat.title} {...cat} />
-      ))}
+    <section className="catalogs-multi" id="catalogs">
+      <CatalogCarousel title="Презентации" items={presentations} />
+      <CatalogCarousel title="Welcome" items={welcomes} />
+      <CatalogCarousel title="Приглашения" items={invites} />
+      <div className="catalogs-cta">
+        <button className="hero-btn hero-btn-minimal" onClick={()=>window.scrollTo({top:document.getElementById('contact').offsetTop-60,behavior:'smooth'})}>
+          Собрать своё слайд-шоу
+        </button>
+      </div>
     </section>
   );
 }
