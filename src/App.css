@@ -261,6 +261,7 @@ body, html, #root, .App {
   position: relative;
   z-index: 4;
   animation: fadeInCatalogs 1.1s cubic-bezier(.23,1.01,.32,1);
+  padding: 0 40px;
 }
 .wow-catalog {
   background: var(--bg-secondary);
@@ -278,7 +279,7 @@ body, html, #root, .App {
   transition: box-shadow 0.25s, transform 0.22s, border 0.22s;
   position: relative;
   animation: fadeInCatalog 1.1s cubic-bezier(.23,1.01,.32,1);
-  border: 2.5px solid var(--bg-secondary);
+  border: none;
 }
 .wow-catalog:hover {
   box-shadow: 0 16px 48px 0 #BFD7ED, 0 2px 16px 0 #C7C6E5;
@@ -426,18 +427,26 @@ body, html, #root, .App {
 }
 @media (max-width: 700px) {
   .catalogs {
-    gap: 12px;
-    padding: 0 2px;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 0 2vw;
+  }
+  .catalogs-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
     flex-wrap: nowrap;
-    overflow-x: auto;
+    overflow-x: unset;
+    padding-bottom: 0;
   }
   .wow-catalog {
-    min-width: 90vw;
-    max-width: 95vw;
-    width: 95vw;
-    min-height: 340px;
-    max-height: 420px;
+    min-width: 98vw;
+    max-width: 99vw;
+    width: 99vw;
+    margin: 0 auto;
     padding: 18px 2vw 12px 2vw;
+    border-radius: 18px;
   }
   .wow-preview {
     height: 80px;
@@ -516,7 +525,8 @@ body, html, #root, .App {
   transition: box-shadow 0.25s, transform 0.22s;
   position: relative;
   animation: fadeInCatalog 1.1s cubic-bezier(.23,1.01,.32,1);
-  border: 2.5px solid var(--accent-primary);
+  border: none;
+  box-shadow: none;
 }
 .catalog-window:hover {
   box-shadow: 0 12px 48px 0 #BFD7ED, 0 2px 16px 0 #C7C6E5;
@@ -2613,4 +2623,25 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
   margin-bottom: 32px;
   line-height: 1.1;
   font-family: 'Bounded', Arial, sans-serif;
+}
+
+@media (max-width: 700px) {
+  .catalog-carousel-list {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 18px;
+    overflow-x: auto;
+    width: 100vw;
+    padding-bottom: 12px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .wow-catalog {
+    min-width: 90vw;
+    max-width: 90vw;
+    width: 90vw;
+    margin: 0;
+    scroll-snap-align: start;
+  }
 }
