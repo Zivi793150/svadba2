@@ -6,6 +6,8 @@ import { FaVk, FaTelegramPlane } from 'react-icons/fa';
 import { RiHeart2Line, RiSparkling2Line } from 'react-icons/ri';
 import ChatFabButton from './ChatFab';
 
+
+
 function Navbar({ mobile, open, onOpen, onClose }) {
   return (
     <>
@@ -49,7 +51,7 @@ function Header() {
   }, [menuOpen]);
   return (
     <header className="header">
-      <div className="logo">Wedding SlideShow</div>
+      <div className="logo">Фейро</div>
       <Navbar mobile={isMobile} open={menuOpen} onOpen={() => setMenuOpen(true)} onClose={() => setMenuOpen(false)} />
     </header>
   );
@@ -59,21 +61,27 @@ function Hero() {
   return (
     <section className="hero">
       <div className="hero-bg-parallax">
-        <img className="hero-bg-image" src="/svadbabg.jpeg" alt="Свадебный фон" />
-        <div className="hero-bg-overlay" />
+        <video 
+          className="hero-bg-video" 
+          autoPlay 
+          loop 
+          muted 
+          playsInline 
+          poster="/logo192.png"
+        >
+          <source src="/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4" type="video/mp4" />
+          Ваш браузер не поддерживает видео.
+        </video>
       </div>
       <div className="hero-content hero-content-minimal">
-        <h1>Свадебные слайд‑шоу нового поколения</h1>
-        <div className="hero-subtitle">WOW-эффект. Премиум-качество. Ваша история — в самом красивом формате.</div>
-        <button className="hero-btn hero-btn-minimal" onClick={()=>window.scrollTo({top:document.getElementById('catalogs').offsetTop-60,behavior:'smooth'})}>
-          Собрать своё слайд-шоу
-        </button>
+        <h1>Фейро — свадебные слайд‑шоу с фейерверком эмоций</h1>
+        <div className="hero-subtitle">WOW-эффект, индивидуальный подход и настоящая магия праздника для вашей свадьбы</div>
       </div>
     </section>
   );
 }
 
-function Catalog({ title, badge, description, icon }) {
+function Catalog({ title, badge, description, icon, info }) {
   return (
     <div className="catalog-window wow-catalog">
       <div className="catalog-title-row">
@@ -88,47 +96,78 @@ function Catalog({ title, badge, description, icon }) {
           Ваш браузер не поддерживает видео.
         </video>
       </div>
-      <select className="catalog-select">
-        <option>Шаблон 1</option>
-        <option>Шаблон 2</option>
-        <option>Шаблон 3</option>
-      </select>
-      <select className="catalog-duration">
-        <option>2 минуты</option>
-        <option>5 минут</option>
-        <option>10 минут</option>
-      </select>
-      <button className="catalog-order-btn"><FiGift style={{marginRight:8,verticalAlign:'middle'}}/>Заказать</button>
+      <div className="catalog-info-line">{info}</div>
+      <button className="catalog-order-btn"><span className="firework-emoji">🎆</span> Заказать</button>
+    </div>
+  );
+}
+
+function CatalogCarousel({ title, items }) {
+  const scrollRef = React.useRef();
+  const [scroll, setScroll] = useState(0);
+  const cardWidth = 340 + 32; // ширина карточки + gap
+  const visibleCount = 3;
+  const canScrollLeft = scroll > 0;
+  const canScrollRight = scroll < items.length - visibleCount;
+
+  const scrollLeft = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+      setScroll(s => Math.max(0, s - 1));
+    }
+  };
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: cardWidth, behavior: 'smooth' });
+      setScroll(s => Math.min(items.length - visibleCount, s + 1));
+    }
+  };
+
+  return (
+    <div className="catalog-carousel">
+      <div className="catalog-carousel-header">
+        <div className="catalog-carousel-title">{title}</div>
+        <div className="catalog-carousel-arrows">
+          <button className="carousel-arrow" onClick={scrollLeft} disabled={!canScrollLeft} aria-label="Влево">&#8592;</button>
+          <button className="carousel-arrow" onClick={scrollRight} disabled={!canScrollRight} aria-label="Вправо">&#8594;</button>
+        </div>
+      </div>
+      <div className="catalog-carousel-list" ref={scrollRef} tabIndex={0}>
+        {items.map((cat, i) => <Catalog key={cat.title + i} {...cat} />)}
+      </div>
     </div>
   );
 }
 
 function Catalogs() {
-  const catalogData = [
-    {
-      title: 'Love',
-      badge: 'Хит',
-      description: 'Романтический шаблон с кольцами и лепестками.',
-      icon: <RiHeart2Line size={28} color="#BFD7ED" />
-    },
-    {
-      title: 'Modern',
-      badge: 'Новинка',
-      description: 'Современный стиль с динамикой и графикой.',
-      icon: <MdOutlinePhotoCamera size={28} color="#BFD7ED" />
-    },
-    {
-      title: 'Classic',
-      badge: 'Топ',
-      description: 'Классика с сердцем и голубями.',
-      icon: <MdFavorite size={28} color="#BFD7ED" />
-    }
+  const invites = [
+    { title: 'Love Invite', badge: 'Хит', description: 'Романтическое приглашение с кольцами.', icon: <RiHeart2Line size={28} color="#a18fff" />, info: 'Шаблон 1 · 1 минута' },
+    { title: 'Classic Invite', badge: '', description: 'Классика с голубями.', icon: <MdFavorite size={28} color="#a18fff" />, info: 'Шаблон 2 · 1 минута' },
+    { title: 'Elegant Invite', badge: '', description: 'Элегантное приглашение с лепестками.', icon: <FiGift size={28} color="#a18fff" />, info: 'Шаблон 3 · 1 минута' },
+    { title: 'Fun Invite', badge: '', description: 'Весёлое приглашение для гостей.', icon: <FiSmile size={28} color="#a18fff" />, info: 'Шаблон 4 · 1 минута' },
+  ];
+  const presentations = [
+    { title: 'Modern Presentation', badge: 'Новинка', description: 'Современная презентация с динамикой.', icon: <MdOutlinePhotoCamera size={28} color="#a18fff" />, info: 'Шаблон 1 · 2 минуты' },
+    { title: 'Elegant Presentation', badge: '', description: 'Элегантный стиль с лепестками.', icon: <FiGift size={28} color="#a18fff" />, info: 'Шаблон 2 · 2 минуты' },
+    { title: 'Classic Presentation', badge: '', description: 'Классика с сердцем и голубями.', icon: <MdFavorite size={28} color="#a18fff" />, info: 'Шаблон 3 · 2 минуты' },
+    { title: 'Bright Presentation', badge: '', description: 'Яркая презентация для праздника.', icon: <RiSparkling2Line size={28} color="#a18fff" />, info: 'Шаблон 4 · 2 минуты' },
+  ];
+  const welcomes = [
+    { title: 'Welcome Party', badge: 'Топ', description: 'Яркое welcome-видео для гостей.', icon: <RiSparkling2Line size={28} color="#a18fff" />, info: 'Шаблон 1 · 1.5 минуты' },
+    { title: 'Fun Welcome', badge: '', description: 'Весёлое приветствие.', icon: <FiSmile size={28} color="#a18fff" />, info: 'Шаблон 2 · 1.5 минуты' },
+    { title: 'Elegant Welcome', badge: '', description: 'Элегантное приветствие.', icon: <FiGift size={28} color="#a18fff" />, info: 'Шаблон 3 · 1.5 минуты' },
+    { title: 'Classic Welcome', badge: '', description: 'Классика для встречи гостей.', icon: <MdFavorite size={28} color="#a18fff" />, info: 'Шаблон 4 · 1.5 минуты' },
   ];
   return (
-    <section className="catalogs" id="catalogs">
-      {catalogData.map((cat, i) => (
-        <Catalog key={cat.title} {...cat} />
-      ))}
+    <section className="catalogs-multi" id="catalogs">
+      <CatalogCarousel title="Презентации" items={presentations} />
+      <CatalogCarousel title="Welcome" items={welcomes} />
+      <CatalogCarousel title="Приглашения" items={invites} />
+      <div className="catalogs-cta">
+        <button className="hero-btn hero-btn-minimal" onClick={()=>window.scrollTo({top:document.getElementById('contact').offsetTop-60,behavior:'smooth'})}>
+          Собрать своё слайд-шоу
+        </button>
+      </div>
     </section>
   );
 }
@@ -284,9 +323,9 @@ function Reviews() {
     <section className="reviews-modern">
       <div className="reviews-modern-bg-svg" aria-hidden="true">
         <svg width="100%" height="100%" viewBox="0 0 600 300" fill="none" style={{position:'absolute',left:0,top:0,width:'100%',height:'100%'}}>
-          <circle cx="120" cy="80" r="60" fill="#BFD7ED22" />
-          <circle cx="500" cy="220" r="80" fill="#C7C6E522" />
-          <ellipse cx="300" cy="150" rx="180" ry="60" fill="#E6E6F622" />
+          <circle cx="120" cy="80" r="60" fill="var(--shadow-color)" />
+          <circle cx="500" cy="220" r="80" fill="var(--shadow-color)" />
+          <ellipse cx="300" cy="150" rx="180" ry="60" fill="var(--shadow-color)" />
         </svg>
       </div>
       <div className="reviews-modern-inner">
@@ -321,7 +360,7 @@ function Reviews() {
 function ChatFab({ onClick }) {
   return (
     <button className="chat-fab" onClick={onClick} aria-label="Открыть чат">
-      <MdOutlineChatBubble size={32} color="#fff" style={{position:'absolute',left:0,top:0}}/>
+      <MdOutlineChatBubble size={32} color="var(--accent-primary)" style={{position:'absolute',left:0,top:0}}/>
     </button>
   );
 }
@@ -342,7 +381,7 @@ function ContactForm({ onClose }) {
         <input type="email" placeholder="Email" required />
         <textarea placeholder="Ваш вопрос или пожелание" rows={4} required />
         <button type="submit" className="contact-send-btn" disabled={sent}>
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 11L19 3L11 19L10 12L3 11Z" fill="#7CA7CE"/><path d="M3 11L19 3L11 19L10 12L3 11Z" stroke="#7CA7CE" strokeWidth="1.5"/></svg>
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 11L19 3L11 19L10 12L3 11Z" fill="var(--accent-primary)"/><path d="M3 11L19 3L11 19L10 12L3 11Z" stroke="var(--accent-primary)" strokeWidth="1.5"/></svg>
           <span>{sent ? 'Отправлено!' : 'Отправить'}</span>
         </button>
       </form>
@@ -354,22 +393,22 @@ function SectionDecor({ type }) {
   if (type === 'rings') {
     return (
       <div className="section-decor" aria-hidden="true">
-        <svg width="220" height="60" viewBox="0 0 220 60" fill="none" style={{display:'block',margin:'0 auto'}}>
-          <ellipse cx="60" cy="30" rx="44" ry="18" stroke="#7CA7CE" strokeWidth="3" />
-          <ellipse cx="160" cy="30" rx="44" ry="18" stroke="#BFD7ED" strokeWidth="3" />
-          <ellipse cx="110" cy="30" rx="60" ry="22" stroke="#C7C6E5" strokeWidth="1.5" />
-        </svg>
+              <svg width="220" height="60" viewBox="0 0 220 60" fill="none" style={{display:'block',margin:'0 auto'}}>
+        <ellipse cx="60" cy="30" rx="44" ry="18" stroke="var(--accent-primary)" strokeWidth="3" />
+        <ellipse cx="160" cy="30" rx="44" ry="18" stroke="var(--accent-secondary)" strokeWidth="3" />
+        <ellipse cx="110" cy="30" rx="60" ry="22" stroke="var(--accent-tertiary)" strokeWidth="1.5" />
+      </svg>
       </div>
     );
   }
   if (type === 'petals') {
     return (
       <div className="section-decor" aria-hidden="true">
-        <svg width="180" height="40" viewBox="0 0 180 40" fill="none" style={{display:'block',margin:'0 auto'}}>
-          <path d="M20 20 Q40 0 60 20 T100 20" stroke="#E6E6F6" strokeWidth="2" fill="none"/>
-          <path d="M80 20 Q100 40 120 20 T160 20" stroke="#BFD7ED" strokeWidth="2" fill="none"/>
-          <circle cx="90" cy="20" r="6" fill="#C7C6E5" />
-        </svg>
+              <svg width="180" height="40" viewBox="0 0 180 40" fill="none" style={{display:'block',margin:'0 auto'}}>
+        <path d="M20 20 Q40 0 60 20 T100 20" stroke="var(--accent-secondary)" strokeWidth="2" fill="none"/>
+        <path d="M80 20 Q100 40 120 20 T160 20" stroke="var(--accent-secondary)" strokeWidth="2" fill="none"/>
+        <circle cx="90" cy="20" r="6" fill="var(--accent-tertiary)" />
+      </svg>
       </div>
     );
   }
@@ -377,8 +416,8 @@ function SectionDecor({ type }) {
     return (
       <div className="section-decor" aria-hidden="true" style={{margin:'-32px 0 0 0'}}>
         <svg viewBox="0 0 1440 60" width="100%" height="60" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-          <path d="M0,40 Q360,60 720,40 T1440,40 V60 H0 Z" fill="#FAF9F6" fillOpacity="0.8" />
-          <path d="M0,50 Q360,55 720,50 T1440,50 V60 H0 Z" fill="#BFD7ED" fillOpacity="0.13" />
+          <path d="M0,40 Q360,60 720,40 T1440,40 V60 H0 Z" fill="var(--bg-primary)" fillOpacity="0.8" />
+          <path d="M0,50 Q360,55 720,50 T1440,50 V60 H0 Z" fill="var(--accent-secondary)" fillOpacity="0.13" />
         </svg>
       </div>
     );
@@ -389,7 +428,7 @@ function SectionDecor({ type }) {
 function Footer() {
   return (
     <footer className="footer">
-      <div>© {new Date().getFullYear()} Wedding SlideShow</div>
+      <div>© {new Date().getFullYear()} Фейро — свадебные слайд-шоу с фейерверком эмоций</div>
       <div className="footer-links">
         <a href="#"><FaVk size={20} style={{verticalAlign:'middle',marginRight:4}}/>VK</a> |
         <a href="#"><FaTelegramPlane size={20} style={{verticalAlign:'middle',marginRight:4}}/>Telegram</a> |
@@ -401,6 +440,12 @@ function Footer() {
 
 function App() {
   const [chatOpen, setChatOpen] = useState(false);
+  
+  // Применение темной темы к документу
+  React.useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }, []);
+  
   return (
     <div className="App">
       <Header />
