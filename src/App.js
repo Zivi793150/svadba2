@@ -83,10 +83,15 @@ function Catalog({ title, badge, description, icon, info }) {
   return (
     <div className="catalog-window wow-catalog">
       <div className="catalog-title-row">
-        <span className="catalog-icon">{icon}</span>
+        {/* Иконка-эмодзи удалена */}
         {/* Название и плашка убраны */}
+        {description === 'Новобрачная презентация' && (
+          <div className="catalog-main-title" style={{
+            fontSize: '1.35rem', fontWeight: 900, color: '#a18fff', textAlign: 'center', marginBottom: 8, marginTop: 2, letterSpacing: '1px', fontFamily: 'Bounded, Arial, sans-serif'
+          }}>Новобрачная презентация</div>
+        )}
       </div>
-      <div className="catalog-mini-desc">{description}</div>
+      {/* Мини-описание удалено */}
       <div className="catalog-video-preview wow-preview">
         <video autoPlay loop muted playsInline poster="/logo192.png" style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '18px', border: '2.5px solid #BFD7ED', boxShadow: '0 4px 24px #BFD7ED33'}}>
           <source src="/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4" type="video/mp4" />
@@ -160,11 +165,7 @@ function Catalogs() {
       <CatalogCarousel title="" items={welcomes} />
       <div style={{textAlign: 'center', margin: '38px 0 8px 0', fontSize: '2.2rem', fontWeight: 900, color: '#7CA7CE', letterSpacing: '1px', textShadow: '0 4px 32px #a18fff99, 0 1px 0 #fff', fontFamily: 'Bounded, Arial, sans-serif'}}>Приглашения</div>
       <CatalogCarousel title="" items={invites} />
-      <div className="catalogs-cta">
-        <button className="hero-btn hero-btn-minimal" onClick={()=>window.scrollTo({top:document.getElementById('contact').offsetTop-60,behavior:'smooth'})}>
-          Собрать своё слайд-шоу
-        </button>
-      </div>
+      {/* Кнопка "Собрать своё слайд-шоу" удалена */}
     </section>
   );
 }
