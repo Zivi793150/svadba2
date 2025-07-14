@@ -6,8 +6,6 @@ import { FaVk, FaTelegramPlane } from 'react-icons/fa';
 import { RiHeart2Line, RiSparkling2Line } from 'react-icons/ri';
 import ChatFabButton from './ChatFab';
 
-
-
 function Navbar({ mobile, open, onOpen, onClose }) {
   return (
     <>
@@ -51,7 +49,7 @@ function Header() {
   }, [menuOpen]);
   return (
     <header className="header">
-      <div className="logo">Фейро</div>
+      <div className="logo">Фейеро</div>
       <Navbar mobile={isMobile} open={menuOpen} onOpen={() => setMenuOpen(true)} onClose={() => setMenuOpen(false)} />
     </header>
   );
@@ -74,8 +72,8 @@ function Hero() {
         </video>
       </div>
       <div className="hero-content hero-content-minimal">
-        <h1>Фейро — свадебные слайд‑шоу с фейерверком эмоций</h1>
-        <div className="hero-subtitle">WOW-эффект, индивидуальный подход и настоящая магия праздника для вашей свадьбы</div>
+        <h1>Фейеро</h1>
+        <div className="hero-subtitle">видео-шоу для фейерверка эмоций</div>
       </div>
     </section>
   );
@@ -86,8 +84,7 @@ function Catalog({ title, badge, description, icon, info }) {
     <div className="catalog-window wow-catalog">
       <div className="catalog-title-row">
         <span className="catalog-icon">{icon}</span>
-        <span className="catalog-title">{title}</span>
-        {badge && <span className="catalog-badge">{badge}</span>}
+        {/* Название и плашка убраны */}
       </div>
       <div className="catalog-mini-desc">{description}</div>
       <div className="catalog-video-preview wow-preview">
@@ -140,29 +137,29 @@ function CatalogCarousel({ title, items }) {
 }
 
 function Catalogs() {
-  const invites = [
-    { title: 'Love Invite', badge: 'Хит', description: 'Романтическое приглашение с кольцами.', icon: <RiHeart2Line size={28} color="#a18fff" />, info: 'Шаблон 1 · 1 минута' },
-    { title: 'Classic Invite', badge: '', description: 'Классика с голубями.', icon: <MdFavorite size={28} color="#a18fff" />, info: 'Шаблон 2 · 1 минута' },
-    { title: 'Elegant Invite', badge: '', description: 'Элегантное приглашение с лепестками.', icon: <FiGift size={28} color="#a18fff" />, info: 'Шаблон 3 · 1 минута' },
-    { title: 'Fun Invite', badge: '', description: 'Весёлое приглашение для гостей.', icon: <FiSmile size={28} color="#a18fff" />, info: 'Шаблон 4 · 1 минута' },
-  ];
+  // В первом каталоге только один шаблон
   const presentations = [
-    { title: 'Modern Presentation', badge: 'Новинка', description: 'Современная презентация с динамикой.', icon: <MdOutlinePhotoCamera size={28} color="#a18fff" />, info: 'Шаблон 1 · 2 минуты' },
-    { title: 'Elegant Presentation', badge: '', description: 'Элегантный стиль с лепестками.', icon: <FiGift size={28} color="#a18fff" />, info: 'Шаблон 2 · 2 минуты' },
-    { title: 'Classic Presentation', badge: '', description: 'Классика с сердцем и голубями.', icon: <MdFavorite size={28} color="#a18fff" />, info: 'Шаблон 3 · 2 минуты' },
-    { title: 'Bright Presentation', badge: '', description: 'Яркая презентация для праздника.', icon: <RiSparkling2Line size={28} color="#a18fff" />, info: 'Шаблон 4 · 2 минуты' },
+    { title: '', badge: '', description: 'Новобрачная презентация', icon: <MdOutlinePhotoCamera size={28} color="#a18fff" />, info: '5 минут' },
+  ];
+  const invites = [
+    { title: 'Love Invite', badge: 'Хит', description: 'Романтическое приглашение с кольцами.', icon: <RiHeart2Line size={28} color="#a18fff" />, info: '1 минута' },
+    { title: 'Classic Invite', badge: '', description: 'Классика с голубями.', icon: <MdFavorite size={28} color="#a18fff" />, info: '1 минута' },
+    { title: 'Elegant Invite', badge: '', description: 'Элегантное приглашение с лепестками.', icon: <FiGift size={28} color="#a18fff" />, info: '1 минута' },
+    { title: 'Fun Invite', badge: '', description: 'Весёлое приглашение для гостей.', icon: <FiSmile size={28} color="#a18fff" />, info: '1 минута' },
   ];
   const welcomes = [
-    { title: 'Welcome Party', badge: 'Топ', description: 'Яркое welcome-видео для гостей.', icon: <RiSparkling2Line size={28} color="#a18fff" />, info: 'Шаблон 1 · 1.5 минуты' },
-    { title: 'Fun Welcome', badge: '', description: 'Весёлое приветствие.', icon: <FiSmile size={28} color="#a18fff" />, info: 'Шаблон 2 · 1.5 минуты' },
-    { title: 'Elegant Welcome', badge: '', description: 'Элегантное приветствие.', icon: <FiGift size={28} color="#a18fff" />, info: 'Шаблон 3 · 1.5 минуты' },
-    { title: 'Classic Welcome', badge: '', description: 'Классика для встречи гостей.', icon: <MdFavorite size={28} color="#a18fff" />, info: 'Шаблон 4 · 1.5 минуты' },
+    { title: 'Welcome Party', badge: 'Топ', description: 'Яркое welcome-видео для гостей.', icon: <RiSparkling2Line size={28} color="#a18fff" />, info: '1.5 минуты' },
+    { title: 'Fun Welcome', badge: '', description: 'Весёлое приветствие.', icon: <FiSmile size={28} color="#a18fff" />, info: '1.5 минуты' },
+    { title: 'Elegant Welcome', badge: '', description: 'Элегантное приветствие.', icon: <FiGift size={28} color="#a18fff" />, info: '1.5 минуты' },
+    { title: 'Classic Welcome', badge: '', description: 'Классика для встречи гостей.', icon: <MdFavorite size={28} color="#a18fff" />, info: '1.5 минуты' },
   ];
   return (
     <section className="catalogs-multi" id="catalogs">
       <CatalogCarousel title="Презентации" items={presentations} />
-      <CatalogCarousel title="Welcome" items={welcomes} />
-      <CatalogCarousel title="Приглашения" items={invites} />
+      <div style={{textAlign: 'center', margin: '38px 0 8px 0', fontSize: '2.2rem', fontWeight: 900, color: '#7CA7CE', letterSpacing: '1px', textShadow: '0 4px 32px #a18fff99, 0 1px 0 #fff', fontFamily: 'Bounded, Arial, sans-serif'}}>Welcome video</div>
+      <CatalogCarousel title="" items={welcomes} />
+      <div style={{textAlign: 'center', margin: '38px 0 8px 0', fontSize: '2.2rem', fontWeight: 900, color: '#7CA7CE', letterSpacing: '1px', textShadow: '0 4px 32px #a18fff99, 0 1px 0 #fff', fontFamily: 'Bounded, Arial, sans-serif'}}>Приглашения</div>
+      <CatalogCarousel title="" items={invites} />
       <div className="catalogs-cta">
         <button className="hero-btn hero-btn-minimal" onClick={()=>window.scrollTo({top:document.getElementById('contact').offsetTop-60,behavior:'smooth'})}>
           Собрать своё слайд-шоу
@@ -428,7 +425,7 @@ function SectionDecor({ type }) {
 function Footer() {
   return (
     <footer className="footer">
-      <div>© {new Date().getFullYear()} Фейро — свадебные слайд-шоу с фейерверком эмоций</div>
+      <div>© {new Date().getFullYear()} Фейеро — свадебные слайд-шоу с фейерверком эмоций</div>
       <div className="footer-links">
         <a href="#"><FaVk size={20} style={{verticalAlign:'middle',marginRight:4}}/>VK</a> |
         <a href="#"><FaTelegramPlane size={20} style={{verticalAlign:'middle',marginRight:4}}/>Telegram</a> |

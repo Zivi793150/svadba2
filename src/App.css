@@ -1529,36 +1529,28 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
   margin-top: 60px;
 }
 .hero-content-minimal h1 {
-  font-size: 2.8rem;
+  font-size: 8.2rem;
   font-weight: 900;
   margin-bottom: 10px;
   letter-spacing: 1px;
   color: #fff;
   text-shadow: 0 0 16px #BFD7ED, 0 4px 32px #33343A, 0 1px 0 #7CA7CE;
   font-family: 'Bounded', Arial, sans-serif;
-  line-height: 1.13;
+  line-height: 1.05;
   word-break: break-word;
 }
-
 @media (max-width: 900px) {
-  .hero-content-minimal {
-    margin-top: 30px;
-  }
   .hero-content-minimal h1 {
-    font-size: 1.7rem;
-    line-height: 1.15;
+    font-size: 3.5rem;
+    line-height: 1.1;
   }
 }
 @media (max-width: 600px) {
-  .hero-content-minimal {
-    margin-top: 12px;
-  }
   .hero-content-minimal h1 {
-    font-size: 1.15rem;
-    line-height: 1.18;
+    font-size: 2.1rem;
+    line-height: 1.13;
   }
 }
-
 .hero-content-minimal .hero-subtitle {
   font-size: 1.45rem;
   font-weight: 400;
@@ -2318,153 +2310,369 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
 
 
 /* Анимации фейерверков */
-.fireworks {
-  position: absolute;
+.fireworks-container {
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 2;
+  z-index: 1;
   pointer-events: none;
   overflow: hidden;
 }
 
-.firework {
+.fireworks-left {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 400px;
+  height: 100%;
+}
+
+.fireworks-right {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 400px;
+  height: 100%;
+}
+
+.fireworks-center {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 100%;
+}
+
+/* Контейнеры для взрывов фейерверков */
+.firework-burst {
+  position: absolute;
+  width: 0;
+  height: 0;
+  animation: firework-burst 4s ease-out infinite;
+}
+
+/* Искры внутри взрыва */
+.spark {
   position: absolute;
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  animation: firework 3s ease-out infinite;
+  animation: spark-explode 2.5s ease-out infinite;
 }
 
-.firework::before,
-.firework::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  animation: firework-spark 3s ease-out infinite;
-}
+/* Позиционирование и цвета искр */
+.spark-1 { animation-delay: 0s; background: #ff6b6b; }
+.spark-2 { animation-delay: 0.1s; background: #4ecdc4; }
+.spark-3 { animation-delay: 0.2s; background: #45b7d1; }
+.spark-4 { animation-delay: 0.3s; background: #96ceb4; }
+.spark-5 { animation-delay: 0.4s; background: #feca57; }
+.spark-6 { animation-delay: 0.5s; background: #ff9ff3; }
+.spark-7 { animation-delay: 0.6s; background: #54a0ff; }
+.spark-8 { animation-delay: 0.7s; background: #5f27cd; }
+.spark-9 { animation-delay: 0.8s; background: #00d2d3; }
+.spark-10 { animation-delay: 0.9s; background: #ff9f43; }
+.spark-11 { animation-delay: 1s; background: #10ac84; }
+.spark-12 { animation-delay: 1.1s; background: #ee5a24; }
+.spark-13 { animation-delay: 1.2s; background: #ff3838; }
+.spark-14 { animation-delay: 1.3s; background: #32ff7e; }
+.spark-15 { animation-delay: 1.4s; background: #ffaf40; }
+.spark-16 { animation-delay: 1.5s; background: #c44569; }
 
-.firework-1 {
-  left: 20%;
-  top: 60%;
-  background: #ff6b6b;
+/* Позиции взрывов */
+.firework-burst-1 {
+  left: 10%;
+  top: 35%;
   animation-delay: 0s;
 }
 
-.firework-1::before {
-  background: #ff8e8e;
-  animation-delay: 0.2s;
-}
-
-.firework-1::after {
-  background: #ff5252;
-  animation-delay: 0.4s;
-}
-
-.firework-2 {
-  left: 80%;
-  top: 40%;
-  background: #4ecdc4;
-  animation-delay: 0.5s;
-}
-
-.firework-2::before {
-  background: #6ee7df;
-  animation-delay: 0.7s;
-}
-
-.firework-2::after {
-  background: #26d0ce;
-  animation-delay: 0.9s;
-}
-
-.firework-3 {
-  left: 50%;
-  top: 30%;
-  background: #45b7d1;
-  animation-delay: 1s;
-}
-
-.firework-3::before {
-  background: #67c7db;
+.firework-burst-2 {
+  left: 20%;
+  top: 55%;
   animation-delay: 1.2s;
 }
 
-.firework-3::after {
-  background: #23a6c7;
-  animation-delay: 1.4s;
-}
-
-.firework-4 {
+.firework-burst-3 {
   left: 30%;
-  top: 20%;
-  background: #96ceb4;
-  animation-delay: 1.5s;
-}
-
-.firework-4::before {
-  background: #a8d5c2;
-  animation-delay: 1.7s;
-}
-
-.firework-4::after {
-  background: #7fb8a0;
-  animation-delay: 1.9s;
-}
-
-.firework-5 {
-  left: 70%;
-  top: 70%;
-  background: #feca57;
-  animation-delay: 2s;
-}
-
-.firework-5::before {
-  background: #ffd271;
-  animation-delay: 2.2s;
-}
-
-.firework-5::after {
-  background: #f39c12;
+  top: 25%;
   animation-delay: 2.4s;
 }
 
-@keyframes firework {
+.firework-burst-4 {
+  left: 70%;
+  top: 45%;
+  animation-delay: 0.6s;
+}
+
+.firework-burst-5 {
+  left: 80%;
+  top: 30%;
+  animation-delay: 1.8s;
+}
+
+.firework-burst-6 {
+  left: 90%;
+  top: 60%;
+  animation-delay: 3s;
+}
+
+.firework-burst-7 {
+  left: 15%;
+  top: 70%;
+  animation-delay: 0.9s;
+}
+
+.firework-burst-8 {
+  left: 25%;
+  top: 20%;
+  animation-delay: 2.1s;
+}
+
+.firework-burst-9 {
+  left: 75%;
+  top: 75%;
+  animation-delay: 1.5s;
+}
+
+.firework-burst-10 {
+  left: 85%;
+  top: 15%;
+  animation-delay: 2.7s;
+}
+
+.firework-burst-11 {
+  left: 50%;
+  top: 40%;
+  animation-delay: 0.3s;
+}
+
+.firework-burst-12 {
+  left: 50%;
+  top: 65%;
+  animation-delay: 1.8s;
+}
+
+/* Анимация взрыва */
+@keyframes firework-burst {
   0% {
-    transform: translateY(100vh) scale(0);
-    opacity: 1;
+    transform: scale(0);
+    opacity: 0;
   }
-  50% {
+  10% {
+    transform: scale(1);
     opacity: 1;
   }
   100% {
-    transform: translateY(-100px) scale(1);
+    transform: scale(1.2);
     opacity: 0;
   }
 }
 
-@keyframes firework-spark {
+/* Анимация разлетающихся искр */
+@keyframes spark-explode {
   0% {
     transform: translateX(0) translateY(0) scale(1);
     opacity: 1;
   }
+  30% {
+    opacity: 1;
+  }
   100% {
-    transform: translateX(var(--spark-x, 100px)) translateY(var(--spark-y, -100px)) scale(0);
+    transform: translateX(calc(cos(var(--angle, 0deg)) * var(--distance, 180px))) 
+                translateY(calc(sin(var(--angle, 0deg)) * var(--distance, 180px))) 
+                scale(0);
     opacity: 0;
   }
 }
 
-/* Стили для фейерверков */
-.firework {
-  filter: brightness(1.2) saturate(1.3);
+/* Настройка углов для каждой искры (круговой тип) */
+.firework-type-circle .spark-1 { --angle: 0deg; }
+.firework-type-circle .spark-2 { --angle: 22.5deg; }
+.firework-type-circle .spark-3 { --angle: 45deg; }
+.firework-type-circle .spark-4 { --angle: 67.5deg; }
+.firework-type-circle .spark-5 { --angle: 90deg; }
+.firework-type-circle .spark-6 { --angle: 112.5deg; }
+.firework-type-circle .spark-7 { --angle: 135deg; }
+.firework-type-circle .spark-8 { --angle: 157.5deg; }
+.firework-type-circle .spark-9 { --angle: 180deg; }
+.firework-type-circle .spark-10 { --angle: 202.5deg; }
+.firework-type-circle .spark-11 { --angle: 225deg; }
+.firework-type-circle .spark-12 { --angle: 247.5deg; }
+.firework-type-circle .spark-13 { --angle: 270deg; }
+.firework-type-circle .spark-14 { --angle: 292.5deg; }
+.firework-type-circle .spark-15 { --angle: 315deg; }
+.firework-type-circle .spark-16 { --angle: 337.5deg; }
+
+/* Спиральный тип - искры разлетаются по спирали */
+.firework-type-spiral .spark-1 { --angle: 0deg; --distance: 100px; }
+.firework-type-spiral .spark-2 { --angle: 45deg; --distance: 120px; }
+.firework-type-spiral .spark-3 { --angle: 90deg; --distance: 140px; }
+.firework-type-spiral .spark-4 { --angle: 135deg; --distance: 160px; }
+.firework-type-spiral .spark-5 { --angle: 180deg; --distance: 180px; }
+.firework-type-spiral .spark-6 { --angle: 225deg; --distance: 200px; }
+.firework-type-spiral .spark-7 { --angle: 270deg; --distance: 220px; }
+.firework-type-spiral .spark-8 { --angle: 315deg; --distance: 240px; }
+.firework-type-spiral .spark-9 { --angle: 30deg; --distance: 260px; }
+.firework-type-spiral .spark-10 { --angle: 75deg; --distance: 280px; }
+.firework-type-spiral .spark-11 { --angle: 120deg; --distance: 300px; }
+.firework-type-spiral .spark-12 { --angle: 165deg; --distance: 320px; }
+.firework-type-spiral .spark-13 { --angle: 210deg; --distance: 340px; }
+.firework-type-spiral .spark-14 { --angle: 255deg; --distance: 360px; }
+.firework-type-spiral .spark-15 { --angle: 300deg; --distance: 380px; }
+.firework-type-spiral .spark-16 { --angle: 345deg; --distance: 400px; }
+
+/* Веерный тип - искры разлетаются веером вверх */
+.firework-type-fan .spark-1 { --angle: -60deg; --distance: 150px; }
+.firework-type-fan .spark-2 { --angle: -45deg; --distance: 160px; }
+.firework-type-fan .spark-3 { --angle: -30deg; --distance: 170px; }
+.firework-type-fan .spark-4 { --angle: -15deg; --distance: 180px; }
+.firework-type-fan .spark-5 { --angle: 0deg; --distance: 190px; }
+.firework-type-fan .spark-6 { --angle: 15deg; --distance: 180px; }
+.firework-type-fan .spark-7 { --angle: 30deg; --distance: 170px; }
+.firework-type-fan .spark-8 { --angle: 45deg; --distance: 160px; }
+.firework-type-fan .spark-9 { --angle: 60deg; --distance: 150px; }
+.firework-type-fan .spark-10 { --angle: 75deg; --distance: 140px; }
+.firework-type-fan .spark-11 { --angle: 90deg; --distance: 130px; }
+.firework-type-fan .spark-12 { --angle: 105deg; --distance: 120px; }
+
+/* Хаотичный тип - случайные направления */
+.firework-type-chaos .spark-1 { --angle: 15deg; --distance: 140px; }
+.firework-type-chaos .spark-2 { --angle: 67deg; --distance: 180px; }
+.firework-type-chaos .spark-3 { --angle: 123deg; --distance: 160px; }
+.firework-type-chaos .spark-4 { --angle: 234deg; --distance: 200px; }
+.firework-type-chaos .spark-5 { --angle: 298deg; --distance: 150px; }
+.firework-type-chaos .spark-6 { --angle: 45deg; --distance: 170px; }
+.firework-type-chaos .spark-7 { --angle: 156deg; --distance: 190px; }
+.firework-type-chaos .spark-8 { --angle: 267deg; --distance: 130px; }
+.firework-type-chaos .spark-9 { --angle: 89deg; --distance: 210px; }
+.firework-type-chaos .spark-10 { --angle: 178deg; --distance: 145px; }
+
+/* Двойной круговой тип - два круга разного размера */
+.firework-type-double .spark-1 { --angle: 0deg; --distance: 100px; }
+.firework-type-double .spark-2 { --angle: 36deg; --distance: 100px; }
+.firework-type-double .spark-3 { --angle: 72deg; --distance: 100px; }
+.firework-type-double .spark-4 { --angle: 108deg; --distance: 100px; }
+.firework-type-double .spark-5 { --angle: 144deg; --distance: 100px; }
+.firework-type-double .spark-6 { --angle: 180deg; --distance: 100px; }
+.firework-type-double .spark-7 { --angle: 216deg; --distance: 100px; }
+.firework-type-double .spark-8 { --angle: 252deg; --distance: 100px; }
+.firework-type-double .spark-9 { --angle: 288deg; --distance: 100px; }
+.firework-type-double .spark-10 { --angle: 324deg; --distance: 100px; }
+
+/* Эффекты свечения для искр */
+.spark {
+  filter: brightness(1.5) saturate(1.8) contrast(1.2);
+  box-shadow: 
+    0 0 8px currentColor,
+    0 0 16px currentColor,
+    0 0 24px currentColor,
+    0 0 32px currentColor;
 }
 
-.firework::before,
-.firework::after {
-  filter: brightness(1.2) saturate(1.3);
+/* Дополнительные эффекты для разных цветов */
+.spark-1, .spark-5, .spark-9, .spark-13 { 
+  box-shadow: 0 0 10px #ff6b6b, 0 0 20px #ff6b6b, 0 0 30px #ff6b6b, 0 0 40px #ff6b6b; 
+  filter: brightness(1.8) saturate(2) contrast(1.3);
+}
+.spark-2, .spark-6, .spark-10, .spark-14 { 
+  box-shadow: 0 0 10px #4ecdc4, 0 0 20px #4ecdc4, 0 0 30px #4ecdc4, 0 0 40px #4ecdc4; 
+  filter: brightness(1.8) saturate(2) contrast(1.3);
+}
+.spark-3, .spark-7, .spark-11, .spark-15 { 
+  box-shadow: 0 0 10px #45b7d1, 0 0 20px #45b7d1, 0 0 30px #45b7d1, 0 0 40px #45b7d1; 
+  filter: brightness(1.8) saturate(2) contrast(1.3);
+}
+.spark-4, .spark-8, .spark-12, .spark-16 { 
+  box-shadow: 0 0 10px #96ceb4, 0 0 20px #96ceb4, 0 0 30px #96ceb4, 0 0 40px #96ceb4; 
+  filter: brightness(1.8) saturate(2) contrast(1.3);
+}
+
+/* Специальные цвета для разных типов фейрверков */
+.firework-type-spiral .spark {
+  filter: brightness(2) saturate(2.2) contrast(1.4);
+  box-shadow: 
+    0 0 12px currentColor,
+    0 0 24px currentColor,
+    0 0 36px currentColor,
+    0 0 48px currentColor;
+}
+
+.firework-type-fan .spark {
+  filter: brightness(1.9) saturate(2.1) contrast(1.3);
+  box-shadow: 
+    0 0 14px currentColor,
+    0 0 28px currentColor,
+    0 0 42px currentColor,
+    0 0 56px currentColor;
+}
+
+.firework-type-chaos .spark {
+  filter: brightness(2.1) saturate(2.3) contrast(1.5);
+  box-shadow: 
+    0 0 16px currentColor,
+    0 0 32px currentColor,
+    0 0 48px currentColor,
+    0 0 64px currentColor;
+}
+
+.firework-type-double .spark {
+  filter: brightness(1.7) saturate(1.9) contrast(1.2);
+  box-shadow: 
+    0 0 8px currentColor,
+    0 0 16px currentColor,
+    0 0 24px currentColor,
+    0 0 32px currentColor;
+}
+
+/* Адаптивность для фейерверков */
+@media (max-width: 900px) {
+  .fireworks-left,
+  .fireworks-right {
+    width: 250px;
+  }
+  
+  .fireworks-center {
+    width: 150px;
+  }
+  
+  .spark {
+    width: 2.5px;
+    height: 2.5px;
+  }
+}
+
+@media (max-width: 700px) {
+  .fireworks-left,
+  .fireworks-right {
+    width: 180px;
+  }
+  
+  .fireworks-center {
+    width: 120px;
+  }
+  
+  .spark {
+    width: 2px;
+    height: 2px;
+  }
+}
+
+@media (max-width: 500px) {
+  .fireworks-left,
+  .fireworks-right {
+    width: 140px;
+  }
+  
+  .fireworks-center {
+    width: 100px;
+  }
+  
+  .spark {
+    width: 1.5px;
+    height: 1.5px;
+  }
 }
 
 .hero-slogan {
@@ -2602,6 +2810,15 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 8px;
+  justify-content: flex-start;
+}
+.catalog-carousel-list:only-child, .catalog-carousel-list.single-centered, .catalog-carousel-list.center-if-one {
+  justify-content: center;
+}
+/* Автоматически центрировать, если только одна карточка */
+.catalog-carousel-list > .catalog-window:only-child {
+  margin-left: auto;
+  margin-right: auto;
 }
 .catalog-carousel-list::-webkit-scrollbar { display: none; }
 @media (max-width: 900px) {
@@ -2644,4 +2861,14 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
     margin: 0;
     scroll-snap-align: start;
   }
+}
+
+.firework-bright .spark {
+  filter: brightness(2.5) saturate(2.8) contrast(1.7) drop-shadow(0 0 16px #fff) drop-shadow(0 0 32px currentColor);
+  box-shadow: 0 0 18px #fff, 0 0 32px currentColor, 0 0 48px currentColor, 0 0 64px currentColor;
+}
+.firework-festive .spark {
+  animation-duration: 1.7s !important;
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 24px #fff, 0 0 48px currentColor, 0 0 72px currentColor, 0 0 96px currentColor;
 }
