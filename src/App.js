@@ -5,6 +5,7 @@ import { FiGift, FiSmile, FiInstagram, FiSend, FiCheckCircle } from 'react-icons
 import { FaVk, FaTelegramPlane } from 'react-icons/fa';
 import { RiHeart2Line, RiSparkling2Line } from 'react-icons/ri';
 import ChatFabButton from './ChatFab';
+import SideFireworks from "./SideFireworks";
 
 function Navbar({ mobile, open, onOpen, onClose }) {
   return (
@@ -67,14 +68,11 @@ function Hero() {
           playsInline 
           poster="/logo192.png"
         >
-          <source src="/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4" type="video/mp4" />
+          <source src="/ФейероТест3В.mp4" type="video/mp4" />
           Ваш браузер не поддерживает видео.
         </video>
       </div>
-      <div className="hero-content hero-content-minimal">
-        <h1>Фейеро</h1>
-        <div className="hero-subtitle">видео-шоу для фейерверка эмоций</div>
-      </div>
+      {/* hero-content и надписи убраны */}
     </section>
   );
 }
@@ -446,6 +444,7 @@ function App() {
   
   return (
     <div className="App">
+      <SideFireworks />
       <Header />
       <div className="hero-wave-overlap">
         <Hero />
