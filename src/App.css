@@ -1,3 +1,9 @@
+/* Сделать весь текст белым */
+* {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+
 /* CSS Variables for Dark Theme */
 :root {
   /* Night sky base */
@@ -42,7 +48,7 @@ body, html, #root, .App {
   padding: 0;
   font-family: 'Bounded', 'Montserrat', Arial, sans-serif;
   background: var(--bg-primary);
-  color: var(--text-primary);
+  color: #fff;
   transition: background 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
 }
@@ -371,7 +377,7 @@ body, html, #root, .App {
   border-radius: 18px;
   border: 1.5px solid var(--accent-secondary);
   background: var(--bg-primary);
-  color: var(--text-primary);
+  color: #fff;
   font-weight: 600;
   padding: 10px 18px;
   box-shadow: 0 2px 8px var(--shadow-color);
@@ -396,7 +402,7 @@ body, html, #root, .App {
 }
 .catalog-select option, .catalog-duration option {
   background: var(--bg-secondary);
-  color: var(--text-primary);
+  color: #fff;
   font-size: 1.08rem;
 }
 @media (max-width: 1100px) {
@@ -656,7 +662,7 @@ body, html, #root, .App {
   border-radius: 16px;
   border: 1.5px solid var(--accent-secondary);
   background: var(--bg-primary);
-  color: var(--text-primary);
+  color: #fff;
   font-family: inherit;
   font-weight: 500;
   box-shadow: 0 2px 8px var(--shadow-color);
@@ -674,7 +680,7 @@ body, html, #root, .App {
   justify-content: center;
   gap: 10px;
   background: linear-gradient(90deg, var(--accent-secondary) 0%, var(--accent-tertiary) 100%);
-  color: var(--text-primary);
+  color: #fff;
   border: none;
   border-radius: 32px;
   padding: 16px 38px;
@@ -698,7 +704,7 @@ body, html, #root, .App {
   background: linear-gradient(90deg, var(--accent-tertiary) 0%, var(--accent-secondary) 100%);
   transform: translateY(-2px) scale(1.045);
   box-shadow: 0 8px 32px var(--shadow-color);
-  color: var(--text-primary);
+  color: #fff;
   border: 2px solid var(--accent-primary);
 }
 @media (max-width: 700px) {
@@ -826,7 +832,7 @@ body, html, #root, .App {
 .upload-form-btn {
   margin-top: 10px;
   background: linear-gradient(90deg, var(--accent-secondary) 0%, var(--accent-tertiary) 100%);
-  color: var(--text-primary);
+  color: #fff;
   border: none;
   border-radius: 32px;
   padding: 16px 38px;
@@ -843,7 +849,7 @@ body, html, #root, .App {
   background: linear-gradient(90deg, var(--accent-tertiary) 0%, var(--accent-secondary) 100%);
   transform: translateY(-2px) scale(1.045);
   box-shadow: 0 8px 32px var(--shadow-color);
-  color: var(--text-primary);
+  color: #fff;
   border: 2px solid var(--accent-primary);
 }
 @media (max-width: 700px) {
@@ -1744,7 +1750,7 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
 }
 .hiw-step-desc {
   font-size: 1.05rem;
-  color: var(--text-primary);
+  color: #fff;
   font-weight: 500;
   min-height: 36px;
   text-align: center;
@@ -2010,13 +2016,13 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
 .adv-title {
   font-size: 1.18rem;
   font-weight: 800;
-  color: var(--accent-primary);
+  color: #7CA7CE;
   margin-bottom: 8px;
   text-align: center;
 }
 .adv-desc {
   font-size: 1.05rem;
-  color: var(--text-primary);
+  color: #fff;
   font-weight: 500;
   min-height: 32px;
   text-align: center;
@@ -2048,7 +2054,7 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
 .advantages-title {
   font-size: 2.1rem;
   font-weight: 900;
-  color: var(--accent-primary);
+  color: #7CA7CE;
   margin-bottom: 32px;
   letter-spacing: 1px;
   text-align: center;
@@ -2117,7 +2123,7 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
 .reviews-modern-left h2 {
   font-size: 2.6rem;
   font-weight: 900;
-  color: var(--accent-primary);
+  color: #7CA7CE;
   margin-bottom: 22px;
   letter-spacing: 1px;
   text-align: left;
@@ -2126,7 +2132,7 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
 }
 .reviews-modern-subtitle {
   font-size: 1.22rem;
-  color: var(--text-primary);
+  color: #fff;
   font-weight: 600;
   opacity: 0.88;
   margin-bottom: 12px;
