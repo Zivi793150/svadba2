@@ -5,7 +5,6 @@ import { FiGift, FiSmile, FiInstagram, FiSend, FiCheckCircle } from 'react-icons
 import { FaVk, FaTelegramPlane } from 'react-icons/fa';
 import { RiHeart2Line, RiSparkling2Line } from 'react-icons/ri';
 import ChatFabButton from './ChatFab';
-import SideFireworks from "./SideFireworks";
 
 function Navbar({ mobile, open, onOpen, onClose }) {
   return (
@@ -444,7 +443,6 @@ function App() {
   
   return (
     <div className="App">
-      <SideFireworks />
       <Header />
       <div className="hero-wave-overlap">
         <Hero />
