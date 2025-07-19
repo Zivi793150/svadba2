@@ -5,35 +5,31 @@ import { FiGift, FiSmile, FiInstagram, FiSend, FiCheckCircle } from 'react-icons
 import { FaVk, FaTelegramPlane } from 'react-icons/fa';
 import { RiHeart2Line, RiSparkling2Line } from 'react-icons/ri';
 import ChatFabButton from './ChatFab';
+import Carousel from './Carousel';
+import './Carousel.css';
 
-function Navbar({ mobile, open, onOpen, onClose }) {
+function BurgerIcon({ open, onClick }) {
   return (
-    <>
-      {!mobile && (
-        <nav className="nav">
-          <a href="#catalogs">Каталоги</a>
-          <a href="#constructor">Собрать слайд-шоу</a>
-          <a href="#contact">Написать нам</a>
-        </nav>
-      )}
-      {mobile && (
-        <>
-          <button className="burger" onClick={onOpen} aria-label="Открыть меню">
-            <span />
-            <span />
-            <span />
-          </button>
-          {open && (
-            <div className="mobile-menu">
-              <button className="mobile-menu-close" onClick={onClose} aria-label="Закрыть меню">×</button>
-              <a href="#catalogs" onClick={onClose}>Каталоги</a>
-              <a href="#constructor" onClick={onClose}>Собрать слайд-шоу</a>
-              <a href="#contact" onClick={onClose}>Написать нам</a>
-            </div>
-          )}
-        </>
-      )}
-    </>
+    <button className="burger-new" onClick={onClick} aria-label={open ? 'Закрыть меню' : 'Открыть меню'}>
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <rect y="8" width="36" height="4" rx="2" fill="#7CA7CE" style={{transition: 'all 0.3s', transform: open ? 'rotate(45deg) translate(6px, 6px)' : 'none'}} />
+        <rect y="16" width="36" height="4" rx="2" fill="#7CA7CE" style={{opacity: open ? 0 : 1, transition: 'all 0.3s'}} />
+        <rect y="24" width="36" height="4" rx="2" fill="#7CA7CE" style={{transition: 'all 0.3s', transform: open ? 'rotate(-45deg) translate(7px, -7px)' : 'none'}} />
+      </svg>
+    </button>
+  );
+}
+
+function MobileMenu({ open, onClose }) {
+  return (
+    <div className={`mobile-menu-new${open ? ' open' : ''}`}> 
+      <button className="mobile-menu-close-new" onClick={onClose} aria-label="Закрыть меню">×</button>
+      <nav className="mobile-menu-list">
+        <a href="#catalogs" onClick={onClose}>Каталоги</a>
+        <a href="#constructor" onClick={onClose}>Собрать слайд-шоу</a>
+        <a href="#contact" onClick={onClose}>Написать нам</a>
+      </nav>
+    </div>
   );
 }
 
@@ -50,7 +46,19 @@ function Header() {
   return (
     <header className="header">
       <div className="logo">Фейеро</div>
-      <Navbar mobile={isMobile} open={menuOpen} onOpen={() => setMenuOpen(true)} onClose={() => setMenuOpen(false)} />
+      {!isMobile && (
+        <nav className="nav">
+          <a href="#catalogs">Каталоги</a>
+          <a href="#constructor">Собрать слайд-шоу</a>
+          <a href="#contact">Написать нам</a>
+        </nav>
+      )}
+      {isMobile && (
+        <>
+          <BurgerIcon open={menuOpen} onClick={() => setMenuOpen(!menuOpen)} />
+          <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+        </>
+      )}
     </header>
   );
 }
@@ -77,25 +85,29 @@ function Hero() {
 }
 
 function Catalog({ title, badge, description, icon, info }) {
+  const isMain = description === 'Новобрачная презентация';
   return (
     <div className="catalog-window wow-catalog">
       <div className="catalog-title-row">
-        {/* Иконка-эмодзи удалена */}
-        {/* Название и плашка убраны */}
-        {description === 'Новобрачная презентация' && (
-          <div className="catalog-main-title" style={{
-            fontSize: '1.35rem', fontWeight: 900, color: '#a18fff', textAlign: 'center', marginBottom: 8, marginTop: 2, letterSpacing: '1px', fontFamily: 'Bounded, Arial, sans-serif'
-          }}>Новобрачная презентация</div>
+        {isMain && (
+          <>
+            <div className="catalog-main-title" style={{
+              fontSize: '2rem', fontWeight: 900, color: '#fff', textAlign: 'center', marginBottom: 10, marginTop: 2, letterSpacing: '1px', fontFamily: 'Bounded, Arial, sans-serif', whiteSpace: 'nowrap'
+            }}>Новобрачная презентация</div>
+            <div style={{
+              fontSize: '1.08rem', color: '#fff', textAlign: 'center', marginBottom: 18, lineHeight: 1.3, fontWeight: 400, opacity: 0.92
+            }}>
+              Главная часть вашего праздника.<br/>Расскажите свою историю!
+            </div>
+          </>
         )}
       </div>
-      {/* Мини-описание удалено */}
       <div className="catalog-video-preview wow-preview">
         <video autoPlay loop muted playsInline poster="/logo192.png" style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '18px', border: '2.5px solid #BFD7ED', boxShadow: '0 4px 24px #BFD7ED33'}}>
           <source src="/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4" type="video/mp4" />
           Ваш браузер не поддерживает видео.
         </video>
       </div>
-      <div className="catalog-info-line">{info}</div>
       <button className="catalog-order-btn"><span className="firework-emoji">🎆</span> Заказать</button>
     </div>
   );
@@ -125,11 +137,13 @@ function CatalogCarousel({ title, items }) {
   return (
     <div className="catalog-carousel">
       <div className="catalog-carousel-header">
-        <div className="catalog-carousel-title">{title}</div>
-        <div className="catalog-carousel-arrows">
-          <button className="carousel-arrow" onClick={scrollLeft} disabled={!canScrollLeft} aria-label="Влево">&#8592;</button>
-          <button className="carousel-arrow" onClick={scrollRight} disabled={!canScrollRight} aria-label="Вправо">&#8594;</button>
-        </div>
+        {/* <div className="catalog-carousel-title">{title}</div> */}
+        {items.length > 1 && (
+          <div className="catalog-carousel-arrows">
+            <button className="carousel-arrow" onClick={scrollLeft} disabled={!canScrollLeft} aria-label="Влево">&#8592;</button>
+            <button className="carousel-arrow" onClick={scrollRight} disabled={!canScrollRight} aria-label="Вправо">&#8594;</button>
+          </div>
+        )}
       </div>
       <div className="catalog-carousel-list" ref={scrollRef} tabIndex={0}>
         {items.map((cat, i) => <Catalog key={cat.title + i} {...cat} />)}
@@ -143,26 +157,33 @@ function Catalogs() {
   const presentations = [
     { title: '', badge: '', description: 'Новобрачная презентация', icon: <MdOutlinePhotoCamera size={28} color="#a18fff" />, info: '5 минут' },
   ];
-  const invites = [
-    { title: 'Love Invite', badge: 'Хит', description: 'Романтическое приглашение с кольцами.', icon: <RiHeart2Line size={28} color="#a18fff" />, info: '1 минута' },
-    { title: 'Classic Invite', badge: '', description: 'Классика с голубями.', icon: <MdFavorite size={28} color="#a18fff" />, info: '1 минута' },
-    { title: 'Elegant Invite', badge: '', description: 'Элегантное приглашение с лепестками.', icon: <FiGift size={28} color="#a18fff" />, info: '1 минута' },
-    { title: 'Fun Invite', badge: '', description: 'Весёлое приглашение для гостей.', icon: <FiSmile size={28} color="#a18fff" />, info: '1 минута' },
+  // Welcome-видео
+  const welcomeItems = [
+    { video: '/ФейероТест3В.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/ФейероТест3В.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4', poster: '/svadbabg.jpeg' },
   ];
-  const welcomes = [
-    { title: 'Welcome Party', badge: 'Топ', description: 'Яркое welcome-видео для гостей.', icon: <RiSparkling2Line size={28} color="#a18fff" />, info: '1.5 минуты' },
-    { title: 'Fun Welcome', badge: '', description: 'Весёлое приветствие.', icon: <FiSmile size={28} color="#a18fff" />, info: '1.5 минуты' },
-    { title: 'Elegant Welcome', badge: '', description: 'Элегантное приветствие.', icon: <FiGift size={28} color="#a18fff" />, info: '1.5 минуты' },
-    { title: 'Classic Welcome', badge: '', description: 'Классика для встречи гостей.', icon: <MdFavorite size={28} color="#a18fff" />, info: '1.5 минуты' },
+  // Видео-приглашения
+  const inviteItems = [
+    { video: '/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/ФейероТест3В.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/ФейероТест3В.mp4', poster: '/svadbabg.jpeg' },
   ];
   return (
     <section className="catalogs-multi" id="catalogs">
-      <CatalogCarousel title="Презентации" items={presentations} />
-      <div style={{textAlign: 'center', margin: '38px 0 8px 0', fontSize: '2.2rem', fontWeight: 900, color: '#7CA7CE', letterSpacing: '1px', textShadow: '0 4px 32px #a18fff99, 0 1px 0 #fff', fontFamily: 'Bounded, Arial, sans-serif'}}>Welcome video</div>
-      <CatalogCarousel title="" items={welcomes} />
-      <div style={{textAlign: 'center', margin: '38px 0 8px 0', fontSize: '2.2rem', fontWeight: 900, color: '#7CA7CE', letterSpacing: '1px', textShadow: '0 4px 32px #a18fff99, 0 1px 0 #fff', fontFamily: 'Bounded, Arial, sans-serif'}}>Приглашения</div>
-      <CatalogCarousel title="" items={invites} />
-      {/* Кнопка "Собрать своё слайд-шоу" удалена */}
+      <CatalogCarousel title="" items={presentations} />
+      <section className="catalog-section">
+        <h2 className="catalog-main-title" style={{textAlign:'center', marginTop:40, marginBottom:8}}>Welcome-видео</h2>
+        <div className="catalog-mini-desc" style={{textAlign:'center', marginBottom:24}}>Видеофон из ваших фото</div>
+        <Carousel items={welcomeItems} />
+      </section>
+      <section className="catalog-section">
+        <h2 className="catalog-main-title" style={{textAlign:'center', marginTop:40, marginBottom:8}}>Видео-приглашения</h2>
+        <div className="catalog-mini-desc" style={{textAlign:'center', marginBottom:24}}>Праздник начинается с приглашения</div>
+        <Carousel items={inviteItems} />
+      </section>
     </section>
   );
 }
@@ -170,17 +191,14 @@ function Catalogs() {
 function HowItWorks() {
   const steps = [
     {
-      icon: <MdOutlinePhotoCamera size={36} color="#BFD7ED" />, // загрузка фото
       title: 'Загрузите фото и пожелания',
       desc: 'Отправьте нам ваши фотографии и пожелания к видео.'
     },
     {
-      icon: <MdStar size={36} color="#BFD7ED" />, // выбор стиля
       title: 'Выберите стиль и музыку',
       desc: 'Подберите шаблон, музыку и стиль оформления.'
     },
     {
-      icon: <FiSend size={36} color="#BFD7ED" />, // получение видео
       title: 'Получите готовое видео',
       desc: 'Мы создаём слайд-шоу и отправляем вам ссылку.'
     }
@@ -214,7 +232,6 @@ function HowItWorks() {
               <span>{i + 1}</span>
               <span className="hiw-step-bg-circle" />
             </div>
-            <div className="hiw-step-icon">{step.icon}</div>
             <div className="hiw-step-title">{step.title}</div>
             <div className="hiw-step-desc">{step.desc}</div>
           </div>
@@ -433,6 +450,38 @@ function Footer() {
   );
 }
 
+function Card({ title, text }) {
+  return (
+    <div className="card">
+      <img
+        className="card-video"
+        src="https://static.vecteezy.com/system/resources/previews/024/114/186/original/fireworks-on-black-background-celebration-and-holiday-concept-4k-footage-free-video.jpg"
+        alt="Видео фейерверк"
+        style={{ width: '100%', borderRadius: 16, marginBottom: 0 }}
+      />
+      <div className="card-content" style={{ width: '100%' }}>
+        {/* Можно добавить описание, если нужно */}
+      </div>
+      <button className="catalog-order-btn">
+        <span role="img" aria-label="Фейерверк">🎆</span> Заказать
+      </button>
+    </div>
+  );
+}
+
+const welcomeItems = [
+  { video: '/ФейероТест3В.mp4', poster: '/svadbabg.jpeg' },
+  { video: '/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4', poster: '/svadbabg.jpeg' },
+  { video: '/ФейероТест3В.mp4', poster: '/svadbabg.jpeg' },
+  { video: '/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4', poster: '/svadbabg.jpeg' },
+];
+const inviteItems = [
+  { video: '/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4', poster: '/svadbabg.jpeg' },
+  { video: '/ФейероТест3В.mp4', poster: '/svadbabg.jpeg' },
+  { video: '/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4', poster: '/svadbabg.jpeg' },
+  { video: '/ФейероТест3В.mp4', poster: '/svadbabg.jpeg' },
+];
+
 function App() {
   const [chatOpen, setChatOpen] = useState(false);
   
@@ -486,9 +535,7 @@ function App() {
         </div>
       </div>
       <Catalogs />
-      <SectionDecor type="rings" />
       <HowItWorks />
-      <SectionDecor type="petals" />
       <Advantages />
       <SectionDecor type="wave" />
       <Reviews />
