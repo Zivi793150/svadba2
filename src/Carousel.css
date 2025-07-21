@@ -10,7 +10,7 @@
 .carousel-list {
   display: flex !important;
   flex-direction: row !important;
-  gap: 2vw !important;
+  gap: 2.6vw !important;
   overflow-x: auto !important;
   scroll-behavior: smooth !important;
   padding: 40px 2vw 40px 2vw !important;
@@ -24,10 +24,10 @@
   background: var(--bg-secondary, #18182a) !important;
   border-radius: 18px !important;
   box-shadow: 0 8px 32px 0 var(--shadow-color), 0 2px 8px var(--shadow-color) !important;
-  width: 28vw !important;
-  min-width: 28vw !important;
-  max-width: 28vw !important;
-  height: 320px !important;
+  width: 19vw !important;
+  min-width: 19vw !important;
+  max-width: 19vw !important;
+  height: 260px !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -43,9 +43,9 @@
 }
 .card-video {
   width: 100% !important;
-  height: 200px !important;
-  min-height: 180px !important;
-  max-height: 220px !important;
+  height: 60% !important;
+  min-height: 70px !important;
+  max-height: 140px !important;
   border-radius: 10px !important;
   margin-bottom: 2px !important;
   box-shadow: 0 4px 24px #BFD7ED33 !important;
@@ -157,15 +157,15 @@
     box-sizing: border-box !important;
   }
   .carousel-card {
-    width: 88vw !important;
-    min-width: 88vw !important;
-    max-width: 88vw !important;
-    height: 44vw !important;
+    width: 72vw !important;
+    min-width: 72vw !important;
+    max-width: 72vw !important;
+    height: 180px !important;
     min-height: 180px !important;
-    max-height: 260px !important;
-    padding: 10px 4vw 10px 4vw !important;
-    border-radius: 18px !important;
-    box-shadow: 0 6px 24px 0 var(--shadow-color), 0 2px 8px var(--shadow-color) !important;
+    max-height: 180px !important;
+    padding: 8px 4vw 8px 4vw !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 18px 0 var(--shadow-color), 0 1px 4px var(--shadow-color) !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -173,10 +173,10 @@
   }
   .card-video {
     height: 70% !important;
-    min-height: 110px !important;
-    max-height: 180px !important;
-    border-radius: 12px !important;
-    margin-bottom: 4px !important;
+    min-height: 90px !important;
+    max-height: 130px !important;
+    border-radius: 10px !important;
+    margin-bottom: 2px !important;
     box-shadow: 0 2px 8px #BFD7ED33 !important;
   }
   .carousel-order-btn {

@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import "./App.css";
 import { MdFavorite, MdStar, MdOutlinePhotoCamera, MdOutlineChatBubble, MdOutlineThumbUp } from 'react-icons/md';
 import { FiGift, FiSmile, FiInstagram, FiSend, FiCheckCircle } from 'react-icons/fi';
-import { FaVk, FaTelegramPlane } from 'react-icons/fa';
+import { FaVk, FaTelegramPlane, FaPaperPlane } from 'react-icons/fa';
 import { RiHeart2Line, RiSparkling2Line } from 'react-icons/ri';
-import ChatFabButton from './ChatFab';
 import Carousel from './Carousel';
 import './Carousel.css';
 
@@ -16,7 +15,7 @@ function BurgerIcon({ open, onClick }) {
         <rect y="16" width="36" height="4" rx="2" fill="#7CA7CE" style={{opacity: open ? 0 : 1, transition: 'all 0.3s'}} />
         <rect y="24" width="36" height="4" rx="2" fill="#7CA7CE" style={{transition: 'all 0.3s', transform: open ? 'rotate(-45deg) translate(7px, -7px)' : 'none'}} />
       </svg>
-    </button>
+          </button>
   );
 }
 
@@ -25,11 +24,11 @@ function MobileMenu({ open, onClose }) {
     <div className={`mobile-menu-new${open ? ' open' : ''}`}> 
       <button className="mobile-menu-close-new" onClick={onClose} aria-label="Закрыть меню">×</button>
       <nav className="mobile-menu-list">
-        <a href="#catalogs" onClick={onClose}>Каталоги</a>
-        <a href="#constructor" onClick={onClose}>Собрать слайд-шоу</a>
-        <a href="#contact" onClick={onClose}>Написать нам</a>
+              <a href="#catalogs" onClick={onClose}>Каталоги</a>
+              <a href="#constructor" onClick={onClose}>Собрать слайд-шоу</a>
+              <a href="#contact" onClick={onClose}>Написать нам</a>
       </nav>
-    </div>
+            </div>
   );
 }
 
@@ -91,9 +90,7 @@ function Catalog({ title, badge, description, icon, info }) {
       <div className="catalog-title-row">
         {isMain && (
           <>
-            <div className="catalog-main-title" style={{
-              fontSize: '2rem', fontWeight: 900, color: '#fff', textAlign: 'center', marginBottom: 10, marginTop: 2, letterSpacing: '1px', fontFamily: 'Bounded, Arial, sans-serif', whiteSpace: 'nowrap'
-            }}>Новобрачная презентация</div>
+            <div className="catalog-title">Новобрачная презентация</div>
             <div style={{
               fontSize: '1.08rem', color: '#fff', textAlign: 'center', marginBottom: 18, lineHeight: 1.3, fontWeight: 400, opacity: 0.92
             }}>
@@ -369,10 +366,10 @@ function Reviews() {
   );
 }
 
-function ChatFab({ onClick }) {
+function ChatFabButton({ onClick }) {
   return (
-    <button className="chat-fab" onClick={onClick} aria-label="Открыть чат">
-      <MdOutlineChatBubble size={32} color="var(--accent-primary)" style={{position:'absolute',left:0,top:0}}/>
+    <button className="chat-fab-new" onClick={onClick} aria-label="Открыть чат">
+      <FaPaperPlane size={28} color="#fff" />
     </button>
   );
 }
@@ -385,16 +382,16 @@ function ContactForm({ onClose }) {
     setTimeout(() => setSent(false), 2000);
   }
   return (
-    <aside className="contact-form contact-form-animated" id="contact">
-      <button className="contact-close" onClick={onClose} aria-label="Закрыть">×</button>
+    <aside className="contact-form-new" id="contact">
+      <button className="contact-close-new" onClick={onClose} aria-label="Закрыть">×</button>
       <h3>Написать нам</h3>
       <form onSubmit={onSubmit} autoComplete="off">
         <input type="text" placeholder="Ваше имя" required />
         <input type="email" placeholder="Email" required />
         <textarea placeholder="Ваш вопрос или пожелание" rows={4} required />
-        <button type="submit" className="contact-send-btn" disabled={sent}>
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 11L19 3L11 19L10 12L3 11Z" fill="var(--accent-primary)"/><path d="M3 11L19 3L11 19L10 12L3 11Z" stroke="var(--accent-primary)" strokeWidth="1.5"/></svg>
-          <span>{sent ? 'Отправлено!' : 'Отправить'}</span>
+        <button type="submit" className="contact-send-btn-new" disabled={sent}>
+          <FaPaperPlane size={20} style={{marginRight: 6}} />
+          {sent ? 'Отправлено!' : ''}
         </button>
       </form>
     </aside>
