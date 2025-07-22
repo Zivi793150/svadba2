@@ -35,15 +35,13 @@ const Carousel = ({ items = [] }) => {
       <div
         className="carousel-list"
         ref={carouselRef}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
+        style={{ touchAction: 'pan-x', overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
       >
         {items.map((item, idx) => (
-          <div className="carousel-card" key={idx}>
+          <div className="carousel-card" key={idx} style={{ scrollSnapAlign: 'start' }}>
             <div className="card-video">
               <video
                 src={item.video}
-                poster={item.poster}
                 autoPlay
                 loop
                 muted
@@ -52,7 +50,7 @@ const Carousel = ({ items = [] }) => {
               />
             </div>
             <button className="carousel-order-btn">
-              <span role="img" aria-label="Фейерверк">🎆</span> Заказать
+              <span role="img" aria-label="Фейерверк">🎆</span> <span className="order-text">Заказать</span>
             </button>
           </div>
         ))}

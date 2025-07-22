@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'Javanese Text';
+  src: url('../public/fonts/Javanese text.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* Сделать весь текст белым */
 * {
   color: #fff !important;
@@ -42,11 +49,11 @@
 
 
 
-body, html, #root, .App {
+body, html, #root, .App, .logo {
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  font-family: 'Lucida Calligraphy', cursive !important;
+  font-family: 'Javanese Text', sans-serif !important;
   background: var(--bg-primary);
   color: #fff;
   transition: background 0.3s ease, color 0.3s ease;
@@ -56,7 +63,11 @@ body, html, #root, .App {
 .header {
   position: fixed;
   top: 0; left: 0; width: 100%;
+  height: auto;
+  min-height: unset;
+  max-height: 80px;
   display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   padding: 18px 38px 14px 38px;
@@ -74,16 +85,20 @@ body, html, #root, .App {
   }
 }
 .logo {
+  min-width: unset;
+  max-width: unset;
+  width: auto;
+  height: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-size: 2.2rem;
   font-weight: 900;
   letter-spacing: 2px;
   color: var(--accent-primary);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: 'Lucida Calligraphy', cursive;
   margin-right: 32px;
   white-space: nowrap;
+  background: none;
 }
 .logo::before {
   content: "\1F48D "; /* 💍 */
@@ -1093,48 +1108,31 @@ body, html, #root, .App {
 @media (max-width: 700px) {
   .header {
     flex-direction: row;
-    align-items: flex-start;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    padding: 8px 4vw 6px 4vw;
-    height: auto;
-    min-height: unset;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 3vw;
+    min-height: 56px;
+    max-height: 64px;
   }
   .logo {
-    font-size: 2rem !important;
-    font-weight: 900 !important;
-    letter-spacing: 1.5px !important;
-    margin-right: 0 !important;
-    white-space: nowrap !important;
+    font-size: 1.3rem !important;
+    max-width: 60vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 8px;
   }
-  .logo::before {
-    font-size: 1rem;
+  .catalog-window, .carousel-card {
+    width: 90vw !important;
+    min-width: 90vw !important;
+    max-width: 92vw !important;
+    margin: 0 auto 16px auto !important;
+    padding: 12px 8px !important;
+    border-radius: 16px !important;
   }
-  .burger {
-    width: 44px;
-    margin: 0 0 0 auto;
-    position: static;
-    align-self: flex-start;
-  }
-  .nav {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-    width: 100%;
-    margin: 8px 0 0 0;
-    position: static;
-    left: auto;
-    top: auto;
-    bottom: auto;
-    transform: none;
-    justify-content: flex-start;
-  }
-  .nav a {
-    font-size: 1rem;
-    padding: 7px 0;
-    margin: 0;
-    width: 100%;
-    display: block;
+  .catalogs-row, .carousel-list {
+    gap: 10px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
   .hero {
     width: 100%;
@@ -3607,5 +3605,132 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
     margin-top: 4px !important;
     margin-bottom: 6px !important;
     padding: 0 2vw !important;
+  }
+}
+
+.how-it-works h2, .advantages-title {
+  font-size: 2.1rem;
+  font-weight: 900;
+  color: var(--accent-primary);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 1.13;
+}
+@media (max-width: 700px) {
+  .how-it-works h2, .advantages-title {
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+  }
+}
+
+.catalog-main-title,
+.how-it-works h2,
+.advantages-title,
+.reviews-modern-left h2,
+.reviews h2 {
+  font-size: 3.5rem !important;
+  font-weight: 900 !important;
+  color: var(--accent-primary) !important;
+  margin-bottom: 8px !important;
+  letter-spacing: 1px !important;
+  text-align: center !important;
+  line-height: 1.13 !important;
+  text-shadow: none !important;
+}
+@media (max-width: 700px) {
+  .catalog-main-title,
+  .how-it-works h2,
+  .advantages-title,
+  .reviews-modern-left h2,
+  .reviews h2 {
+    font-size: 1.3rem !important;
+    margin-bottom: 8px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .catalogs-multi, .catalog-section {
+    padding-left: 2vw !important;
+    padding-right: 2vw !important;
+  }
+  .catalog-window, .carousel-card {
+    width: 86vw !important;
+    min-width: 86vw !important;
+    max-width: 90vw !important;
+    margin: 0 auto 16px auto !important;
+  }
+  .header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 3vw;
+    min-height: 56px;
+    max-height: 64px;
+  }
+  .logo {
+    font-size: 1.5rem !important;
+    max-width: 60vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 8px;
+    white-space: nowrap;
+  }
+  .burger-new {
+    margin-left: auto !important;
+    z-index: 2002;
+    background: var(--header-bg);
+  }
+}
+
+@media (max-width: 700px) {
+  .reviews-modern-subtitle {
+    margin-bottom: 6px !important;
+  }
+  .reviews-modern-slider {
+    margin-top: -100px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .reviews-modern-left {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  .reviews-modern-subtitle {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  .reviews-modern-slider {
+    margin-top: -200px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .adv-conveyor {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 32px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    justify-content: flex-start !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .hero {
+    margin-top: 0px !important;
+  }
+}
+
+@media (min-width: 701px) {
+  .hero {
+    height: auto !important;
+    min-height: 700px !important;
+    margin-top: 100px !important;
   }
 }
