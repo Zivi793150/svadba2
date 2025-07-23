@@ -174,10 +174,19 @@ export default function ChatWidget({ onClose }) {
           {messages.map((msg, i) => (
             <div key={i} style={msg.sender === 'user' ? styles.userMsgWrap : styles.adminMsgWrap}>
               <div style={msg.sender === 'user' ? styles.userMsg : styles.adminMsg}>
-                <span>{msg.text}</span>
+                {msg.sender === 'admin' ? (
+                  <span className="ChatWidget-admin-text">{msg.text}</span>
+                ) : (
+                  <span>{msg.text}</span>
+                )}
                 <div style={styles.msgMeta}>
-                  <span style={styles.msgTime}>{formatTime(msg.createdAt)}</span>
-                  {msg.sender === 'user' && <span style={styles.msgStatus}>✓</span>}
+                  <span className={msg.sender === 'admin' ? 'ChatWidget-admin-meta' : ''} style={styles.msgTime}>{formatTime(msg.createdAt)}</span>
+                  {msg.sender === 'admin' && (
+                    <span className="ChatWidget-admin-meta" style={{marginLeft: 6, fontWeight: 700}}>Админ</span>
+                  )}
+                  {msg.sender === 'user' && (
+                    <span style={styles.msgStatus}>{msg.viewed ? '✓✓' : '✓'}</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -204,6 +213,15 @@ export default function ChatWidget({ onClose }) {
           .App input::placeholder {
             color: #b0b0b0 !important;
             opacity: 1;
+          }
+          .ChatWidget-admin-text {
+            color: #23243a !important;
+            -webkit-text-fill-color: #23243a !important;
+          }
+          .ChatWidget-admin-meta {
+            color: #23243a !important;
+            font-weight: 700 !important;
+            -webkit-text-fill-color: #23243a !important;
           }
         `}</style>
       </div>
@@ -272,8 +290,14 @@ const styles = {
     boxShadow: '0 2px 8px #7CA7CE33', alignSelf: 'flex-end',
   },
   adminMsg: {
-    background: '#fff', color: '#23243a', borderRadius: '16px 16px 16px 4px', padding: '10px 16px', fontSize: 15, maxWidth: '75%',
-    boxShadow: '0 2px 8px #BFD7ED33', alignSelf: 'flex-start',
+    alignSelf: 'flex-start',
+    background: '#fff',
+    color: '#23243a',
+    borderRadius: '16px 16px 16px 4px',
+    padding: '10px 16px',
+    maxWidth: '80%',
+    fontSize: 15,
+    boxShadow: '0 2px 8px #BFD7ED33',
   },
   inputForm: {
     display: 'flex', borderTop: '1.5px solid #e6e6f6', padding: '10px 12px', background: '#23243a',

@@ -11,9 +11,9 @@ app.use(cors());
 app.use(express.json());
 
 // Подключение к MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/svadba', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+mongoose.connect('mongodb+srv://Zivi:oaeJMDcv8uFtOPJT@tanker.gej6glt.mongodb.net/svadba?retryWrites=true&w=majority&appName=Tanker', {
+  // useNewUrlParser: true,
+  // useUnifiedTopology: true,
 });
 
 const db = mongoose.connection;
@@ -70,6 +70,16 @@ app.get('/api/chats', async (req, res) => {
     res.json(chats);
   } catch (err) {
     res.status(500).json({ error: 'Ошибка получения чатов' });
+  }
+});
+
+// Пометить все сообщения пользователя в чате как просмотренные
+app.post('/api/messages/viewed/:chatId', async (req, res) => {
+  try {
+    await Message.updateMany({ chatId: req.params.chatId, sender: 'user', viewed: false }, { $set: { viewed: true } });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Ошибка обновления статуса просмотра' });
   }
 });
 
