@@ -24,10 +24,16 @@ db.once('open', () => {
 
 const Message = require('./message.model');
 
-// Получить все сообщения по chatId
+const lastMessageTimestamps = {};
+
+// Получить все сообщения по chatId с поддержкой пагинации
 app.get('/api/messages/:chatId', async (req, res) => {
   try {
-    const messages = await Message.find({ chatId: req.params.chatId }).sort({ createdAt: 1 });
+    const { limit = 20, skip = 0 } = req.query;
+    const messages = await Message.find({ chatId: req.params.chatId })
+      .sort({ createdAt: 1 })
+      .skip(Number(skip))
+      .limit(Number(limit));
     res.json(messages);
   } catch (err) {
     res.status(500).json({ error: 'Ошибка получения сообщений' });
@@ -38,6 +44,14 @@ app.get('/api/messages/:chatId', async (req, res) => {
 app.post('/api/messages', async (req, res) => {
   try {
     const { chatId, sender, text } = req.body;
+    if (!text || text.length > 1000) {
+      return res.status(400).json({ error: 'Сообщение слишком длинное (макс. 1000 символов)' });
+    }
+    const now = Date.now();
+    if (lastMessageTimestamps[chatId] && now - lastMessageTimestamps[chatId] < 2000) {
+      return res.status(429).json({ error: 'Слишком часто! Подождите пару секунд.' });
+    }
+    lastMessageTimestamps[chatId] = now;
     const message = new Message({ chatId, sender, text });
     await message.save();
     res.status(201).json(message);

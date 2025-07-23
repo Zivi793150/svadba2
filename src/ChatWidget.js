@@ -3,13 +3,14 @@ import io from 'socket.io-client';
 import { FaPaperPlane } from 'react-icons/fa';
 import { BsChatDotsFill } from 'react-icons/bs';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
+import { v4 as uuidv4 } from 'uuid';
 
 const socket = io('http://localhost:5000');
 
 function getSessionId() {
   let id = localStorage.getItem('chatSessionId');
   if (!id) {
-    id = Math.random().toString(36).substr(2, 9);
+    id = uuidv4();
     localStorage.setItem('chatSessionId', id);
   }
   return id;
@@ -19,16 +20,26 @@ function isDesktop() {
   return window.innerWidth > 700;
 }
 
+function formatTime(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
 export default function ChatWidget({ onClose }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
-  const [fullscreen, setFullscreen] = useState(false);
+  const [fullscreen, setFullscreen] = useState(window.innerWidth <= 700);
   const [showCodeInput, setShowCodeInput] = useState(false);
   const [codeInput, setCodeInput] = useState('');
   const [currentChatId, setCurrentChatId] = useState(getSessionId());
+  const [skip, setSkip] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const limit = 20;
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const chatId = currentChatId;
+  const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -38,18 +49,38 @@ export default function ChatWidget({ onClose }) {
     }
   }, [text]);
 
+  // При смене chatId — сбрасываем сообщения, skip, hasMore, переподключаем socket, делаем fetch
   useEffect(() => {
+    setMessages([]);
+    setSkip(0);
+    setHasMore(true);
     socket.emit('join', chatId);
-    fetch(`http://localhost:5000/api/messages/${chatId}`)
+    fetch(`http://localhost:5000/api/messages/${chatId}?limit=${limit}&skip=0`)
       .then(res => res.json())
-      .then(setMessages);
-    socket.on('message', (msg) => {
+      .then(data => {
+        setMessages(data);
+        setSkip(data.length);
+        setHasMore(data.length === limit);
+      });
+    const onMsg = (msg) => {
       setMessages((prev) => [...prev, msg]);
-    });
+    };
+    socket.on('message', onMsg);
     return () => {
-      socket.off('message');
+      socket.off('message', onMsg);
     };
   }, [chatId]);
+
+  // Подгрузка предыдущих сообщений
+  const loadMore = () => {
+    fetch(`http://localhost:5000/api/messages/${chatId}?limit=${limit}&skip=${skip}`)
+      .then(res => res.json())
+      .then(data => {
+        setMessages(prev => [...data, ...prev]);
+        setSkip(prev => prev + data.length);
+        setHasMore(data.length === limit);
+      });
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -57,17 +88,35 @@ export default function ChatWidget({ onClose }) {
 
   useEffect(() => {
     const handleResize = () => {
-      if (!isDesktop() && fullscreen) setFullscreen(false);
+      if (!isDesktop() && !fullscreen) setFullscreen(true);
+      if (isDesktop() && fullscreen) setFullscreen(false);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [fullscreen]);
 
-  const sendMessage = (e) => {
+  const sendMessage = async (e) => {
     e.preventDefault();
-    if (!text.trim()) return;
-    socket.emit('message', { chatId, sender: 'user', text });
-    setText('');
+    if (!text.trim() || text.length > 1000 || sending) return;
+    setSending(true);
+    setError('');
+    try {
+      const res = await fetch('http://localhost:5000/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chatId, sender: 'user', text })
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || 'Ошибка отправки');
+      } else {
+        socket.emit('message', { chatId, sender: 'user', text });
+        setText('');
+      }
+    } catch (err) {
+      setError('Ошибка сети');
+    }
+    setSending(false);
   };
 
   const handleCodeSubmit = (e) => {
@@ -116,13 +165,20 @@ export default function ChatWidget({ onClose }) {
           </form>
         )}
         <div style={styles.messages}>
+          {hasMore && (
+            <button style={styles.loadMoreBtn} onClick={loadMore}>Показать ещё</button>
+          )}
           {messages.length === 0 && (
             <div style={styles.emptyMsg}>Задайте вопрос — мы ответим!</div>
           )}
           {messages.map((msg, i) => (
             <div key={i} style={msg.sender === 'user' ? styles.userMsgWrap : styles.adminMsgWrap}>
               <div style={msg.sender === 'user' ? styles.userMsg : styles.adminMsg}>
-                {msg.text}
+                <span>{msg.text}</span>
+                <div style={styles.msgMeta}>
+                  <span style={styles.msgTime}>{formatTime(msg.createdAt)}</span>
+                  {msg.sender === 'user' && <span style={styles.msgStatus}>✓</span>}
+                </div>
               </div>
             </div>
           ))}
@@ -136,12 +192,14 @@ export default function ChatWidget({ onClose }) {
             value={text}
             onChange={e => setText(e.target.value)}
             placeholder="Введите сообщение..."
+            maxLength={1000}
             autoFocus
           />
-          <button type="submit" style={styles.sendBtn} title="Отправить">
+          <button type="submit" style={styles.sendBtn} title="Отправить" disabled={!text.trim() || text.length > 1000 || sending}>
             <FaPaperPlane size={20} />
           </button>
         </form>
+        {error && <div style={styles.errorMsg}>{error}</div>}
         <style>{`
           .App input::placeholder {
             color: #b0b0b0 !important;
@@ -249,5 +307,20 @@ const styles = {
   },
   codeInputBtn: {
     background: 'linear-gradient(90deg, #7CA7CE 0%, #BFD7ED 100%)', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 16px', fontWeight: 'bold', cursor: 'pointer', fontSize: 15,
+  },
+  msgMeta: {
+    display: 'flex', alignItems: 'center', gap: 6, marginTop: 2, fontSize: 11, color: '#b0b0b0', justifyContent: 'flex-end',
+  },
+  msgTime: {
+    fontSize: 11, color: '#b0b0b0',
+  },
+  msgStatus: {
+    fontSize: 13, color: '#7CA7CE', marginLeft: 2,
+  },
+  loadMoreBtn: {
+    background: 'none', border: 'none', color: '#7CA7CE', fontWeight: 700, fontSize: 14, cursor: 'pointer', margin: '0 auto 8px auto', display: 'block',
+  },
+  errorMsg: {
+    color: '#ff3b3b', fontSize: 13, margin: '6px 0 0 0', textAlign: 'right',
   },
 }; 

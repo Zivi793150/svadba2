@@ -8,6 +8,7 @@ import Footer from "./Footer";
 // import ContactForm from "./ContactForm";
 import ChatFabButton from "./ChatFabButton";
 import ChatWidget from './ChatWidget';
+import io from 'socket.io-client';
 
 // Временная реализация, если нет отдельных файлов:
 function HowItWorks() {
@@ -77,7 +78,29 @@ function Advantages() {
 
 export default function App() {
   const [chatOpen, setChatOpen] = useState(false);
-  
+  const [hasNewMsg, setHasNewMsg] = useState(false);
+  const chatIdRef = useRef(localStorage.getItem('chatSessionId'));
+  const socketRef = useRef(null);
+
+  useEffect(() => {
+    socketRef.current = io('http://localhost:5000');
+    const chatId = chatIdRef.current;
+    socketRef.current.emit('join', chatId);
+    socketRef.current.on('message', (msg) => {
+      if (!chatOpen && msg.chatId === chatId) {
+        setHasNewMsg(true);
+      }
+    });
+    return () => {
+      socketRef.current.disconnect();
+    };
+  }, [chatOpen]);
+
+  const handleOpenChat = () => {
+    setChatOpen(true);
+    setHasNewMsg(false);
+  };
+
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark');
   }, []);
@@ -93,7 +116,7 @@ export default function App() {
       <Advantages />
       <Reviews />
       {/* {chatOpen && <ContactForm onClose={() => setChatOpen(false)} />} */}
-      {!chatOpen && <ChatFabButton onClick={() => setChatOpen(true)} />}
+      {!chatOpen && <ChatFabButton onClick={handleOpenChat} hasNewMsg={hasNewMsg} />}
       {chatOpen && <ChatWidget onClose={() => setChatOpen(false)} />}
       <Footer />
     </div>
