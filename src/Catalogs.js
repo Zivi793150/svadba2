@@ -25,7 +25,7 @@ function Catalog({ title, badge, description, icon, info }) {
           Ваш браузер не поддерживает видео.
         </video>
       </div>
-      <button className="catalog-order-btn"><span className="firework-emoji">🎆</span> <span className="order-text">Заказать</span></button>
+      <button className="carousel-order-btn"><span className="order-text">Заказать</span></button>
     </div>
   );
 }

@@ -76,11 +76,11 @@ function Advantages() {
 
 export default function App() {
   const [chatOpen, setChatOpen] = useState(false);
-
+  
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark');
   }, []);
-
+  
   return (
     <div className="App">
       <Header />

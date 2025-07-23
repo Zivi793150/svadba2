@@ -29,9 +29,6 @@ const Carousel = ({ items = [] }) => {
 
   return (
     <div className="carousel-outer">
-      <button className="carousel-arrow left" onClick={() => scroll(-1)} aria-label="Назад">
-        &#8592;
-      </button>
       <div
         className="carousel-list"
         ref={carouselRef}
@@ -50,14 +47,11 @@ const Carousel = ({ items = [] }) => {
               />
             </div>
             <button className="carousel-order-btn">
-              <span role="img" aria-label="Фейерверк">🎆</span> <span className="order-text">Заказать</span>
+              <span className="order-text">Заказать</span>
             </button>
           </div>
         ))}
       </div>
-      <button className="carousel-arrow right" onClick={() => scroll(1)} aria-label="Вперёд">
-        &#8594;
-      </button>
     </div>
   );
 };

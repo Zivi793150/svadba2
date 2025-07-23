@@ -13,7 +13,7 @@ export default function Hero() {
           playsInline 
           poster="/logo192.png"
         >
-          <source src="/ФейероТест3В.mp4" type="video/mp4" />
+          <source src="/Фейеро7В.mp4" type="video/mp4" />
           Ваш браузер не поддерживает видео.
         </video>
       </div>
