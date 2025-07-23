@@ -1,0 +1,253 @@
+import React, { useEffect, useRef, useState } from 'react';
+import io from 'socket.io-client';
+import { FaPaperPlane } from 'react-icons/fa';
+import { BsChatDotsFill } from 'react-icons/bs';
+import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
+
+const socket = io('http://localhost:5000');
+
+function getSessionId() {
+  let id = localStorage.getItem('chatSessionId');
+  if (!id) {
+    id = Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('chatSessionId', id);
+  }
+  return id;
+}
+
+function isDesktop() {
+  return window.innerWidth > 700;
+}
+
+export default function ChatWidget({ onClose }) {
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState('');
+  const [fullscreen, setFullscreen] = useState(false);
+  const [showCodeInput, setShowCodeInput] = useState(false);
+  const [codeInput, setCodeInput] = useState('');
+  const [currentChatId, setCurrentChatId] = useState(getSessionId());
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+  const chatId = currentChatId;
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.setProperty('color', '#23243a', 'important');
+      inputRef.current.style.setProperty('background', '#f9f9f9', 'important');
+      inputRef.current.style.setProperty('caretColor', '#23243a', 'important');
+    }
+  }, [text]);
+
+  useEffect(() => {
+    socket.emit('join', chatId);
+    fetch(`http://localhost:5000/api/messages/${chatId}`)
+      .then(res => res.json())
+      .then(setMessages);
+    socket.on('message', (msg) => {
+      setMessages((prev) => [...prev, msg]);
+    });
+    return () => {
+      socket.off('message');
+    };
+  }, [chatId]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (!isDesktop() && fullscreen) setFullscreen(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [fullscreen]);
+
+  const sendMessage = (e) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    socket.emit('message', { chatId, sender: 'user', text });
+    setText('');
+  };
+
+  const handleCodeSubmit = (e) => {
+    e.preventDefault();
+    if (!codeInput.trim()) return;
+    localStorage.setItem('chatSessionId', codeInput.trim());
+    setCurrentChatId(codeInput.trim());
+    setShowCodeInput(false);
+    setCodeInput('');
+  };
+
+  return (
+    <div style={fullscreen ? styles.overlayFull : styles.overlay}>
+      <div style={fullscreen ? styles.chatBoxFull : styles.chatBox}>
+        <div style={styles.header}>
+          <div style={styles.headerLeft}>
+            <div style={styles.iconCircle}><BsChatDotsFill size={22} color="#fff" /></div>
+            <span style={styles.title}>Чат поддержки</span>
+          </div>
+          {isDesktop() && (
+            <button
+              onClick={() => setFullscreen(f => !f)}
+              style={styles.fullBtn}
+              title={fullscreen ? 'Свернуть' : 'Во весь экран'}
+            >
+              {fullscreen ? <FiMinimize2 size={22} /> : <FiMaximize2 size={22} />}
+            </button>
+          )}
+          <button onClick={() => setShowCodeInput(s => !s)} style={styles.codeBtn} title="Ввести код чата">🔑</button>
+          <button onClick={onClose} style={styles.closeBtn} title="Закрыть">×</button>
+        </div>
+        <div style={styles.codeBox}>
+          <span style={styles.codeLabel}>Код чата:</span>
+          <span style={styles.codeValue}>{chatId}</span>
+        </div>
+        {showCodeInput && (
+          <form onSubmit={handleCodeSubmit} style={styles.codeInputForm}>
+            <input
+              style={styles.codeInput}
+              value={codeInput}
+              onChange={e => setCodeInput(e.target.value)}
+              placeholder="Введите код чата..."
+              autoFocus
+            />
+            <button type="submit" style={styles.codeInputBtn}>ОК</button>
+          </form>
+        )}
+        <div style={styles.messages}>
+          {messages.length === 0 && (
+            <div style={styles.emptyMsg}>Задайте вопрос — мы ответим!</div>
+          )}
+          {messages.map((msg, i) => (
+            <div key={i} style={msg.sender === 'user' ? styles.userMsgWrap : styles.adminMsgWrap}>
+              <div style={msg.sender === 'user' ? styles.userMsg : styles.adminMsg}>
+                {msg.text}
+              </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+        <form onSubmit={sendMessage} style={styles.inputForm} autoComplete="off">
+          <input
+            ref={inputRef}
+            className="ChatWidget-input"
+            style={styles.input}
+            value={text}
+            onChange={e => setText(e.target.value)}
+            placeholder="Введите сообщение..."
+            autoFocus
+          />
+          <button type="submit" style={styles.sendBtn} title="Отправить">
+            <FaPaperPlane size={20} />
+          </button>
+        </form>
+        <style>{`
+          .App input::placeholder {
+            color: #b0b0b0 !important;
+            opacity: 1;
+          }
+        `}</style>
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  overlay: {
+    position: 'fixed', right: 24, bottom: 24, zIndex: 4000,
+    display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', pointerEvents: 'auto',
+  },
+  overlayFull: {
+    position: 'fixed', left: 0, top: 0, right: 0, bottom: 0, zIndex: 5000,
+    display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,19,0.92)',
+  },
+  chatBox: {
+    width: 370, background: '#23243a', borderRadius: 18, boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+    display: 'flex', flexDirection: 'column', maxHeight: 520, minHeight: 420, overflow: 'hidden',
+    fontFamily: 'inherit',
+  },
+  chatBoxFull: {
+    width: 600, height: 700, maxWidth: '98vw', maxHeight: '98vh', background: '#23243a', borderRadius: 22, boxShadow: '0 12px 48px rgba(0,0,0,0.35)',
+    display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: 'inherit',
+  },
+  header: {
+    background: 'linear-gradient(90deg, #7CA7CE 0%, #BFD7ED 100%)',
+    padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    borderBottom: '1.5px solid #e6e6f6',
+  },
+  headerLeft: {
+    display: 'flex', alignItems: 'center', gap: 10,
+  },
+  iconCircle: {
+    background: 'linear-gradient(135deg, #7CA7CE 0%, #BFD7ED 100%)',
+    borderRadius: '50%', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
+    boxShadow: '0 2px 8px #7CA7CE44',
+  },
+  title: {
+    color: '#fff', fontWeight: 800, fontSize: 18, letterSpacing: 0.5,
+    textShadow: '0 2px 8px #7CA7CE',
+  },
+  fullBtn: {
+    background: 'none', border: 'none', color: '#fff', fontSize: 22, cursor: 'pointer', marginRight: 8, opacity: 0.7, transition: 'opacity 0.2s',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+  },
+  closeBtn: {
+    background: 'none', border: 'none', fontSize: 28, cursor: 'pointer', color: '#fff', fontWeight: 700, opacity: 0.7, transition: 'opacity 0.2s',
+  },
+  messages: {
+    flex: 1, overflowY: 'auto', padding: '18px 14px 8px 14px', display: 'flex', flexDirection: 'column', gap: 10,
+    background: 'linear-gradient(120deg, #23243a 80%, #2e2f4a 100%)',
+  },
+  emptyMsg: {
+    color: '#aaa', textAlign: 'center', marginTop: 40, fontSize: 16,
+  },
+  userMsgWrap: {
+    display: 'flex', justifyContent: 'flex-end',
+  },
+  adminMsgWrap: {
+    display: 'flex', justifyContent: 'flex-start',
+  },
+  userMsg: {
+    background: 'linear-gradient(90deg, #7CA7CE 0%, #BFD7ED 100%)', color: '#fff',
+    borderRadius: '16px 16px 4px 16px', padding: '10px 16px', fontSize: 15, maxWidth: '75%',
+    boxShadow: '0 2px 8px #7CA7CE33', alignSelf: 'flex-end',
+  },
+  adminMsg: {
+    background: '#fff', color: '#23243a', borderRadius: '16px 16px 16px 4px', padding: '10px 16px', fontSize: 15, maxWidth: '75%',
+    boxShadow: '0 2px 8px #BFD7ED33', alignSelf: 'flex-start',
+  },
+  inputForm: {
+    display: 'flex', borderTop: '1.5px solid #e6e6f6', padding: '10px 12px', background: '#23243a',
+  },
+  input: {
+    flex: 1, border: 'none', outline: 'none', padding: '10px 14px', fontSize: 16, borderRadius: 12, background: '#f9f9f9', marginRight: 8,
+    color: '#23243a !important', fontWeight: 500, boxShadow: '0 2px 8px #BFD7ED33',
+  },
+  sendBtn: {
+    background: 'linear-gradient(90deg, #7CA7CE 0%, #BFD7ED 100%)', color: '#fff !important', border: 'none', borderRadius: 12, padding: '0 16px', fontWeight: 'bold', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px #7CA7CE33', transition: 'background 0.2s',
+  },
+  codeBox: {
+    display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', background: 'rgba(255,255,255,0.07)',
+    fontSize: 14, fontWeight: 500, color: '#b0b0b0', borderBottom: '1px solid #e6e6f6',
+  },
+  codeLabel: {
+    color: '#b0b0b0', fontWeight: 500,
+  },
+  codeValue: {
+    color: '#fff', fontWeight: 700, fontFamily: 'monospace', background: '#23243a', padding: '2px 8px', borderRadius: 6, fontSize: 15,
+  },
+  codeBtn: {
+    background: 'none', border: 'none', color: '#fff', fontSize: 22, cursor: 'pointer', marginRight: 8, opacity: 0.7, transition: 'opacity 0.2s',
+  },
+  codeInputForm: {
+    display: 'flex', alignItems: 'center', gap: 8, padding: '8px 18px', background: 'rgba(255,255,255,0.07)',
+    borderBottom: '1px solid #e6e6f6',
+  },
+  codeInput: {
+    border: '1px solid #b0b0b0', borderRadius: 6, padding: '6px 10px', fontSize: 15, outline: 'none',
+  },
+  codeInputBtn: {
+    background: 'linear-gradient(90deg, #7CA7CE 0%, #BFD7ED 100%)', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 16px', fontWeight: 'bold', cursor: 'pointer', fontSize: 15,
+  },
+}; 

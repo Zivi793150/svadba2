@@ -1,0 +1,15 @@
+/* Гарантированная перекраска input в чате */
+.App .ChatWidget-input,
+.App .ChatWidget-input:focus,
+.App .ChatWidget-input:active {
+  color: #23243a !important;
+  background: #f9f9f9 !important;
+  font-weight: 500;
+  box-shadow: 0 2px 8px #BFD7ED33;
+  caret-color: #23243a !important;
+  -webkit-text-fill-color: #23243a !important;
+}
+.App .ChatWidget-input::placeholder {
+  color: #b0b0b0 !important;
+  opacity: 1;
+} 

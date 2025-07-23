@@ -1,0 +1,20 @@
+# Node.js
+node_modules/
+.env
+.env.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
+debug.log
+.DS_Store
+.idea/
+.vscode/
+coverage/
+dist/
+build/ 

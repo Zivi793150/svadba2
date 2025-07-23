@@ -5,8 +5,9 @@ import Hero from "./Hero";
 import Catalogs from "./Catalogs";
 import Reviews from "./Reviews";
 import Footer from "./Footer";
-import ContactForm from "./ContactForm";
+// import ContactForm from "./ContactForm";
 import ChatFabButton from "./ChatFabButton";
+import ChatWidget from './ChatWidget';
 
 // Временная реализация, если нет отдельных файлов:
 function HowItWorks() {
@@ -91,8 +92,9 @@ export default function App() {
       <HowItWorks />
       <Advantages />
       <Reviews />
-      {chatOpen && <ContactForm onClose={() => setChatOpen(false)} />}
+      {/* {chatOpen && <ContactForm onClose={() => setChatOpen(false)} />} */}
       {!chatOpen && <ChatFabButton onClick={() => setChatOpen(true)} />}
+      {chatOpen && <ChatWidget onClose={() => setChatOpen(false)} />}
       <Footer />
     </div>
   );
