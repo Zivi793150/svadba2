@@ -6,7 +6,7 @@ import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { v4 as uuidv4 } from 'uuid';
 import './ChatWidgetFix.css';
 
-const API_URL = 'https://svadba2.onrender.com';
+const API_URL = 'http://localhost:5000';
 const socket = io(API_URL);
 
 function getSessionId() {
@@ -81,7 +81,16 @@ export default function ChatWidget({ onClose }) {
     })();
     socket.emit('join', chatId);
     const onMsg = (msg) => {
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => {
+        // Если есть pending сообщение с таким же текстом и sender, заменяем его на настоящее
+        const idx = prev.findIndex(m => m.pending && m.text === msg.text && m.sender === msg.sender);
+        if (idx !== -1) {
+          const newArr = [...prev];
+          newArr[idx] = msg;
+          return newArr;
+        }
+        return [...prev, msg];
+      });
     };
     socket.on('message', onMsg);
     return () => {
@@ -117,8 +126,18 @@ export default function ChatWidget({ onClose }) {
     if (!text.trim() || text.length > 1000 || sending) return;
     setSending(true);
     setError('');
+    const tempId = 'pending-' + uuidv4();
+    const optimisticMsg = {
+      _id: tempId,
+      chatId,
+      sender: 'user',
+      text,
+      createdAt: new Date().toISOString(),
+      pending: true
+    };
+    setMessages((prev) => [...prev, optimisticMsg]);
     try {
-      const res = await fetch(`${API_URL}/api/messages`, {
+      const res = await fetch('http://localhost:5000/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chatId, sender: 'user', text })
@@ -126,13 +145,14 @@ export default function ChatWidget({ onClose }) {
       if (!res.ok) {
         const data = await res.json();
         setError(data.error || 'Ошибка отправки');
+        // Удаляем временное сообщение при ошибке
+        setMessages((prev) => prev.filter((msg) => msg._id !== tempId));
       } else {
-        const message = await res.json();
-        setMessages(prev => [...prev, message]);
         setText('');
       }
     } catch (err) {
       setError('Ошибка сети');
+      setMessages((prev) => prev.filter((msg) => msg._id !== tempId));
     }
     setSending(false);
   };
@@ -190,20 +210,13 @@ export default function ChatWidget({ onClose }) {
             <div style={styles.emptyMsg}>Задайте вопрос — мы ответим!</div>
           )}
           {messages.map((msg, i) => (
-            <div key={i} style={msg.sender === 'user' ? styles.userMsgWrap : styles.adminMsgWrap}>
+            <div key={msg._id || i} style={msg.sender === 'user' ? styles.userMsgWrap : styles.adminMsgWrap}>
               <div style={msg.sender === 'user' ? styles.userMsg : styles.adminMsg}>
-                {msg.sender === 'admin' ? (
-                  <span className="ChatWidget-admin-text">{msg.text}</span>
-                ) : (
-                  <span>{msg.text}</span>
-                )}
+                <span>{msg.text}</span>
                 <div style={styles.msgMeta}>
-                  <span className={msg.sender === 'admin' ? 'ChatWidget-admin-meta' : ''} style={styles.msgTime}>{formatTime(msg.createdAt)}</span>
-                  {msg.sender === 'admin' && (
-                    <span className="ChatWidget-admin-meta" style={{marginLeft: 6, fontWeight: 700}}>Админ</span>
-                  )}
+                  <span style={styles.msgTime}>{formatTime(msg.createdAt)}</span>
                   {msg.sender === 'user' && (
-                    <span style={styles.msgStatus}>{msg.viewed ? '✓✓' : '✓'}</span>
+                    <span style={styles.msgStatus}>{msg.pending ? '...' : '✓'}</span>
                   )}
                 </div>
               </div>
