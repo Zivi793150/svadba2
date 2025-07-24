@@ -35,6 +35,7 @@ export default function ChatWidget({ onClose }) {
   const [codeInput, setCodeInput] = useState('');
   const [currentChatId, setCurrentChatId] = useState(getSessionId());
   const [skip, setSkip] = useState(0);
+  const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const limit = 20;
   const messagesEndRef = useRef(null);
@@ -51,19 +52,30 @@ export default function ChatWidget({ onClose }) {
     }
   }, [text]);
 
+  // Получить общее количество сообщений
+  async function fetchTotal() {
+    const res = await fetch(`${API_URL}/api/messages/${chatId}?count=1`);
+    const data = await res.json();
+    return data.total || 0;
+  }
+
   // При смене chatId — сбрасываем сообщения, skip, hasMore, переподключаем socket, делаем fetch
   useEffect(() => {
     setMessages([]);
     setSkip(0);
     setHasMore(true);
+    (async () => {
+      const res = await fetch(`${API_URL}/api/messages/${chatId}`);
+      const all = await res.json();
+      const totalCount = all.length;
+      setTotal(totalCount);
+      let initialSkip = 0;
+      if (totalCount > limit) initialSkip = totalCount - limit;
+      setSkip(initialSkip + limit);
+      setMessages(all.slice(initialSkip, initialSkip + limit));
+      setHasMore(initialSkip > 0);
+    })();
     socket.emit('join', chatId);
-    fetch(`${API_URL}/api/messages/${chatId}?limit=${limit}&skip=0`)
-      .then(res => res.json())
-      .then(data => {
-        setMessages(data);
-        setSkip(data.length);
-        setHasMore(data.length === limit);
-      });
     const onMsg = (msg) => {
       setMessages((prev) => [...prev, msg]);
     };
@@ -74,14 +86,13 @@ export default function ChatWidget({ onClose }) {
   }, [chatId]);
 
   // Подгрузка предыдущих сообщений
-  const loadMore = () => {
-    fetch(`${API_URL}/api/messages/${chatId}?limit=${limit}&skip=${skip}`)
-      .then(res => res.json())
-      .then(data => {
-        setMessages(prev => [...data, ...prev]);
-        setSkip(prev => prev + data.length);
-        setHasMore(data.length === limit);
-      });
+  const loadMore = async () => {
+    const newSkip = Math.max(0, skip - limit);
+    const res = await fetch(`${API_URL}/api/messages/${chatId}`);
+    const all = await res.json();
+    setMessages(prev => [...all.slice(newSkip, skip - limit), ...prev]);
+    setSkip(newSkip);
+    setHasMore(newSkip > 0);
   };
 
   useEffect(() => {

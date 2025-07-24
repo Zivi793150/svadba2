@@ -86,7 +86,7 @@ export default function App() {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    socketRef.current = io('http://localhost:5000');
+    socketRef.current = io(API_URL);
     const chatId = chatIdRef.current;
     socketRef.current.emit('join', chatId);
     socketRef.current.on('message', (msg) => {
