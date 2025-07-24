@@ -16,15 +16,19 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage });
+require('dotenv').config();
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({
+  origin: [process.env.FRONTEND_URL || 'http://localhost:3000'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Подключение к MongoDB
-mongoose.connect('mongodb+srv://Zivi:oaeJMDcv8uFtOPJT@tanker.gej6glt.mongodb.net/svadba?retryWrites=true&w=majority&appName=Tanker', {
+mongoose.connect(process.env.MONGO_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });

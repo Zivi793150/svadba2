@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import './ChatWidgetFix.css';
 import { FaPaperclip } from 'react-icons/fa';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 const socket = io(API_URL);
 
 function getSessionId() {
