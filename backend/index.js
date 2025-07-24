@@ -8,7 +8,7 @@ const app = express();
 const PORT = 5000;
 
 app.use(cors({
-  origin: ['https://svadba2.vercel.app', 'https://svadba2-git-main-svadba2.vercel.app', 'http://localhost:3000'],
+  origin: ['https://svadba2.vercel.app', 'https://svadba2-git-main-svadba2.vercel.app', 'https://svadba2-ju4z.vercel.app', 'http://localhost:3000'],
   credentials: true
 }));
 app.use(express.json());
@@ -93,7 +93,7 @@ app.get('/', (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ['https://svadba2.vercel.app', 'https://svadba2-git-main-svadba2.vercel.app', 'http://localhost:3000'],
+    origin: ['https://svadba2.vercel.app', 'https://svadba2-git-main-svadba2.vercel.app', 'https://svadba2-ju4z.vercel.app', 'http://localhost:3000'],
     methods: ['GET', 'POST'],
     credentials: true
   }
