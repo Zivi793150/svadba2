@@ -4,6 +4,7 @@ const messageSchema = new mongoose.Schema({
   chatId: { type: String, required: true }, // id чата (sessionId или id пользователя)
   sender: { type: String, required: true }, // 'user' или 'admin'
   text: { type: String, required: true },
+  viewed: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
 

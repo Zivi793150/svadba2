@@ -4,8 +4,10 @@ import { FaPaperPlane } from 'react-icons/fa';
 import { BsChatDotsFill } from 'react-icons/bs';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { v4 as uuidv4 } from 'uuid';
+import './ChatWidgetFix.css';
 
-const socket = io('http://localhost:5000');
+const API_URL = 'https://svadba2.onrender.com';
+const socket = io(API_URL);
 
 function getSessionId() {
   let id = localStorage.getItem('chatSessionId');
@@ -33,6 +35,7 @@ export default function ChatWidget({ onClose }) {
   const [codeInput, setCodeInput] = useState('');
   const [currentChatId, setCurrentChatId] = useState(getSessionId());
   const [skip, setSkip] = useState(0);
+  const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const limit = 20;
   const messagesEndRef = useRef(null);
@@ -49,19 +52,34 @@ export default function ChatWidget({ onClose }) {
     }
   }, [text]);
 
+  // Получить общее количество сообщений
+  async function fetchTotal() {
+    const res = await fetch(`${API_URL}/api/messages/${chatId}?count=1`);
+    const data = await res.json();
+    return data.total || 0;
+  }
+
   // При смене chatId — сбрасываем сообщения, skip, hasMore, переподключаем socket, делаем fetch
   useEffect(() => {
     setMessages([]);
     setSkip(0);
     setHasMore(true);
+    (async () => {
+      // Получаем общее количество сообщений
+      const countRes = await fetch(`${API_URL}/api/messages/${chatId}/count`);
+      const countData = await countRes.json();
+      const totalCount = countData.total || 0;
+      setTotal(totalCount);
+      let initialSkip = 0;
+      if (totalCount > limit) initialSkip = totalCount - limit;
+      setSkip(initialSkip + limit);
+      // Получаем только нужный диапазон сообщений
+      const res = await fetch(`${API_URL}/api/messages/${chatId}?limit=${limit}&skip=${initialSkip}`);
+      const data = await res.json();
+      setMessages(data);
+      setHasMore(initialSkip > 0);
+    })();
     socket.emit('join', chatId);
-    fetch(`http://localhost:5000/api/messages/${chatId}?limit=${limit}&skip=0`)
-      .then(res => res.json())
-      .then(data => {
-        setMessages(data);
-        setSkip(data.length);
-        setHasMore(data.length === limit);
-      });
     const onMsg = (msg) => {
       setMessages((prev) => [...prev, msg]);
     };
@@ -72,14 +90,13 @@ export default function ChatWidget({ onClose }) {
   }, [chatId]);
 
   // Подгрузка предыдущих сообщений
-  const loadMore = () => {
-    fetch(`http://localhost:5000/api/messages/${chatId}?limit=${limit}&skip=${skip}`)
-      .then(res => res.json())
-      .then(data => {
-        setMessages(prev => [...data, ...prev]);
-        setSkip(prev => prev + data.length);
-        setHasMore(data.length === limit);
-      });
+  const loadMore = async () => {
+    const newSkip = Math.max(0, skip - limit);
+    const res = await fetch(`${API_URL}/api/messages/${chatId}?limit=${limit}&skip=${newSkip}`);
+    const data = await res.json();
+    setMessages(prev => [...data, ...prev]);
+    setSkip(newSkip);
+    setHasMore(newSkip > 0);
   };
 
   useEffect(() => {
@@ -101,7 +118,7 @@ export default function ChatWidget({ onClose }) {
     setSending(true);
     setError('');
     try {
-      const res = await fetch('http://localhost:5000/api/messages', {
+      const res = await fetch(`${API_URL}/api/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chatId, sender: 'user', text })
@@ -175,10 +192,19 @@ export default function ChatWidget({ onClose }) {
           {messages.map((msg, i) => (
             <div key={i} style={msg.sender === 'user' ? styles.userMsgWrap : styles.adminMsgWrap}>
               <div style={msg.sender === 'user' ? styles.userMsg : styles.adminMsg}>
-                <span>{msg.text}</span>
+                {msg.sender === 'admin' ? (
+                  <span className="ChatWidget-admin-text">{msg.text}</span>
+                ) : (
+                  <span>{msg.text}</span>
+                )}
                 <div style={styles.msgMeta}>
-                  <span style={styles.msgTime}>{formatTime(msg.createdAt)}</span>
-                  {msg.sender === 'user' && <span style={styles.msgStatus}>✓</span>}
+                  <span className={msg.sender === 'admin' ? 'ChatWidget-admin-meta' : ''} style={styles.msgTime}>{formatTime(msg.createdAt)}</span>
+                  {msg.sender === 'admin' && (
+                    <span className="ChatWidget-admin-meta" style={{marginLeft: 6, fontWeight: 700}}>Админ</span>
+                  )}
+                  {msg.sender === 'user' && (
+                    <span style={styles.msgStatus}>{msg.viewed ? '✓✓' : '✓'}</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -205,6 +231,15 @@ export default function ChatWidget({ onClose }) {
           .App input::placeholder {
             color: #b0b0b0 !important;
             opacity: 1;
+          }
+          .ChatWidget-admin-text {
+            color: #23243a !important;
+            -webkit-text-fill-color: #23243a !important;
+          }
+          .ChatWidget-admin-meta {
+            color: #23243a !important;
+            font-weight: 700 !important;
+            -webkit-text-fill-color: #23243a !important;
           }
         `}</style>
       </div>
@@ -273,8 +308,14 @@ const styles = {
     boxShadow: '0 2px 8px #7CA7CE33', alignSelf: 'flex-end',
   },
   adminMsg: {
-    background: '#fff', color: '#23243a', borderRadius: '16px 16px 16px 4px', padding: '10px 16px', fontSize: 15, maxWidth: '75%',
-    boxShadow: '0 2px 8px #BFD7ED33', alignSelf: 'flex-start',
+    alignSelf: 'flex-start',
+    background: '#fff',
+    color: '#23243a',
+    borderRadius: '16px 16px 16px 4px',
+    padding: '10px 16px',
+    maxWidth: '80%',
+    fontSize: 15,
+    boxShadow: '0 2px 8px #BFD7ED33',
   },
   inputForm: {
     display: 'flex', borderTop: '1.5px solid #e6e6f6', padding: '10px 12px', background: '#23243a',

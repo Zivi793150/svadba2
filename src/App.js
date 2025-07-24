@@ -10,6 +10,9 @@ import ChatFabButton from "./ChatFabButton";
 import ChatWidget from './ChatWidget';
 import io from 'socket.io-client';
 
+const API_URL = 'https://svadba2.onrender.com';
+const socket = io(API_URL);
+
 // Временная реализация, если нет отдельных файлов:
 function HowItWorks() {
   const steps = [
@@ -83,7 +86,7 @@ export default function App() {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    socketRef.current = io('http://localhost:5000');
+    socketRef.current = io(API_URL);
     const chatId = chatIdRef.current;
     socketRef.current.emit('join', chatId);
     socketRef.current.on('message', (msg) => {
