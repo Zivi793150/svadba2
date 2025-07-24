@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import io from 'socket.io-client';
 
 const ADMIN_PASSWORD = 'admin123'; // временно, потом вынести на сервер
+const API_URL = 'http://localhost:5000';
+const socket = io(API_URL);
 
 export default function AdminPanel() {
   const [password, setPassword] = useState('');
@@ -23,10 +26,39 @@ export default function AdminPanel() {
 
   useEffect(() => {
     if (!selectedChat) return;
-    fetch(`http://localhost:5000/api/messages/${selectedChat}`)
+    fetch(`${API_URL}/api/messages/${selectedChat}`)
       .then(res => res.json())
       .then(setMessages)
       .catch(() => setError('Ошибка загрузки сообщений'));
+    // Пометить все сообщения пользователя как просмотренные
+    fetch(`${API_URL}/api/messages/viewed/${selectedChat}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sender: 'admin' })
+    });
+    socket.emit('join', selectedChat);
+    const onMsg = (msg) => {
+      if (msg.chatId === selectedChat) {
+        setMessages(prev => [...prev, msg]);
+        // Мгновенно помечаем сообщения пользователя как прочитанные
+        fetch(`${API_URL}/api/messages/viewed/${selectedChat}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sender: 'admin' })
+        });
+      }
+    };
+    const onViewed = (data) => {
+      if (data.chatId === selectedChat) {
+        setMessages(prev => prev.map(m => data.ids.includes(m._id) ? { ...m, viewed: true } : m));
+      }
+    };
+    socket.on('message', onMsg);
+    socket.on('viewed', onViewed);
+    return () => {
+      socket.off('message', onMsg);
+      socket.off('viewed', onViewed);
+    };
   }, [selectedChat]);
 
   useEffect(() => {
@@ -100,6 +132,7 @@ export default function AdminPanel() {
                   </div>
                   <div style={{fontSize:12,color:'var(--text-secondary)',marginTop:2,textAlign:m.sender==='admin'?'right':'left'}}>
                     {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {m.sender==='admin'?'Админ':'Пользователь'}
+                    {m.sender==='user' && m.viewed && <span style={{marginLeft:6,color:'var(--accent-tertiary)'}}>✓✓</span>}
                   </div>
                 </div>
               ))

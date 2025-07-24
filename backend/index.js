@@ -52,7 +52,7 @@ app.post('/api/messages', async (req, res) => {
       return res.status(429).json({ error: 'Слишком часто! Подождите пару секунд.' });
     }
     lastMessageTimestamps[chatId] = now;
-    const message = new Message({ chatId, sender, text });
+    const message = new Message({ chatId, sender, text, delivered: true });
     await message.save();
     io.to(chatId).emit('message', message); // Эмитим новое сообщение всем в комнате
     res.status(201).json(message);
@@ -81,6 +81,20 @@ app.get('/api/chats', async (req, res) => {
     res.json(chats);
   } catch (err) {
     res.status(500).json({ error: 'Ошибка получения чатов' });
+  }
+});
+
+app.post('/api/messages/viewed/:chatId', async (req, res) => {
+  try {
+    const { sender } = req.body; // 'user' или 'admin'
+    const filter = { chatId: req.params.chatId, sender: sender === 'user' ? 'admin' : 'user', viewed: false };
+    await Message.updateMany(filter, { $set: { viewed: true } });
+    // Получаем id обновлённых сообщений
+    const updatedMessages = await Message.find({ chatId: req.params.chatId, sender: sender === 'user' ? 'admin' : 'user', viewed: true });
+    io.to(req.params.chatId).emit('viewed', { chatId: req.params.chatId, sender, ids: updatedMessages.map(m => m._id) });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Ошибка пометки как прочитанные' });
   }
 });
 

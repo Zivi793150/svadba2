@@ -82,6 +82,12 @@ export default function ChatWidget({ onClose }) {
       setHasMore(initialSkip > 0);
     })();
     socket.emit('join', chatId);
+    // Помечаем сообщения админа как прочитанные, если чат открыт пользователем
+    fetch(`${API_URL}/api/messages/viewed/${chatId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sender: 'user' })
+    });
     const onMsg = (msg) => {
       setMessages((prev) => {
         // Если есть pending сообщение с таким же текстом и sender, заменяем его на настоящее
@@ -93,10 +99,23 @@ export default function ChatWidget({ onClose }) {
         }
         return [...prev, msg];
       });
+      // Мгновенно помечаем сообщения админа как прочитанные
+      fetch(`${API_URL}/api/messages/viewed/${chatId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sender: 'user' })
+      });
+    };
+    const onViewed = (data) => {
+      if (data.chatId === chatId) {
+        setMessages(prev => prev.map(m => data.ids.includes(m._id) ? { ...m, viewed: true } : m));
+      }
     };
     socket.on('message', onMsg);
+    socket.on('viewed', onViewed);
     return () => {
       socket.off('message', onMsg);
+      socket.off('viewed', onViewed);
     };
   }, [chatId]);
 
@@ -218,7 +237,9 @@ export default function ChatWidget({ onClose }) {
                 <div style={styles.msgMeta}>
                   <span style={styles.msgTime}>{formatTime(msg.createdAt)}</span>
                   {msg.sender === 'user' && (
-                    <span style={styles.msgStatus}>{msg.pending ? '...' : '✓'}</span>
+                    <span style={styles.msgStatus}>
+                      {msg.pending ? '...' : (msg.viewed ? '✓✓' : (msg.delivered ? '✓' : '...'))}
+                    </span>
                   )}
                 </div>
               </div>
