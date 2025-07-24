@@ -256,6 +256,8 @@ export default function ChatWidget({ onClose }) {
                 {msg.fileUrl ? (
                   msg.fileType && msg.fileType.startsWith('image/') ? (
                     <img src={API_URL + msg.fileUrl} alt="file" style={{maxWidth:180,maxHeight:180,borderRadius:12,marginBottom:6}} />
+                  ) : msg.fileType && msg.fileType.startsWith('video/') ? (
+                    <video src={API_URL + msg.fileUrl} controls style={{maxWidth:220,maxHeight:180,borderRadius:12,marginBottom:6,background:'#000'}} />
                   ) : (
                     <a href={API_URL + msg.fileUrl} target="_blank" rel="noopener noreferrer" style={{color:'#7CA7CE',wordBreak:'break-all',display:'block',marginBottom:6}}>
                       📎 Скачать файл

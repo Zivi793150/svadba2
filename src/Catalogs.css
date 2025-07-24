@@ -104,9 +104,9 @@
   opacity: 1 !important;
 }
 .catalogs-multi > .catalog-carousel:first-child .catalog-video-preview.wow-preview {
-  height: 160px !important;
-  min-height: 120px !important;
-  max-height: 180px !important;
+  height: 220px !important;
+  min-height: 180px !important;
+  max-height: 260px !important;
   border-radius: 14px !important;
   margin-bottom: 12px !important;
 }

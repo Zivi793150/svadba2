@@ -3,8 +3,14 @@ import { MdOutlinePhotoCamera } from 'react-icons/md';
 import Carousel from "./Carousel";
 import "./Catalogs.css";
 
-function Catalog({ title, badge, description, icon, info }) {
+function Catalog({ title, badge, description, icon, info, video, poster }) {
   const isMain = description === 'Новобрачная презентация';
+  const handleTimeUpdate = (e) => {
+    if (e.target.currentTime > 30) {
+      e.target.currentTime = 0;
+      e.target.play();
+    }
+  };
   return (
     <div className="catalog-window wow-catalog">
       <div className="catalog-title-row">
@@ -20,10 +26,12 @@ function Catalog({ title, badge, description, icon, info }) {
         )}
       </div>
       <div className="catalog-video-preview wow-preview">
-        <video autoPlay loop muted playsInline poster="/logo192.png" style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '18px', border: '2.5px solid #BFD7ED', boxShadow: '0 4px 24px #BFD7ED33'}}>
-          <source src="/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4" type="video/mp4" />
-          Ваш браузер не поддерживает видео.
-        </video>
+        {video ? (
+          <video autoPlay loop muted playsInline poster={poster || "/logo192.png"} style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '18px', border: '2.5px solid #BFD7ED', boxShadow: '0 4px 24px #BFD7ED33'}} onTimeUpdate={handleTimeUpdate}>
+            <source src={video} type="video/mp4" />
+            Ваш браузер не поддерживает видео.
+          </video>
+        ) : null}
       </div>
       <button className="carousel-order-btn"><span className="order-text">Заказать</span></button>
     </div>
@@ -70,19 +78,19 @@ function CatalogCarousel({ title, items }) {
 
 export default function Catalogs() {
   const presentations = [
-    { title: '', badge: '', description: 'Новобрачная презентация', icon: <MdOutlinePhotoCamera size={28} color="#a18fff" />, info: '5 минут' },
+    { title: '', badge: '', description: 'Новобрачная презентация', icon: <MdOutlinePhotoCamera size={28} color="#a18fff" />, info: '5 минут', video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
   ];
   const welcomeItems = [
-    { video: '/ФейероТест3В.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/ФейероТест3В.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
   ];
   const inviteItems = [
-    { video: '/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/ФейероТест3В.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/stock-footage-fireworks-celebration-k-video-clip-alpha-channel-ready-isolated-transparent-background.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/ФейероТест3В.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
   ];
   return (
     <section className="catalogs-multi" id="catalogs">

@@ -3,6 +3,12 @@ import './Carousel.css';
 
 const Carousel = ({ items = [] }) => {
   const carouselRef = useRef(null);
+  const handleTimeUpdate = (e) => {
+    if (e.target.currentTime > 30) {
+      e.target.currentTime = 0;
+      e.target.play();
+    }
+  };
 
   // Прокрутка влево/вправо
   const scroll = (direction) => {
@@ -37,14 +43,18 @@ const Carousel = ({ items = [] }) => {
         {items.map((item, idx) => (
           <div className="carousel-card" key={idx} style={{ scrollSnapAlign: 'start' }}>
             <div className="card-video">
-              <video
-                src={item.video}
-                autoPlay
-                loop
-                muted
-                playsInline
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '16px' }}
-              />
+              {item.video ? (
+                <video
+                  src={item.video}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  poster={item.poster || "/logo192.png"}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '16px' }}
+                  onTimeUpdate={handleTimeUpdate}
+                />
+              ) : null}
             </div>
             <button className="carousel-order-btn">
               <span className="order-text">Заказать</span>
