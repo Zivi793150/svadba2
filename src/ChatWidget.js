@@ -61,6 +61,7 @@ export default function ChatWidget({ onClose }) {
 
   // При смене chatId — сбрасываем сообщения, skip, hasMore, переподключаем socket, делаем fetch
   useEffect(() => {
+    console.log('Загрузка сообщений для chatId:', chatId);
     setMessages([]);
     setSkip(0);
     setHasMore(true);
@@ -76,6 +77,7 @@ export default function ChatWidget({ onClose }) {
       // Получаем только нужный диапазон сообщений
       const res = await fetch(`${API_URL}/api/messages/${chatId}?limit=${limit}&skip=${initialSkip}`);
       const data = await res.json();
+      console.log('Загружено сообщений:', data);
       setMessages(data);
       setHasMore(initialSkip > 0);
     })();
@@ -137,7 +139,7 @@ export default function ChatWidget({ onClose }) {
     };
     setMessages((prev) => [...prev, optimisticMsg]);
     try {
-      const res = await fetch('http://localhost:5000/api/messages', {
+      const res = await fetch(`${API_URL}/api/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chatId, sender: 'user', text })
