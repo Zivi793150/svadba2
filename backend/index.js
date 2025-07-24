@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // Подключение к MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/svadba', {
+mongoose.connect('mongodb+srv://Zivi:oaeJMDcv8uFtOPJT@tanker.gej6glt.mongodb.net/svadba?retryWrites=true&w=majority&appName=Tanker', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -54,6 +54,7 @@ app.post('/api/messages', async (req, res) => {
     lastMessageTimestamps[chatId] = now;
     const message = new Message({ chatId, sender, text });
     await message.save();
+    io.to(chatId).emit('message', message); // Эмитим новое сообщение всем в комнате
     res.status(201).json(message);
   } catch (err) {
     res.status(500).json({ error: 'Ошибка отправки сообщения' });
@@ -86,17 +87,8 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-  // Получаем chatId при подключении
   socket.on('join', (chatId) => {
     socket.join(chatId);
-  });
-
-  // Получаем новое сообщение и рассылаем всем в чате
-  socket.on('message', async (data) => {
-    const { chatId, sender, text } = data;
-    const message = new Message({ chatId, sender, text });
-    await message.save();
-    io.to(chatId).emit('message', message); // отправляем всем в комнате
   });
 });
 

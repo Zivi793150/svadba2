@@ -110,7 +110,8 @@ export default function ChatWidget({ onClose }) {
         const data = await res.json();
         setError(data.error || 'Ошибка отправки');
       } else {
-        socket.emit('message', { chatId, sender: 'user', text });
+        const message = await res.json();
+        setMessages(prev => [...prev, message]);
         setText('');
       }
     } catch (err) {
