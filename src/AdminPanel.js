@@ -17,7 +17,7 @@ export default function AdminPanel() {
 
   useEffect(() => {
     if (isAuth) {
-      fetch('http://localhost:5000/api/chats')
+      fetch(`${API_URL}/api/chats`)
         .then(res => res.json())
         .then(data => setChats(data))
         .catch(() => setError('Ошибка загрузки чатов'));
@@ -38,6 +38,7 @@ export default function AdminPanel() {
     });
     socket.emit('join', selectedChat);
     const onMsg = (msg) => {
+      console.log('Получено сообщение через socket (admin):', msg);
       if (msg.chatId === selectedChat) {
         setMessages(prev => [...prev, msg]);
         // Мгновенно помечаем сообщения пользователя как прочитанные
@@ -78,15 +79,12 @@ export default function AdminPanel() {
   const sendMsg = async (e) => {
     e.preventDefault();
     if (!msg.trim() || !selectedChat) return;
-    await fetch('http://localhost:5000/api/messages', {
+    await fetch(`${API_URL}/api/messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chatId: selectedChat, sender: 'admin', text: msg })
     });
     setMsg('');
-    fetch(`http://localhost:5000/api/messages/${selectedChat}`)
-      .then(res => res.json())
-      .then(setMessages);
   };
 
   if (!isAuth) {
