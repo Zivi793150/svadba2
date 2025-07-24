@@ -5,6 +5,7 @@ import { BsChatDotsFill } from 'react-icons/bs';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { v4 as uuidv4 } from 'uuid';
 import './ChatWidgetFix.css';
+import { FaPaperclip } from 'react-icons/fa';
 
 const API_URL = 'http://localhost:5000';
 const socket = io(API_URL);
@@ -40,6 +41,7 @@ export default function ChatWidget({ onClose }) {
   const limit = 20;
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
   const chatId = currentChatId;
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
@@ -89,6 +91,7 @@ export default function ChatWidget({ onClose }) {
       body: JSON.stringify({ sender: 'user' })
     });
     const onMsg = (msg) => {
+      console.log('Получено сообщение через socket:', msg);
       setMessages((prev) => {
         // Если есть pending сообщение с таким же текстом и sender, заменяем его на настоящее
         const idx = prev.findIndex(m => m.pending && m.text === msg.text && m.sender === msg.sender);
@@ -187,9 +190,26 @@ export default function ChatWidget({ onClose }) {
     setCodeInput('');
   };
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('chatId', chatId);
+    formData.append('sender', 'user');
+    formData.append('text', '');
+    await fetch(`${API_URL}/api/messages/file`, {
+      method: 'POST',
+      body: formData
+    });
+    fileInputRef.current.value = '';
+  };
+
+  const isMobile = window.innerWidth <= 700;
+
   return (
-    <div style={fullscreen ? styles.overlayFull : styles.overlay}>
-      <div style={fullscreen ? styles.chatBoxFull : styles.chatBox}>
+    <div style={fullscreen || isMobile ? styles.overlayFull : styles.overlay}>
+      <div style={fullscreen || isMobile ? styles.chatBoxFull : styles.chatBox}>
         <div style={styles.header}>
           <div style={styles.headerLeft}>
             <div style={styles.iconCircle}><BsChatDotsFill size={22} color="#fff" /></div>
@@ -233,6 +253,15 @@ export default function ChatWidget({ onClose }) {
           {messages.map((msg, i) => (
             <div key={msg._id || i} style={msg.sender === 'user' ? styles.userMsgWrap : styles.adminMsgWrap}>
               <div style={msg.sender === 'user' ? styles.userMsg : styles.adminMsg}>
+                {msg.fileUrl ? (
+                  msg.fileType && msg.fileType.startsWith('image/') ? (
+                    <img src={API_URL + msg.fileUrl} alt="file" style={{maxWidth:180,maxHeight:180,borderRadius:12,marginBottom:6}} />
+                  ) : (
+                    <a href={API_URL + msg.fileUrl} target="_blank" rel="noopener noreferrer" style={{color:'#7CA7CE',wordBreak:'break-all',display:'block',marginBottom:6}}>
+                      📎 Скачать файл
+                    </a>
+                  )
+                ) : null}
                 <span>{msg.text}</span>
                 <div style={styles.msgMeta}>
                   <span style={styles.msgTime}>{formatTime(msg.createdAt)}</span>
@@ -248,18 +277,22 @@ export default function ChatWidget({ onClose }) {
           <div ref={messagesEndRef} />
         </div>
         <form onSubmit={sendMessage} style={styles.inputForm} autoComplete="off">
+          <button type="button" onClick={() => fileInputRef.current.click()} style={{...styles.sendBtn, marginRight: 8, background: 'linear-gradient(135deg, #BFD7ED 0%, #7CA7CE 100%)'}} title="Прикрепить файл">
+            <FaPaperclip size={isMobile ? 24 : 18} />
+          </button>
+          <input type="file" ref={fileInputRef} style={{display:'none'}} onChange={handleFileChange} />
           <input
             ref={inputRef}
             className="ChatWidget-input"
-            style={styles.input}
+            style={{...styles.input, fontSize: isMobile ? 18 : 16, padding: isMobile ? '16px 18px' : '10px 14px', borderRadius: isMobile ? 18 : 12}}
             value={text}
             onChange={e => setText(e.target.value)}
             placeholder="Введите сообщение..."
             maxLength={1000}
             autoFocus
           />
-          <button type="submit" style={styles.sendBtn} title="Отправить" disabled={!text.trim() || text.length > 1000 || sending}>
-            <FaPaperPlane size={20} />
+          <button type="submit" style={{...styles.sendBtn, fontSize: isMobile ? 22 : 18, borderRadius: isMobile ? 18 : 12, padding: isMobile ? '0 24px' : '0 16px', minWidth: isMobile ? 56 : 40, minHeight: isMobile ? 56 : 40}} title="Отправить" disabled={!text.trim() || text.length > 1000 || sending}>
+            <FaPaperPlane size={isMobile ? 26 : 20} />
           </button>
         </form>
         {error && <div style={styles.errorMsg}>{error}</div>}

@@ -127,6 +127,15 @@ export default function AdminPanel() {
             messages.length > 0 ? (
               messages.map((m,i) => (
                 <div key={i} style={{alignSelf:m.sender==='admin'?'flex-end':'flex-start',maxWidth:'70%'}}>
+                  {m.fileUrl ? (
+                    m.fileType && m.fileType.startsWith('image/') ? (
+                      <img src={API_URL + m.fileUrl} alt="file" style={{maxWidth:180,maxHeight:180,borderRadius:12,marginBottom:6}} />
+                    ) : (
+                      <a href={API_URL + m.fileUrl} target="_blank" rel="noopener noreferrer" style={{color:'#7CA7CE',wordBreak:'break-all',display:'block',marginBottom:6}}>
+                        📎 Скачать файл
+                      </a>
+                    )
+                  ) : null}
                   <div style={{background:m.sender==='admin'?'linear-gradient(90deg,var(--accent-secondary) 0%,var(--accent-primary) 100%)':'var(--bg-secondary)',color:m.sender==='admin'?'#fff':'var(--text-primary)',borderRadius:m.sender==='admin'?'16px 16px 4px 16px':'16px 16px 16px 4px',padding:'12px 18px',fontSize:16,boxShadow:'0 2px 8px var(--shadow-color)',marginBottom:2,fontWeight:600,letterSpacing:0.2}}>
                     <span>{m.text}</span>
                   </div>

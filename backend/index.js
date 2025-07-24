@@ -3,6 +3,19 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
+const multer = require('multer');
+const path = require('path');
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const ext = file.originalname.split('.').pop();
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, unique + '.' + ext);
+  }
+});
+const upload = multer({ storage });
 
 const app = express();
 const PORT = 5000;
@@ -61,6 +74,29 @@ app.post('/api/messages', async (req, res) => {
   }
 });
 
+// Загрузка файла и создание сообщения с файлом
+app.post('/api/messages/file', upload.single('file'), async (req, res) => {
+  try {
+    console.log('POST /api/messages/file', req.body, req.file);
+    const { chatId, sender, text } = req.body;
+    const file = req.file;
+    if (!file) {
+      console.log('Файл не загружен');
+      return res.status(400).json({ error: 'Файл не загружен' });
+    }
+    const fileUrl = `/uploads/${file.filename}`;
+    const fileType = file.mimetype;
+    const message = new Message({ chatId, sender, text, fileUrl, fileType, delivered: true });
+    await message.save();
+    console.log('Message saved:', message);
+    io.to(chatId).emit('message', message);
+    res.status(201).json(message);
+  } catch (err) {
+    console.error('Ошибка загрузки файла:', err);
+    res.status(500).json({ error: 'Ошибка загрузки файла' });
+  }
+});
+
 // Получить количество сообщений по chatId
 app.get('/api/messages/:chatId/count', async (req, res) => {
   try {
@@ -102,6 +138,9 @@ app.get('/', (req, res) => {
   res.send('Backend работает!');
 });
 
+// Раздача файлов из папки uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -114,6 +153,13 @@ io.on('connection', (socket) => {
   socket.on('join', (chatId) => {
     socket.join(chatId);
   });
+});
+
+process.on('unhandledRejection', (reason, p) => {
+  console.error('Unhandled Rejection at:', p, 'reason:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
 });
 
 server.listen(PORT, () => {
