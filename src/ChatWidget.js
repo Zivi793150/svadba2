@@ -65,14 +65,18 @@ export default function ChatWidget({ onClose }) {
     setSkip(0);
     setHasMore(true);
     (async () => {
-      const res = await fetch(`${API_URL}/api/messages/${chatId}`);
-      const all = await res.json();
-      const totalCount = all.length;
+      // Получаем общее количество сообщений
+      const countRes = await fetch(`${API_URL}/api/messages/${chatId}/count`);
+      const countData = await countRes.json();
+      const totalCount = countData.total || 0;
       setTotal(totalCount);
       let initialSkip = 0;
       if (totalCount > limit) initialSkip = totalCount - limit;
       setSkip(initialSkip + limit);
-      setMessages(all.slice(initialSkip, initialSkip + limit));
+      // Получаем только нужный диапазон сообщений
+      const res = await fetch(`${API_URL}/api/messages/${chatId}?limit=${limit}&skip=${initialSkip}`);
+      const data = await res.json();
+      setMessages(data);
       setHasMore(initialSkip > 0);
     })();
     socket.emit('join', chatId);
@@ -88,9 +92,9 @@ export default function ChatWidget({ onClose }) {
   // Подгрузка предыдущих сообщений
   const loadMore = async () => {
     const newSkip = Math.max(0, skip - limit);
-    const res = await fetch(`${API_URL}/api/messages/${chatId}`);
-    const all = await res.json();
-    setMessages(prev => [...all.slice(newSkip, skip - limit), ...prev]);
+    const res = await fetch(`${API_URL}/api/messages/${chatId}?limit=${limit}&skip=${newSkip}`);
+    const data = await res.json();
+    setMessages(prev => [...data, ...prev]);
     setSkip(newSkip);
     setHasMore(newSkip > 0);
   };

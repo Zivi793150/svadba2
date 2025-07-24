@@ -76,6 +76,16 @@ app.get('/api/chats', async (req, res) => {
   }
 });
 
+// Получить количество сообщений по chatId
+app.get('/api/messages/:chatId/count', async (req, res) => {
+  try {
+    const total = await Message.countDocuments({ chatId: req.params.chatId });
+    res.json({ total });
+  } catch (err) {
+    res.status(500).json({ error: 'Ошибка получения количества сообщений' });
+  }
+});
+
 // Пометить все сообщения пользователя в чате как просмотренные
 app.post('/api/messages/viewed/:chatId', async (req, res) => {
   try {
