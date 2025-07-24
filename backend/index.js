@@ -7,7 +7,10 @@ const { Server } = require('socket.io');
 const app = express();
 const PORT = 5000;
 
-app.use(cors());
+app.use(cors({
+  origin: ['https://svadba2.vercel.app', 'https://svadba2-git-main-svadba2.vercel.app', 'http://localhost:3000'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Подключение к MongoDB
@@ -90,8 +93,9 @@ app.get('/', (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
+    origin: ['https://svadba2.vercel.app', 'https://svadba2-git-main-svadba2.vercel.app', 'http://localhost:3000'],
+    methods: ['GET', 'POST'],
+    credentials: true
   }
 });
 

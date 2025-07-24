@@ -4,8 +4,10 @@ import { FaPaperPlane } from 'react-icons/fa';
 import { BsChatDotsFill } from 'react-icons/bs';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { v4 as uuidv4 } from 'uuid';
+import './ChatWidgetFix.css';
 
-const socket = io('http://localhost:5000');
+const API_URL = 'https://svadba2.onrender.com';
+const socket = io(API_URL);
 
 function getSessionId() {
   let id = localStorage.getItem('chatSessionId');
@@ -55,7 +57,7 @@ export default function ChatWidget({ onClose }) {
     setSkip(0);
     setHasMore(true);
     socket.emit('join', chatId);
-    fetch(`http://localhost:5000/api/messages/${chatId}?limit=${limit}&skip=0`)
+    fetch(`${API_URL}/api/messages/${chatId}?limit=${limit}&skip=0`)
       .then(res => res.json())
       .then(data => {
         setMessages(data);
@@ -73,7 +75,7 @@ export default function ChatWidget({ onClose }) {
 
   // Подгрузка предыдущих сообщений
   const loadMore = () => {
-    fetch(`http://localhost:5000/api/messages/${chatId}?limit=${limit}&skip=${skip}`)
+    fetch(`${API_URL}/api/messages/${chatId}?limit=${limit}&skip=${skip}`)
       .then(res => res.json())
       .then(data => {
         setMessages(prev => [...data, ...prev]);
@@ -101,7 +103,7 @@ export default function ChatWidget({ onClose }) {
     setSending(true);
     setError('');
     try {
-      const res = await fetch('http://localhost:5000/api/messages', {
+      const res = await fetch(`${API_URL}/api/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chatId, sender: 'user', text })

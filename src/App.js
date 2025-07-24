@@ -10,6 +10,9 @@ import ChatFabButton from "./ChatFabButton";
 import ChatWidget from './ChatWidget';
 import io from 'socket.io-client';
 
+const API_URL = 'https://svadba2.onrender.com';
+const socket = io(API_URL);
+
 // Временная реализация, если нет отдельных файлов:
 function HowItWorks() {
   const steps = [

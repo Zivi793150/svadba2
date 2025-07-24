@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
+import './ChatWidgetFix.css';
 
 const ADMIN_PASSWORD = 'admin123'; // Замените на свой пароль
-const socket = io('http://localhost:5000');
+const API_URL = 'https://svadba2.onrender.com';
+const socket = io(API_URL);
 
 export default function AdminPanel() {
   const [auth, setAuth] = useState(false);
@@ -28,7 +30,7 @@ export default function AdminPanel() {
   // Получение списка чатов
   useEffect(() => {
     if (!auth) return;
-    fetch('http://localhost:5000/api/chats')
+    fetch(`${API_URL}/api/chats`)
       .then(res => res.json())
       .then(setChats);
   }, [auth]);
@@ -36,13 +38,13 @@ export default function AdminPanel() {
   // Получение сообщений выбранного чата
   useEffect(() => {
     if (!selectedChat) return;
-    fetch(`http://localhost:5000/api/messages/${selectedChat}`)
+    fetch(`${API_URL}/api/messages/${selectedChat}`)
       .then(res => res.json())
       .then(setMessages);
     // Пометить все сообщения пользователя как просмотренные и затем обновить сообщения
-    fetch(`http://localhost:5000/api/messages/viewed/${selectedChat}`, { method: 'POST' })
+    fetch(`${API_URL}/api/messages/viewed/${selectedChat}`, { method: 'POST' })
       .then(() => {
-        fetch(`http://localhost:5000/api/messages/${selectedChat}`)
+        fetch(`${API_URL}/api/messages/${selectedChat}`)
           .then(res => res.json())
           .then(setMessages);
       });
