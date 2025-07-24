@@ -323,14 +323,8 @@ const styles = {
     boxShadow: '0 2px 8px #7CA7CE33', alignSelf: 'flex-end',
   },
   adminMsg: {
-    alignSelf: 'flex-start',
-    background: '#fff',
-    color: '#23243a',
-    borderRadius: '16px 16px 16px 4px',
-    padding: '10px 16px',
-    maxWidth: '80%',
-    fontSize: 15,
-    boxShadow: '0 2px 8px #BFD7ED33',
+    background: 'var(--accent-primary)', color: '#fff', borderRadius: '16px 16px 16px 4px', padding: '10px 16px', fontSize: 15, maxWidth: '75%',
+    boxShadow: '0 2px 8px #BFD7ED33', alignSelf: 'flex-start',
   },
   inputForm: {
     display: 'flex', borderTop: '1.5px solid #e6e6f6', padding: '10px 12px', background: '#23243a',
