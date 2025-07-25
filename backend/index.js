@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
     cb(null, unique + '.' + ext);
   }
 });
-const upload = multer({ storage });
+const upload = multer({ storage: multer.memoryStorage() });
 const cloudinary = require('cloudinary').v2;
 require('dotenv').config();
 cloudinary.config({
@@ -96,7 +96,7 @@ app.post('/api/messages', async (req, res) => {
   }
 });
 
-// Загрузка файла и создание сообщения с файлом (Cloudinary)
+// Загрузка файла и создание сообщения с файлом (Cloudinary, memoryStorage)
 app.post('/api/messages/file', upload.single('file'), async (req, res) => {
   try {
     const { chatId, sender, text } = req.body;
@@ -104,17 +104,23 @@ app.post('/api/messages/file', upload.single('file'), async (req, res) => {
     if (!file) {
       return res.status(400).json({ error: 'Файл не загружен' });
     }
-    // Загружаем файл в Cloudinary
-    const result = await cloudinary.uploader.upload(file.path, {
-      folder: 'svadba_chat',
-      resource_type: 'auto',
-    });
-    const fileUrl = result.secure_url;
-    const fileType = result.resource_type;
-    const message = new Message({ chatId, sender, text, fileUrl, fileType, delivered: true });
-    await message.save();
-    io.to(chatId).emit('message', message);
-    res.status(201).json(message);
+    // Загружаем файл в Cloudinary из памяти
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'svadba_chat', resource_type: 'auto' },
+      async (error, result) => {
+        if (error) {
+          console.error('Ошибка загрузки файла в Cloudinary:', error);
+          return res.status(500).json({ error: 'Ошибка загрузки файла' });
+        }
+        const fileUrl = result.secure_url;
+        const fileType = result.resource_type;
+        const message = new Message({ chatId, sender, text, fileUrl, fileType, delivered: true });
+        await message.save();
+        io.to(chatId).emit('message', message);
+        res.status(201).json(message);
+      }
+    );
+    stream.end(file.buffer);
   } catch (err) {
     console.error('Ошибка загрузки файла:', err);
     res.status(500).json({ error: 'Ошибка загрузки файла' });
