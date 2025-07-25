@@ -4,6 +4,12 @@
   font-weight: normal;
   font-style: normal;
 }
+@font-face {
+  font-family: 'Monotype Corsiva';
+  src: url('../public/fonts/Monotype-Corsiva-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
 /* Сделать весь текст белым */
 *:not(input):not(textarea) {
@@ -30,18 +36,27 @@
 /* Темная тема для hero секции */
 
 
-body, html, #root, .App, .logo {
+body, html, #root, .App {
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  font-family: 'Javanese Text', sans-serif !important;
+  font-family: 'Javanese Text', Arial, sans-serif !important;
   background: var(--bg-primary);
   /* color: #fff; */
   transition: background 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
 }
 
+/* Для текстов в карточках используем Monotype Corsiva */
+.catalog-desc, .catalog-card-desc, .catalog-card-subtitle, .catalog-description, .card-description, .card-desc, .catalog-under-title {
+  font-family: 'Monotype Corsiva', 'Javanese Text', Arial, sans-serif !important;
+  font-weight: normal !important;
+}
 
+h1, h2, h3, h4, h5, h6, .monotype, .hero-title, .hiw-step-title {
+  font-family: 'Monotype Corsiva', 'Javanese Text', Arial, sans-serif !important;
+  font-weight: normal;
+}
 
 
 .constructor {
@@ -1080,6 +1095,7 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
   text-align: left;
   line-height: 1.1;
   text-shadow: 0 2px 12px var(--shadow-color);
+  font-family: 'Javanese Text', Arial, sans-serif !important;
 }
 .reviews-modern-subtitle {
   font-size: 1.22rem;
@@ -1464,7 +1480,7 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
   text-shadow: 0 4px 32px #a18fff99, 0 1px 0 #fff;
   margin-bottom: 32px;
   line-height: 1.1;
-  font-family: 'Bounded', Arial, sans-serif;
+  font-family: 'Javanese Text', Arial, sans-serif !important;
 }
 
 

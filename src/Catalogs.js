@@ -16,8 +16,8 @@ function Catalog({ title, badge, description, icon, info, video, poster }) {
       <div className="catalog-title-row">
         {isMain && (
           <>
-            <div className="catalog-title">Новобрачная презентация</div>
-            <div style={{
+            <div className="catalog-title javanese-title">Новобрачная презентация</div>
+            <div className="catalog-under-title" style={{
               fontSize: '1.08rem', color: '#fff', textAlign: 'center', marginBottom: 18, lineHeight: 1.3, fontWeight: 400, opacity: 0.92
             }}>
               Главная часть вашего праздника.<br/>Расскажите свою историю!

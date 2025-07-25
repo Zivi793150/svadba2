@@ -125,7 +125,7 @@
   font-size: 1.7rem;
   font-weight: 900;
   color: var(--accent-primary);
-  font-family: 'Javanese Text', Arial, sans-serif;
+  font-family: 'Javanese Text', Arial, sans-serif !important;
   letter-spacing: 1px;
   margin-bottom: 0;
   max-width: 100%;
@@ -133,6 +133,9 @@
   text-align: center;
   word-break: break-word;
   line-height: 1.13;
+}
+.catalog-main-title {
+  font-family: 'Javanese Text', Arial, sans-serif !important;
 }
 .catalogs-multi > .catalog-carousel:first-child .catalog-title {
   font-size: 1.5rem;
@@ -211,11 +214,13 @@
 
 /* === Кнопка заказа === */
 .catalog-order-btn {
-  margin-top: auto;
-  padding: 12px 32px;
-  font-size: 1.15rem;
+  width: 70%;
+  max-width: 220px;
+  margin-top: 0px;
+  padding: 8px 18px;
+  font-size: 1rem;
   font-weight: 700;
-  border-radius: 18px;
+  border-radius: 12px;
   background: #111;
   color: #fff;
   border: none;
@@ -230,22 +235,23 @@
 }
 .catalog-window.wow-catalog .catalog-order-btn,
 .catalogs-multi > .catalog-carousel:first-child .catalog-window.wow-catalog .catalog-order-btn {
-  width: 80%;
+  width: 70% !important;
+  max-width: 220px !important;
   min-width: 160px;
   max-width: 320px;
   background: #fff !important;
   color: #111 !important;
   border: none !important;
-  border-radius: 14px !important;
-  padding: 16px 0 !important;
-  font-size: 1.18rem !important;
+  border-radius: 10px !important;
+  padding: 10px 0 !important;
+  font-size: 1rem !important;
   font-weight: 800 !important;
   box-shadow: 0 2px 8px #00000022 !important;
   cursor: pointer !important;
   transition: background 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s !important;
   letter-spacing: 0.5px !important;
   outline: none !important;
-  margin: 14px auto 0 auto !important;
+  margin: 0px auto 0 auto !important;
 }
 .catalog-window.wow-catalog .catalog-order-btn .order-text {
   color: #111 !important;
@@ -269,15 +275,16 @@
 
 /* === Кнопка заказа в wow-catalog — как в карусели === */
 .catalogs-multi > .catalog-carousel:first-child .catalog-order-btn {
-  width: 90% !important;
+  width: 70% !important;
+  max-width: 220px !important;
   min-width: 120px !important;
   max-width: 98%;
   background: #fff !important;
   color: #111 !important;
   border: none !important;
-  border-radius: 12px !important;
-  padding: 16px 0 !important;
-  font-size: 1.18rem !important;
+  border-radius: 10px !important;
+  padding: 10px 0 !important;
+  font-size: 1rem !important;
   font-weight: 800 !important;
   box-shadow: 0 2px 6px #00000022 !important;
   cursor: pointer !important;
@@ -288,7 +295,7 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  margin: 32px auto 0 auto !important;
+  margin: 0px auto 0 auto !important;
 }
 .catalogs-multi > .catalog-carousel:first-child .catalog-order-btn span {
   color: #111 !important;
@@ -436,4 +443,17 @@
 @keyframes fadeInCatalog {
   0% { opacity: 0; transform: scale(0.92) translateY(40px); }
   100% { opacity: 1; transform: scale(1) translateY(0); }
+} 
+
+.catalog-title, .catalog-mini-desc, .catalogs-multi > .catalog-carousel:first-child .catalog-title {
+  font-family: 'Javanese Text', Arial, sans-serif !important;
+} 
+
+.javanese-title {
+  font-family: 'Javanese Text', Arial, sans-serif !important;
+} 
+
+.catalog-section {
+  padding-top: 48px !important;
+  padding-bottom: 48px !important;
 } 
