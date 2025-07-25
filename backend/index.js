@@ -16,7 +16,13 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage });
+const cloudinary = require('cloudinary').v2;
 require('dotenv').config();
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -90,21 +96,23 @@ app.post('/api/messages', async (req, res) => {
   }
 });
 
-// Загрузка файла и создание сообщения с файлом
+// Загрузка файла и создание сообщения с файлом (Cloudinary)
 app.post('/api/messages/file', upload.single('file'), async (req, res) => {
   try {
-    console.log('POST /api/messages/file', req.body, req.file);
     const { chatId, sender, text } = req.body;
     const file = req.file;
     if (!file) {
-      console.log('Файл не загружен');
       return res.status(400).json({ error: 'Файл не загружен' });
     }
-    const fileUrl = `/uploads/${file.filename}`;
-    const fileType = file.mimetype;
+    // Загружаем файл в Cloudinary
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: 'svadba_chat',
+      resource_type: 'auto',
+    });
+    const fileUrl = result.secure_url;
+    const fileType = result.resource_type;
     const message = new Message({ chatId, sender, text, fileUrl, fileType, delivered: true });
     await message.save();
-    console.log('Message saved:', message);
     io.to(chatId).emit('message', message);
     res.status(201).json(message);
   } catch (err) {
