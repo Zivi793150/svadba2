@@ -118,6 +118,10 @@
     border-radius: 10px !important;
     margin-bottom: 6px !important;
   }
+  
+  .catalogs-multi > .catalog-carousel:first-child .catalog-video-preview.wow-preview video {
+    border-radius: 10px !important;
+  }
 }
 
 /* === Стили для заголовка и описания === */
@@ -195,10 +199,84 @@
   align-items: center;
   justify-content: center;
 }
+
+/* === Специальные стили для видео в карточках "Видео-приглашения" === */
+.catalog-video-preview video,
+.wow-preview video {
+  width: 80% !important;
+  height: 80px !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 18px !important;
+  border: 2.5px solid #BFD7ED !important;
+  box-shadow: 0 4px 24px #BFD7ED33 !important;
+  margin-bottom: 10px !important;
+  margin: 0 auto !important;
+}
+
+/* === Специальные стили для видео в "Новобрачной презентации" === */
+.catalogs-multi > .catalog-carousel:first-child .catalog-video-preview.wow-preview video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 14px !important;
+  border: 2.5px solid #BFD7ED !important;
+  box-shadow: 0 4px 24px #BFD7ED33 !important;
+  margin: 0 !important;
+}
+
+/* === Специальные стили для Carousel компонента (Видео-приглашения) === */
+.catalog-section .catalog-video-preview video,
+.catalog-section .wow-preview video {
+  width: 40% !important;
+  height: 30px !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 8px !important;
+  border: 1px solid #BFD7ED !important;
+  box-shadow: 0 2px 12px #BFD7ED33 !important;
+  margin-bottom: 4px !important;
+  margin: 0 auto !important;
+}
+
+/* === Специальные стили ТОЛЬКО для раздела "Видео-приглашения" === */
+.catalog-section:last-child .carousel-card {
+  width: 18vw !important;
+  min-width: 190px !important;
+  max-width: 240px !important;
+  padding: 14px 10px 10px 10px !important;
+  border-radius: 12px !important;
+}
+
+.catalog-section:last-child .card-video {
+  border-radius: 6px !important;
+  margin-bottom: 8px !important;
+}
+
+.catalog-section:last-child .card-video video {
+  border-radius: 8px !important;
+}
+
+/* === Уменьшаем размер контейнера для видео в Carousel === */
+.catalog-section .catalog-video-preview,
+.catalog-section .wow-preview {
+  height: 100px !important;
+  min-height: 80px !important;
+  max-height: 120px !important;
+}
+
+/* === Специально для раздела "Видео-приглашения" === */
+.catalog-section:last-child .catalog-video-preview,
+.catalog-section:last-child .wow-preview {
+  height: 55px !important;
+  min-height: 40px !important;
+  max-height: 70px !important;
+}
 .catalogs-multi > .catalog-carousel:first-child .catalog-video-preview.wow-preview {
-  height: 160px;
-  min-height: 120px;
-  max-height: 180px;
+  height: 220px;
+  min-height: 180px;
+  max-height: 260px;
   border-radius: 14px;
   margin-bottom: 12px;
 }

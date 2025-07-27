@@ -27,10 +27,26 @@ function Catalog({ title, badge, description, icon, info, video, poster }) {
       </div>
       <div className="catalog-video-preview wow-preview">
         {video ? (
-          <video autoPlay loop muted playsInline poster={poster || "/logo192.png"} style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '18px', border: '2.5px solid #BFD7ED', boxShadow: '0 4px 24px #BFD7ED33'}} onTimeUpdate={handleTimeUpdate}>
-            <source src={video} type="video/mp4" />
-            Ваш браузер не поддерживает видео.
-          </video>
+          video.includes('drive.google.com') || video.includes('youtube.com') ? (
+            <iframe 
+              src={video} 
+              style={{
+                width: '100%', 
+                height: '100%', 
+                border: 'none', 
+                borderRadius: '18px', 
+                border: '2.5px solid #BFD7ED', 
+                boxShadow: '0 4px 24px #BFD7ED33'
+              }}
+              allowFullScreen
+              allow="autoplay; encrypted-media"
+            />
+          ) : (
+            <video autoPlay loop muted playsInline poster={poster || "/logo192.png"} style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '18px', border: '2.5px solid #BFD7ED', boxShadow: '0 4px 24px #BFD7ED33'}} onTimeUpdate={handleTimeUpdate}>
+              <source src={video} type="video/mp4" />
+              Ваш браузер не поддерживает видео.
+            </video>
+          )
         ) : null}
       </div>
       <button className="carousel-order-btn"><span className="order-text">Заказать</span></button>
@@ -87,10 +103,10 @@ export default function Catalogs() {
     { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
   ];
   const inviteItems = [
-    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/compressed_Приглашение6В.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/compressed_Приглашение6В.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/compressed_Приглашение6В.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/compressed_Приглашение6В.mp4', poster: '/svadbabg.jpeg' },
   ];
   return (
     <section className="catalogs-multi" id="catalogs">
