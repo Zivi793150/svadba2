@@ -6,6 +6,7 @@ import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { v4 as uuidv4 } from 'uuid';
 import './ChatWidgetFix.css';
 import { FaPaperclip } from 'react-icons/fa';
+import { FaWhatsapp } from 'react-icons/fa';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 const socket = io(API_URL);
@@ -205,6 +206,28 @@ export default function ChatWidget({ onClose }) {
     fileInputRef.current.value = '';
   };
 
+  const handleWhatsAppRedirect = () => {
+    // Номер WhatsApp (замените на ваш)
+    const phoneNumber = '79605110071'; // Замените на реальный номер
+    
+    // Информация о заказе (пока заглушка)
+    const orderInfo = `Здравствуйте! Хочу заказать слайд-шоу.
+    
+Код чата: ${chatId}
+Дата заказа: ${new Date().toLocaleDateString('ru-RU')}
+
+Готов обсудить детали заказа.`;
+
+    // Кодируем сообщение для URL
+    const encodedMessage = encodeURIComponent(orderInfo);
+    
+    // Создаем WhatsApp Web URL
+    const whatsappWebUrl = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
+    
+    // Открываем WhatsApp Web
+    window.open(whatsappWebUrl, '_blank');
+  };
+
   const isMobile = window.innerWidth <= 700;
 
   return (
@@ -277,6 +300,19 @@ export default function ChatWidget({ onClose }) {
             </div>
           ))}
           <div ref={messagesEndRef} />
+          
+          {/* Кнопка WhatsApp */}
+          <div style={styles.whatsappContainer}>
+            <button 
+              onClick={handleWhatsAppRedirect}
+              style={styles.whatsappBtn}
+              className="whatsapp-btn"
+              title="Перейти в WhatsApp для заказа"
+            >
+              <FaWhatsapp size={isMobile ? 24 : 20} />
+              <span style={styles.whatsappText}>Хотите перейти в WhatsApp?</span>
+            </button>
+          </div>
         </div>
         <form onSubmit={sendMessage} style={styles.inputForm} autoComplete="off">
           <button type="button" onClick={() => fileInputRef.current.click()} style={{...styles.sendBtn, marginRight: 8, background: 'linear-gradient(135deg, #BFD7ED 0%, #7CA7CE 100%)'}} title="Прикрепить файл">
@@ -311,6 +347,10 @@ export default function ChatWidget({ onClose }) {
             color: #23243a !important;
             font-weight: 700 !important;
             -webkit-text-fill-color: #23243a !important;
+          }
+          .whatsapp-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px #25D36644 !important;
           }
         `}</style>
       </div>
@@ -429,5 +469,34 @@ const styles = {
   },
   errorMsg: {
     color: '#ff3b3b', fontSize: 13, margin: '6px 0 0 0', textAlign: 'right',
+  },
+  whatsappContainer: {
+    display: 'flex', justifyContent: 'center', marginTop: 16, marginBottom: 8,
+  },
+  whatsappBtn: {
+    background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 20,
+    padding: '12px 20px',
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    boxShadow: '0 4px 16px #25D36633',
+    transition: 'all 0.2s ease',
+    textDecoration: 'none',
+    ...(window.innerWidth <= 700 && {
+      padding: '14px 24px',
+      fontSize: 16,
+      borderRadius: 24,
+    }),
+  },
+  whatsappText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 600,
   },
 }; 
