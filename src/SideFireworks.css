@@ -1,0 +1,90 @@
+.side-fireworks {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0;
+}
+.side-fireworks.left {
+  left: 0;
+  align-items: flex-start;
+}
+.side-fireworks.right {
+  right: 0;
+  align-items: flex-end;
+}
+
+.spark {
+  position: absolute;
+  bottom: 60px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  opacity: 0.85;
+  filter: blur(1.5px) drop-shadow(0 0 8px #fff7);
+  background: radial-gradient(circle at 40% 60%, #ffe066 60%, #a18fff 100%);
+  animation: firework-spark 2.8s linear infinite;
+}
+
+/* Индивидуальные стили и анимации для каждой искры */
+.spark-1 {
+  left: 18px;
+  animation-delay: 0s;
+  background: radial-gradient(circle at 40% 60%, #ffe066 60%, #a18fff 100%);
+}
+.spark-2 {
+  left: 38px;
+  animation-delay: 0.7s;
+  background: radial-gradient(circle at 60% 40%, #5ee7ff 60%, #a18fff 100%);
+}
+.spark-3 {
+  left: 58px;
+  animation-delay: 1.4s;
+  background: radial-gradient(circle at 60% 40%, #a18fff 60%, #ffe066 100%);
+}
+.spark-4 {
+  left: 28px;
+  animation-delay: 1.9s;
+  background: radial-gradient(circle at 40% 60%, #fff 60%, #5ee7ff 100%);
+}
+.spark-5 {
+  left: 48px;
+  animation-delay: 2.2s;
+  background: radial-gradient(circle at 60% 40%, #ffe066 60%, #fff 100%);
+}
+
+.side-fireworks.right .spark-1 { left: 18px; }
+.side-fireworks.right .spark-2 { left: 38px; }
+.side-fireworks.right .spark-3 { left: 58px; }
+.side-fireworks.right .spark-4 { left: 28px; }
+.side-fireworks.right .spark-5 { left: 48px; }
+
+@keyframes firework-spark {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.9;
+  }
+  10% {
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(-120px) scale(1.2);
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(-180px) scale(0.7);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .side-fireworks { display: none; }
+} 

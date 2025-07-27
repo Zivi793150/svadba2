@@ -1,0 +1,228 @@
+/* === Карусель: контейнер и список === */
+.carousel-list, .catalog-carousel-list {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 32px !important;
+  padding-left: 40px !important;
+  padding-right: 40px !important;
+  background: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  justify-content: center !important;
+}
+@media (max-width: 900px) {
+  .carousel-list, .catalog-carousel-list {
+    gap: 18px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    justify-content: flex-start !important;
+  }
+}
+.carousel-list::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-card {
+  background: var(--bg-secondary, #18182a) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 32px 0 var(--shadow-color), 0 2px 8px var(--shadow-color) !important;
+  width: 28vw !important;
+  min-width: 320px !important;
+  max-width: 400px !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  padding: 24px 18px 18px 18px !important;
+  margin: 0 !important;
+  transition: box-shadow 0.18s, transform 0.18s, background 0.18s !important;
+  box-sizing: border-box !important;
+  padding-bottom: 32px !important;
+  padding-top: 40px !important;
+  padding-bottom: 40px !important;
+  min-height: unset !important;
+  max-height: unset !important;
+}
+@media (max-width: 1200px) {
+  .carousel-card {
+    width: 40vw !important;
+    min-width: 240px !important;
+    max-width: 340px !important;
+    padding: 18px 8px 14px 8px !important;
+    border-radius: 12px !important;
+    height: auto !important;
+    min-height: unset !important;
+    max-height: unset !important;
+    padding-bottom: 24px !important;
+    padding-top: 32px !important;
+    padding-bottom: 32px !important;
+  }
+}
+@media (max-width: 700px) {
+  .carousel-card {
+    width: 90vw !important;
+    min-width: 90vw !important;
+    max-width: 98vw !important;
+    margin: 0 auto 12px auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding-top: 28px !important;
+    padding-bottom: 28px !important;
+    height: auto !important;
+    min-height: unset !important;
+    max-height: unset !important;
+    padding-bottom: 20px !important;
+  }
+}
+.carousel-card:hover {
+  box-shadow: 0 16px 48px 0 var(--shadow-color), 0 2px 8px var(--shadow-color) !important;
+  border: none !important;
+  background: var(--bg-secondary, #18182a) !important;
+  transform: scale(1.045) !important;
+}
+@media (max-width: 700px) {
+  .carousel-card:hover {
+    box-shadow: none !important;
+    background: var(--bg-secondary, #18182a) !important;
+    transform: none !important;
+}
+}
+
+.card-video {
+  width: 100% !important;
+  height: auto !important;
+  min-height: unset !important;
+  max-height: unset !important;
+  border-radius: 10px !important;
+  margin-bottom: 12px !important;
+  box-shadow: 0 4px 24px #BFD7ED33 !important;
+  background: #FAF9F6 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  flex: 1 0 auto !important;
+}
+.card-video video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 10px !important;
+  background: #000 !important;
+}
+@media (max-width: 1200px) {
+  .card-video {
+    height: auto !important;
+    min-height: unset !important;
+    max-height: unset !important;
+  }
+}
+@media (max-width: 700px) {
+  .card-video {
+    flex-grow: 1 !important;
+    height: auto !important;
+    min-height: unset !important;
+    max-height: unset !important;
+    border-radius: 10px !important;
+    margin-bottom: 8px !important;
+    box-shadow: 0 2px 8px #BFD7ED33 !important;
+  }
+}
+
+.carousel-order-btn {
+  width: 70% !important;
+  max-width: 220px !important;
+  min-width: 120px !important;
+  background: #fff !important;
+  color: #111 !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 10px 0 !important;
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 6px #00000022 !important;
+  cursor: pointer !important;
+  transition: background 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s !important;
+  letter-spacing: 0.5px !important;
+  outline: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin: 0px auto 0 auto !important;
+}
+.carousel-order-btn span {
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
+}
+.carousel-order-btn .firework-emoji {
+  color: #111 !important;
+}
+.carousel-order-btn:hover {
+  background: #111 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px #00000033 !important;
+  transform: scale(1.04) !important;
+}
+.carousel-order-btn:hover span,
+.carousel-order-btn:hover .firework-emoji {
+  color: #fff !important;
+}
+.carousel-order-btn .order-text {
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
+  font-weight: 800;
+}
+.carousel-order-btn:hover .order-text {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+@media (max-width: 700px) {
+  .carousel-order-btn {
+    width: 98% !important;
+    margin-top: 18px !important;
+    font-size: 1.1rem !important;
+    border-radius: 12px !important;
+    padding: 14px 0 !important;
+  }
+}
+@media (min-width: 701px) {
+  .carousel-order-btn {
+    width: 90% !important;
+    margin-top: 32px !important;
+    margin-bottom: 0 !important;
+    align-self: center !important;
+}
+}
+
+.carousel-arrow {
+  background: var(--bg-secondary);
+  border: 2px solid #a18fff;
+  color: #fff;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 2rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin: 0 12px;
+  box-shadow: 0 2px 8px #a18fff33;
+  transition: background 0.18s, color 0.18s, border 0.18s, transform 0.18s;
+  z-index: 2;
+}
+.carousel-arrow:hover {
+  background: #a18fff;
+  color: #18182a;
+  border: 2px solid #5ee7ff;
+  transform: scale(1.12);
+}
+@media (max-width: 900px) {
+  .carousel-arrow {
+    display: none;
+  }
+} 
