@@ -34,12 +34,6 @@
   background: none;
   font-family: 'Javanese Text', sans-serif;
 }
-.logo::before {
-  content: "\1F48D "; /* 💍 */
-  font-size: 2.2rem;
-  vertical-align: middle;
-  color: var(--accent-primary);
-}
 .nav {
   position: absolute;
   left: 50%;

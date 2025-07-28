@@ -110,7 +110,7 @@ export default function App() {
   
   return (
     <div className="App">
-      <Header />
+      <Header onContactClick={handleOpenChat} />
       <div className="hero-wave-overlap">
         <Hero />
       </div>

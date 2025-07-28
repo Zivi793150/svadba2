@@ -48,7 +48,7 @@ body, html, #root, .App {
 }
 
 /* Для текстов в карточках используем Monotype Corsiva */
-.catalog-desc, .catalog-card-desc, .catalog-card-subtitle, .catalog-description, .card-description, .card-desc, .catalog-under-title {
+.catalog-desc, .catalog-card-desc, .catalog-card-subtitle, .catalog-description, .card-description, .card-desc, .catalog-under-title, .catalog-mini-desc {
   font-family: 'Monotype Corsiva', 'Javanese Text', Arial, sans-serif !important;
   font-weight: normal !important;
 }

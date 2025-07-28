@@ -166,7 +166,7 @@
   }
 }
 .catalog-mini-desc {
-  font-size: 1.13rem;
+  font-size: 1.6rem;
   color: var(--accent-primary);
   margin-bottom: 18px;
   text-align: center;
@@ -177,6 +177,7 @@
   justify-content: center;
   font-weight: 500;
   letter-spacing: 0.2px;
+  font-family: 'Monotype Corsiva', 'Javanese Text', Arial, sans-serif !important;
 }
 .catalogs-multi > .catalog-carousel:first-child .catalog-mini-desc {
   font-size: 1rem;
@@ -523,7 +524,7 @@
   100% { opacity: 1; transform: scale(1) translateY(0); }
 } 
 
-.catalog-title, .catalog-mini-desc, .catalogs-multi > .catalog-carousel:first-child .catalog-title {
+.catalog-title, .catalogs-multi > .catalog-carousel:first-child .catalog-title {
   font-family: 'Javanese Text', Arial, sans-serif !important;
 } 
 

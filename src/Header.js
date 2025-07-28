@@ -13,22 +13,35 @@ function BurgerIcon({ open, onClick }) {
   );
 }
 
-function MobileMenu({ open, onClose }) {
+function MobileMenu({ open, onClose, onContactClick, onReviewsClick }) {
+  const handleReviewsClick = (e) => {
+    e.preventDefault();
+    onClose();
+    onReviewsClick(e);
+  };
+
+  const handleContactClick = (e) => {
+    e.preventDefault();
+    onClose();
+    onContactClick(e);
+  };
+
   return (
     <div className={`mobile-menu-new${open ? ' open' : ''}`}> 
       <button className="mobile-menu-close-new" onClick={onClose} aria-label="Закрыть меню">×</button>
       <nav className="mobile-menu-list">
         <a href="#catalogs" onClick={onClose}>Каталоги</a>
-        <a href="#constructor" onClick={onClose}>Собрать слайд-шоу</a>
-        <a href="#contact" onClick={onClose}>Написать нам</a>
+        <a href="#reviews" onClick={handleReviewsClick}>Отзывы</a>
+        <a href="#contact" onClick={handleContactClick}>Написать нам</a>
       </nav>
     </div>
   );
 }
 
-export default function Header() {
+export default function Header({ onContactClick }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 700;
+  
   useEffect(() => {
     const onResize = () => {
       if (window.innerWidth >= 700 && menuOpen) setMenuOpen(false);
@@ -36,20 +49,36 @@ export default function Header() {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, [menuOpen]);
+
+  const handleContactClick = (e) => {
+    e.preventDefault();
+    if (onContactClick) {
+      onContactClick();
+    }
+  };
+
+  const handleReviewsClick = (e) => {
+    e.preventDefault();
+    const reviewsSection = document.querySelector('.reviews-modern');
+    if (reviewsSection) {
+      reviewsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <header className="header">
       <div className="logo">Фейеро</div>
       {!isMobile && (
         <nav className="nav">
           <a href="#catalogs">Каталоги</a>
-          <a href="#constructor">Собрать слайд-шоу</a>
-          <a href="#contact">Написать нам</a>
+          <a href="#reviews" onClick={handleReviewsClick}>Отзывы</a>
+          <a href="#contact" onClick={handleContactClick}>Написать нам</a>
         </nav>
       )}
       {isMobile && (
         <>
           <BurgerIcon open={menuOpen} onClick={() => setMenuOpen(!menuOpen)} />
-          <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+          <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} onContactClick={onContactClick} onReviewsClick={handleReviewsClick} />
         </>
       )}
     </header>
