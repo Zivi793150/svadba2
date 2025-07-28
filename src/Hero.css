@@ -8,21 +8,21 @@
   align-items: center;
   justify-content: center;
   overflow: visible;
-  margin-top: 40px;
+  margin-top: 20px;
   padding: 0 0 140px 0;
 }
 @media (max-width: 900px) {
   .hero {
     height: 320px;
     padding-bottom: 90px;
-    margin-top: 24px;
+    margin-top: 6px;
   }
 }
 @media (max-width: 600px) {
   .hero {
     height: 220px;
     min-height: 36vh;
-    margin-top: 12px;
+    margin-top: 0px;
     padding-bottom: 60px;
   }
 }

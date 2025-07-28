@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
+import "./Advantages.css";
 import Header from "./Header";
 import Hero from "./Hero";
 import Catalogs from "./Catalogs";

@@ -139,6 +139,14 @@
   line-height: 1.13;
 }
 .catalog-main-title {
+  font-size: 3.5rem !important;
+  font-weight: 900 !important;
+  color: var(--accent-primary) !important;
+  margin-bottom: 8px !important;
+  letter-spacing: 1px !important;
+  text-align: center !important;
+  line-height: 1.13 !important;
+  text-shadow: none !important;
   font-family: 'Javanese Text', Arial, sans-serif !important;
 }
 .catalogs-multi > .catalog-carousel:first-child .catalog-title {
@@ -466,8 +474,8 @@
     border-radius: 10px;
   }
   .catalog-main-title {
-    font-size: 1.3rem;
-    margin-bottom: 8px;
+    font-size: 1.3rem !important;
+    margin-bottom: 8px !important;
   }
   .catalog-mini-desc {
     font-size: 1.01rem;
@@ -533,6 +541,6 @@
 } 
 
 .catalog-section {
-  padding-top: 48px !important;
+  padding-top: 0px !important;
   padding-bottom: 48px !important;
 } 

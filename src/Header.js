@@ -40,7 +40,6 @@ function MobileMenu({ open, onClose, onContactClick, onReviewsClick }) {
 
 export default function Header({ onContactClick }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 700;
   
   useEffect(() => {
     const onResize = () => {
@@ -68,19 +67,13 @@ export default function Header({ onContactClick }) {
   return (
     <header className="header">
       <div className="logo">Фейеро</div>
-      {!isMobile && (
-        <nav className="nav">
-          <a href="#catalogs">Каталоги</a>
-          <a href="#reviews" onClick={handleReviewsClick}>Отзывы</a>
-          <a href="#contact" onClick={handleContactClick}>Написать нам</a>
-        </nav>
-      )}
-      {isMobile && (
-        <>
-          <BurgerIcon open={menuOpen} onClick={() => setMenuOpen(!menuOpen)} />
-          <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} onContactClick={onContactClick} onReviewsClick={handleReviewsClick} />
-        </>
-      )}
+      <nav className="nav">
+        <a href="#catalogs">Каталоги</a>
+        <a href="#reviews" onClick={handleReviewsClick}>Отзывы</a>
+        <a href="#contact" onClick={handleContactClick}>Написать нам</a>
+      </nav>
+      <BurgerIcon open={menuOpen} onClick={() => setMenuOpen(!menuOpen)} />
+      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} onContactClick={onContactClick} onReviewsClick={handleReviewsClick} />
     </header>
   );
 } 
