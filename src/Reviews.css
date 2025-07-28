@@ -1,6 +1,6 @@
 .reviews-modern {
-  margin-top: -20px;
-  padding: 8px 0 32px 0;
+  margin-top: 0px;
+  padding: 32px 0 64px 0;
   background: var(--bg-primary);
   position: relative;
   overflow: hidden;
@@ -44,7 +44,6 @@
   flex-direction: column;
   align-items: flex-start;
   padding: 0 0 0 0;
-  margin-top: -40px;
 }
 .reviews-modern-left h2 {
   font-size: 2.6rem;
@@ -76,7 +75,7 @@
   position: relative;
   min-height: auto;
   z-index: 2;
-  margin-top: -100px;
+  margin-top: 0px;
 }
 .reviews-modern-card {
   background: linear-gradient(120deg, var(--bg-secondary) 80%, var(--bg-primary) 100%);
@@ -239,8 +238,14 @@
 
 @media (max-width: 700px) {
   .reviews-modern {
-    padding: 16px 0 24px 0;
+    padding: 8px 0 48px 0;
     min-height: auto;
+  }
+  .reviews-modern-left {
+    margin-top: -40px;
+  }
+  .reviews-modern-slider {
+    margin-top: -100px;
   }
   .reviews-modern-slider {
     min-height: auto;

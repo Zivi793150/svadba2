@@ -1,9 +1,9 @@
 .advantages {
   margin-top: 0px !important;
-  padding: 0px 0 16px 0 !important;
+  padding: 0px 0 32px 0 !important;
 }
 .advantages-title {
-  font-size: 3.5rem !important;
+  font-size: 4.5rem !important;
   font-weight: 900 !important;
   color: var(--accent-primary) !important;
   margin-bottom: 8px !important;
@@ -64,19 +64,19 @@
 }
 
 /* How It Works стили */
-.how-it-works {
-  margin-top: 0px;
-  padding: 0px 0 32px 0;
-  background: var(--bg-primary);
-  position: relative;
-  overflow: hidden;
-  min-height: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  text-align: center;
-}
+  .how-it-works {
+    margin-top: 0px;
+    padding: 0px 0 120px 0;
+    background: var(--bg-primary);
+    position: relative;
+    overflow: hidden;
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+  }
 
 .how-it-works h2 {
   font-size: 3.5rem !important;
@@ -484,9 +484,13 @@
   
   .advantages {
     margin-top: -40px !important;
+    padding: 0px 0 0px 0 !important;
+  }
+  .how-it-works {
+    padding: 0px 0 0px 0 !important;
   }
   .advantages-title {
-    font-size: 1.3rem !important;
+    font-size: 1.8rem !important;
     font-weight: 900 !important;
     margin-top: 0 !important;
     margin-bottom: 8px !important;
@@ -534,24 +538,24 @@
     transform: none !important;
     opacity: 1 !important;
     margin-bottom: 18px !important;
-    min-width: 90vw !important;
-    max-width: 98vw !important;
-    width: 98vw !important;
+    min-width: 80vw !important;
+    max-width: 85vw !important;
+    width: 80vw !important;
   }
   
   .hiw-step-animated, .hiw-steps-animated-active .hiw-step-animated {
     transform: none !important;
     opacity: 1 !important;
     margin-bottom: 18px !important;
-    min-width: 90vw !important;
-    max-width: 98vw !important;
-    width: 98vw !important;
+    min-width: 80vw !important;
+    max-width: 85vw !important;
+    width: 80vw !important;
   }
   
   .creative-step {
-    min-width: 90vw !important;
-    max-width: 98vw !important;
-    width: 98vw !important;
+    min-width: 80vw !important;
+    max-width: 85vw !important;
+    width: 80vw !important;
     padding: 18px 8px 14px 8px !important;
     opacity: 1 !important;
     transform: none !important;
@@ -608,8 +612,8 @@
   }
   
   .creative-step-stairs {
-    min-width: 120px;
-    max-width: 95vw;
+    min-width: 100px;
+    max-width: 90vw;
     padding: 14px 4px 10px 4px;
   }
   

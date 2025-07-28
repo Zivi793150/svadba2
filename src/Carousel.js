@@ -50,6 +50,7 @@ const Carousel = ({ items = [] }) => {
                   loop
                   muted
                   playsInline
+                  preload="metadata"
                   poster={item.poster || "/logo192.png"}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '16px' }}
                   onTimeUpdate={handleTimeUpdate}

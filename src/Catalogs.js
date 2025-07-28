@@ -42,7 +42,7 @@ function Catalog({ title, badge, description, icon, info, video, poster }) {
               allow="autoplay; encrypted-media"
             />
           ) : (
-            <video autoPlay loop muted playsInline poster={poster || "/logo192.png"} style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '18px', border: '2.5px solid #BFD7ED', boxShadow: '0 4px 24px #BFD7ED33'}} onTimeUpdate={handleTimeUpdate}>
+            <video autoPlay loop muted playsInline preload="metadata" poster={poster || "/logo192.png"} style={{width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '18px', border: '2.5px solid #BFD7ED', boxShadow: '0 4px 24px #BFD7ED33'}} onTimeUpdate={handleTimeUpdate}>
               <source src={video} type="video/mp4" />
               Ваш браузер не поддерживает видео.
             </video>
