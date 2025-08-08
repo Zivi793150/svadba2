@@ -3,7 +3,7 @@
   padding: 0px 0 32px 0 !important;
 }
 .advantages-title {
-  font-size: 4.5rem !important;
+  font-size: 3.5rem !important;
   font-weight: 900 !important;
   color: var(--accent-primary) !important;
   margin-bottom: 8px !important;
@@ -49,7 +49,7 @@
   margin-bottom: 6px;
 }
 .adv-desc {
-  font-size: 0.98rem;
+  font-size: 1.05rem;
   color: #33343A;
   font-weight: 500;
   min-height: 32px;
@@ -437,7 +437,7 @@
   }
   
   .hiw-step-desc {
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     min-height: 24px;
   }
   
@@ -490,7 +490,7 @@
     padding: 0px 0 0px 0 !important;
   }
   .advantages-title {
-    font-size: 1.8rem !important;
+    font-size: 1.3rem !important;
     font-weight: 900 !important;
     margin-top: 0 !important;
     margin-bottom: 8px !important;

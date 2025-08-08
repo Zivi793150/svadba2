@@ -41,6 +41,8 @@ body, html, #root, .App {
   background: var(--bg-primary);
   transition: background 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Для текстов в карточках используем Monotype Corsiva */
@@ -59,11 +61,37 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
   transition: background 0.22s, color 0.22s, box-shadow 0.22s, border 0.22s, transform 0.18s;
 }
 
-
-
-
-
-/* Медиа-запросы для адаптивности */
+/* Улучшенная поддержка для мобильных устройств */
 @media (max-width: 700px) {
-  /* Стили для мобильной версии */
+  body {
+    font-size: 14px;
+  }
+  
+  /* Улучшение производительности на мобильных */
+  * {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  
+  /* Оптимизация для устройств с ограниченной производительностью */
+  video {
+    will-change: auto;
+  }
+}
+
+/* Поддержка для устройств с высоким DPI */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Поддержка для устройств с ограниченной производительностью */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

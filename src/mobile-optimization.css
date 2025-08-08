@@ -1,0 +1,84 @@
+/* Дополнительные оптимизации для мобильных устройств */
+
+/* Улучшенная поддержка для iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .hero-bg-video {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+}
+
+/* Оптимизация для Android Chrome */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .hero-bg-video {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Улучшенная поддержка для устройств с ограниченной памятью */
+@media (max-width: 480px) {
+  .hero-bg-video {
+    will-change: auto;
+    contain: layout style paint;
+  }
+}
+
+/* Оптимизация для устройств с медленным интернетом */
+@media (max-width: 600px) {
+  .hero {
+    background: var(--bg-primary);
+  }
+  
+  .hero-bg-video {
+    opacity: 0.9;
+  }
+}
+
+/* Поддержка для устройств с темной темой */
+@media (prefers-color-scheme: dark) {
+  .hero {
+    background: var(--bg-primary);
+  }
+}
+
+/* Улучшенная поддержка для устройств с высоким DPI */
+@media (-webkit-min-device-pixel-ratio: 3), (min-resolution: 288dpi) {
+  .hero-bg-video {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Оптимизация для устройств с ограниченной производительностью */
+@media (max-width: 700px) {
+  .hero {
+    contain: layout style;
+  }
+  
+  .hero-bg-parallax {
+    contain: layout style paint;
+  }
+}
+
+/* Поддержка для устройств с ограниченной производительностью */
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg-video {
+    animation: none;
+    transition: none;
+  }
+  
+  .hero {
+    animation: none;
+  }
+}
+
+/* Улучшенная поддержка для устройств с ограниченной памятью */
+@media (max-width: 480px) {
+  * {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
