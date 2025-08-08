@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 
 const ADMIN_PASSWORD = 'admin123'; // временно, потом вынести на сервер
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_URL = process.env.REACT_APP_API_URL || 'https://svadba2.onrender.com';
 const socket = io(API_URL);
 
 export default function AdminPanel() {

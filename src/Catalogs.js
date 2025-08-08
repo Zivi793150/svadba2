@@ -1,26 +1,67 @@
 import React, { useState, useRef } from "react";
-import { MdOutlinePhotoCamera } from 'react-icons/md';
+import { MdOutlinePhotoCamera, MdOutlineConstruction, MdOutlineAccessTime } from 'react-icons/md';
 import Carousel from "./Carousel";
 import "./Catalogs.css";
 
-function Catalog({ title, badge, description, icon, info, video, poster }) {
-  const isMain = description === 'Новобрачная презентация';
+function Catalog({ title, badge, description, icon, info, video, poster, isInDevelopment }) {
+  const isMain = description === 'Презентация вашей пары-ожившая история вашей любви';
   const handleTimeUpdate = (e) => {
     if (e.target.currentTime > 30) {
       e.target.currentTime = 0;
       e.target.play();
     }
   };
+  
+  if (isInDevelopment) {
+    // Выбираем видео в зависимости от секции
+    const developmentVideo = title?.includes('Welcome') ? '/video5193080489858068792.mp4' : '/compressed_Приглашение6В.mp4';
+    
+    return (
+      <div className="catalog-window wow-catalog development-card">
+        <div className="development-overlay">
+          <MdOutlineConstruction size={48} color="#BFD7ED" />
+          <div className="development-text">В разработке</div>
+          <div className="development-subtext">Скоро будет готово</div>
+        </div>
+        <div className="catalog-video-preview wow-preview development-preview">
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline 
+            preload="metadata" 
+            poster="/logo192.png"
+            style={{
+              width: '100%', 
+              height: '100%', 
+              objectFit: 'cover', 
+              display: 'block', 
+              borderRadius: '18px', 
+              filter: 'blur(8px) brightness(0.3)',
+              opacity: 0.6
+            }}
+          >
+            <source src={developmentVideo} type="video/mp4" />
+          </video>
+          <div className="development-placeholder">
+            <MdOutlineAccessTime size={32} color="#7CA7CE" />
+            <div className="placeholder-text">Подготовка контента</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="catalog-window wow-catalog">
       <div className="catalog-title-row">
         {isMain && (
           <>
-            <div className="catalog-title javanese-title">Новобрачная презентация</div>
+            <div className="catalog-title javanese-title">Презентация вашей пары<br/>— ожившая история любви</div>
             <div className="catalog-under-title" style={{
               fontSize: '1.08rem', color: '#fff', textAlign: 'center', marginBottom: 18, lineHeight: 1.3, fontWeight: 400, opacity: 0.92
             }}>
-              Главная часть вашего праздника.<br/>Расскажите свою историю!
+              Ваша история в движении.<br/>Расскажите свою историю!
             </div>
           </>
         )}
@@ -94,19 +135,19 @@ function CatalogCarousel({ title, items }) {
 
 export default function Catalogs() {
   const presentations = [
-    { title: '', badge: '', description: 'Новобрачная презентация', icon: <MdOutlinePhotoCamera size={28} color="#a18fff" />, info: '5 минут', video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
+    { title: '', badge: '', description: 'Презентация вашей пары-ожившая история вашей любви', icon: <MdOutlinePhotoCamera size={28} color="#a18fff" />, info: '5 минут', video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
   ];
   const welcomeItems = [
-    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' }, // Рабочая карточка
+    { isInDevelopment: true, title: 'Welcome-видео' }, // В разработке
+    { isInDevelopment: true, title: 'Welcome-видео' }, // В разработке
+    { isInDevelopment: true, title: 'Welcome-видео' }, // В разработке
   ];
   const inviteItems = [
-    { video: '/compressed_Приглашение6В.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/compressed_Приглашение6В.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/compressed_Приглашение6В.mp4', poster: '/svadbabg.jpeg' },
-    { video: '/compressed_Приглашение6В.mp4', poster: '/svadbabg.jpeg' },
+    { video: '/compressed_Приглашение6В.mp4', poster: '/svadbabg.jpeg' }, // Рабочая карточка
+    { isInDevelopment: true, title: 'Видео-приглашения' }, // В разработке
+    { isInDevelopment: true, title: 'Видео-приглашения' }, // В разработке
+    { isInDevelopment: true, title: 'Видео-приглашения' }, // В разработке
   ];
   return (
     <section className="catalogs-multi" id="catalogs">

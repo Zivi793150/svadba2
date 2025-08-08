@@ -8,7 +8,7 @@ import './ChatWidgetFix.css';
 import { FaPaperclip } from 'react-icons/fa';
 import { FaWhatsapp } from 'react-icons/fa';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_URL = process.env.REACT_APP_API_URL || 'https://svadba2.onrender.com';
 const socket = io(API_URL);
 
 function getSessionId() {

@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Фейеро",
+  "name": "Фейеро - Создание слайд-шоу для свадеб и праздников",
+  "description": "Профессиональные слайд-шоу для свадеб и праздников. Видео-приглашения, новобрачные презентации, Welcome-видео.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +21,9 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#0a0a13",
+  "background_color": "#0a0a13",
+  "orientation": "portrait-primary",
+  "categories": ["entertainment", "lifestyle", "business"],
+  "lang": "ru"
 }

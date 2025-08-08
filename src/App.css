@@ -61,6 +61,25 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
   transition: background 0.22s, color 0.22s, box-shadow 0.22s, border 0.22s, transform 0.18s;
 }
 
+/* Принудительное отображение кнопки чата */
+.chat-fab-new {
+  position: fixed !important;
+  z-index: 99999 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 700px) {
+  .chat-fab-new {
+    position: fixed !important;
+    right: 20px !important;
+    bottom: 20px !important;
+    z-index: 99999 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
 /* Улучшенная поддержка для мобильных устройств */
 @media (max-width: 700px) {
   body {
@@ -79,7 +98,45 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
   }
 }
 
-/* Поддержка для устройств с высоким DPI */
+/* Индикатор загрузки */
+.loading-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #BFD7ED, #C7C6E5, #BFD7ED);
+  background-size: 200% 100%;
+  animation: loading 2s ease-in-out infinite;
+  z-index: 9999;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Улучшенные hover эффекты */
+.catalog-window:hover,
+.wow-catalog:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(191,215,237,0.15);
+}
+
+/* Плавные переходы для всех элементов */
+* {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Улучшенная доступность */
+button:focus,
+.carousel-arrow:focus,
+.catalog-window:focus {
+  outline: 2px solid #BFD7ED;
+  outline-offset: 2px;
+}
+
+/* Оптимизация для устройств с высоким DPI */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   body {
     -webkit-font-smoothing: antialiased;

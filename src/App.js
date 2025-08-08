@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, Suspense, lazy } from "react";
 import "./App.css";
 import "./Advantages.css";
 import "./mobile-optimization.css";
@@ -11,6 +11,9 @@ import Footer from "./Footer";
 import ChatFabButton from "./ChatFabButton";
 import ChatWidget from './ChatWidget';
 import io from 'socket.io-client';
+
+// Lazy loading для тяжелых компонентов
+const LazyChatWidget = lazy(() => import('./ChatWidget'));
 
 const API_URL = 'https://svadba2.onrender.com';
 const socket = io(API_URL);
@@ -84,8 +87,18 @@ function Advantages() {
 export default function App() {
   const [chatOpen, setChatOpen] = useState(false);
   const [hasNewMsg, setHasNewMsg] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const chatIdRef = useRef(localStorage.getItem('chatSessionId'));
   const socketRef = useRef(null);
+
+  useEffect(() => {
+    // Имитация загрузки ресурсов
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     socketRef.current = io(API_URL);
@@ -112,6 +125,7 @@ export default function App() {
   
   return (
     <div className="App">
+      {isLoading && <div className="loading-indicator" />}
       <Header onContactClick={handleOpenChat} />
       <div className="hero-wave-overlap">
         <Hero />
@@ -122,7 +136,11 @@ export default function App() {
       <Reviews />
       {/* {chatOpen && <ContactForm onClose={() => setChatOpen(false)} />} */}
       {!chatOpen && <ChatFabButton onClick={handleOpenChat} hasNewMsg={hasNewMsg} />}
-      {chatOpen && <ChatWidget onClose={() => setChatOpen(false)} />}
+      {chatOpen && (
+        <Suspense fallback={<div>Загрузка чата...</div>}>
+          <LazyChatWidget onClose={() => setChatOpen(false)} />
+        </Suspense>
+      )}
       <Footer />
     </div>
   );

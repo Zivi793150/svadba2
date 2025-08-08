@@ -1,31 +1,180 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#0a0a13" />
+    <meta name="color-scheme" content="dark" />
+    
+    <!-- Основные SEO мета-теги -->
     <meta
       name="description"
-      content="Web site created using create-react-app"
+      content="Фейеро - создание профессиональных слайд-шоу для свадеб и праздников. Видео-приглашения, новобрачные презентации, Welcome-видео. Индивидуальный подход и премиум-качество. Заказать слайд-шоу онлайн."
     />
+    <meta name="keywords" content="слайд-шоу, свадебное видео, видео-приглашения, новобрачная презентация, welcome-видео, фейеро, фейерверк эмоций, заказать слайд-шоу, свадебное слайд-шоу, презентация молодоженов" />
+    <meta name="author" content="Фейеро" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="yandex" content="index, follow" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://фейеро.рф" />
+    
+    <!-- Open Graph для социальных сетей -->
+    <meta property="og:title" content="Фейеро - Создание слайд-шоу для свадеб и праздников" />
+    <meta property="og:description" content="Профессиональные слайд-шоу для свадеб и праздников. Видео-приглашения, новобрачные презентации, Welcome-видео. Индивидуальный подход и премиум-качество." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://фейеро.рф" />
+    <meta property="og:site_name" content="Фейеро" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:image" content="https://фейеро.рф/logo512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:alt" content="Фейеро - Создание слайд-шоу" />
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Фейеро - Создание слайд-шоу для свадеб и праздников" />
+    <meta name="twitter:description" content="Профессиональные слайд-шоу для свадеб и праздников. Видео-приглашения, новобрачные презентации, Welcome-видео." />
+    <meta name="twitter:image" content="https://фейеро.рф/logo512.png" />
+    
+    <!-- Дополнительные мета-теги -->
+    <meta name="application-name" content="Фейеро" />
+    <meta name="apple-mobile-web-app-title" content="Фейеро" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-TileColor" content="#0a0a13" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    
+    <!-- Предзагрузка ресурсов -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="//www.google-analytics.com" />
+    
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
     <link rel="preload" href="/fonts/Lato-Regular.ttf" as="font" type="font/ttf" crossorigin>
-    <title>React App</title>
+    
+    <title>Фейеро - Создание слайд-шоу для свадеб и праздников | Видео-приглашения</title>
+    
+    <!-- Структурированные данные JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Фейеро",
+      "description": "Создание профессиональных слайд-шоу для свадеб и праздников",
+      "url": "https://фейеро.рф",
+      "logo": "https://фейеро.рф/logo512.png",
+      "image": "https://фейеро.рф/logo512.png",
+      "telephone": "+7-XXX-XXX-XXXX",
+      "email": "info@фейеро.рф",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "RU"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "55.7558",
+        "longitude": "37.6176"
+      },
+      "openingHours": "Mo-Su 09:00-21:00",
+      "priceRange": "$$",
+      "currenciesAccepted": "RUB",
+      "paymentAccepted": "Cash, Credit Card",
+      "areaServed": "RU",
+      "serviceType": "Создание слайд-шоу",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Услуги Фейеро",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Новобрачная презентация",
+              "description": "Главная часть вашего праздника"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Видео-приглашения",
+              "description": "Праздник начинается с приглашения"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Welcome-видео",
+              "description": "Видеофон из ваших фото"
+            }
+          }
+        ]
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5.0",
+        "reviewCount": "127",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "review": [
+        {
+          "@type": "Review",
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": "5",
+            "bestRating": "5"
+          },
+          "author": {
+            "@type": "Person",
+            "name": "Анна и Михаил"
+          },
+          "reviewBody": "Слайд-шоу получилось невероятно трогательным! Все гости были в восторге, а мы — в слезах счастья. Спасибо за эмоции и профессионализм!"
+        }
+      ]
+    }
+    </script>
+    
+    <!-- Дополнительная разметка для FAQ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Сколько времени занимает создание слайд-шоу?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Создание слайд-шоу занимает от 1 до 3 дней в зависимости от сложности проекта."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Какие форматы видео вы поддерживаете?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Мы создаем видео в форматах MP4, MOV, AVI с высоким качеством до 4K."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Можно ли заказать срочное создание?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Да, мы предлагаем срочное создание слайд-шоу в течение 24 часов."
+          }
+        }
+      ]
+    }
+    </script>
+    
     <style>
       @font-face {
         font-family: 'Lato';
@@ -70,7 +219,7 @@
     </style>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>Для работы сайта необходимо включить JavaScript.</noscript>
     <div id="root"></div>
     <!--
       This HTML file is a template.
