@@ -8,7 +8,6 @@ export default function ChatFabButton({ onClick, hasNewMsg }) {
       className="chat-fab-new"
       onClick={onClick}
       aria-label="Открыть чат"
-      style={{position: 'fixed', right: 24, bottom: 24, zIndex: 4000}}
     >
       <FaPaperPlane size={28} color="#fff" />
       {hasNewMsg && <span style={badgeStyle} />}

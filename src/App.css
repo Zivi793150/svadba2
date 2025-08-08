@@ -1,14 +1,16 @@
 @font-face {
   font-family: 'Javanese Text';
-  src: url('../public/fonts/Javanese text.ttf') format('truetype');
+  src: url('./fonts/Javanese text.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 @font-face {
   font-family: 'Monotype Corsiva';
-  src: url('../public/fonts/Monotype-Corsiva-Regular.ttf') format('truetype');
+  src: url('./fonts/Monotype-Corsiva-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 /* Сделать весь текст белым */

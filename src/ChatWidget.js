@@ -366,6 +366,7 @@ const styles = {
   overlayFull: {
     position: 'fixed', left: 0, top: 0, right: 0, bottom: 0, zIndex: 5000,
     display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,19,0.92)',
+    width: '100vw', height: '100vh',
   },
   chatBox: {
     width: 370, background: '#23243a', borderRadius: 18, boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
@@ -373,7 +374,7 @@ const styles = {
     fontFamily: 'inherit',
   },
   chatBoxFull: {
-    width: 600, height: 700, maxWidth: '98vw', maxHeight: '98vh', background: '#23243a', borderRadius: 22, boxShadow: '0 12px 48px rgba(0,0,0,0.35)',
+    width: '95vw', height: '95vh', maxWidth: '95vw', maxHeight: '95vh', background: '#23243a', borderRadius: 22, boxShadow: '0 12px 48px rgba(0,0,0,0.35)',
     display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: 'inherit',
   },
   header: {

@@ -1,11 +1,15 @@
-# Фейеро - SEO оптимизация для reg.ru
-# Сайт: https://фейеро.рф
-
-# Принудительное перенаправление на HTTPS (исправлено)
+# Упрощенная конфигурация для фейеро.рф
 RewriteEngine On
+
+# Принудительное перенаправление на HTTPS только для основного домена
 RewriteCond %{HTTPS} off
 RewriteCond %{HTTP_HOST} ^фейеро\.рф$ [NC]
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# React Router - все запросы ведут на index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
 
 # Включаем сжатие
 <IfModule mod_deflate.c>
@@ -27,17 +31,3 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     ExpiresByType image/gif "access plus 1 year"
     ExpiresByType video/mp4 "access plus 1 year"
 </IfModule>
-
-# Безопасность
-<IfModule mod_headers.c>
-    Header always set X-Content-Type-Options nosniff
-    Header always set X-Frame-Options DENY
-    Header always set X-XSS-Protection "1; mode=block"
-    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
-</IfModule>
-
-# React Router - исправленное правило
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/api/
-RewriteRule . /index.html [L]

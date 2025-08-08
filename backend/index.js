@@ -30,6 +30,8 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:3000',
+  'https://фейеро.рф',
+  'https://xn--e1aalvju.xn--p1ai',
   /^https:\/\/.+\.vercel\.app$/
 ].filter(Boolean);
 
