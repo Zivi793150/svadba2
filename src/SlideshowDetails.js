@@ -1,10 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { FaArrowLeft, FaWhatsapp, FaPaperPlane, FaPlay, FaPause } from 'react-icons/fa';
+import React, { useRef, useEffect } from 'react';
+import { FaArrowLeft, FaWhatsapp, FaPaperPlane } from 'react-icons/fa';
 import './SlideshowDetails.css';
 
 export default function SlideshowDetails({ onClose, onContactClick, videoData }) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [playbackRate, setPlaybackRate] = useState(1);
   const videoRef = useRef(null);
 
   // Блокируем скролл основной страницы при открытии модального окна
@@ -31,28 +29,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData })
     onContactClick();
   };
 
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
 
-  const changePlaybackRate = () => {
-    const rates = [0.5, 1, 1.25, 1.5, 2];
-    const currentIndex = rates.indexOf(playbackRate);
-    const nextIndex = (currentIndex + 1) % rates.length;
-    const newRate = rates[nextIndex];
-    
-    if (videoRef.current) {
-      videoRef.current.playbackRate = newRate;
-    }
-    setPlaybackRate(newRate);
-  };
 
   return (
     <div className="slideshow-details-overlay">
@@ -73,22 +50,12 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData })
               ref={videoRef}
               className={`main-video ${videoData?.isVertical ? 'vertical-video' : ''}`}
               controls
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
             >
               <source src={videoData?.video || './video5193080489858068792.mp4'} type="video/mp4" />
               Ваш браузер не поддерживает видео.
             </video>
             
-            {/* Кастомные контролы */}
-            <div className="video-controls">
-              <button className="video-control-btn" onClick={togglePlay}>
-                {isPlaying ? <FaPause size={16} /> : <FaPlay size={16} />}
-              </button>
-              <button className="video-control-btn speed-btn" onClick={changePlaybackRate}>
-                {playbackRate}x
-              </button>
-            </div>
+
           </div>
           
           {/* Текстовый контент */}

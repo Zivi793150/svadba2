@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import './ChatWidgetFix.css';
 import { FaPaperclip } from 'react-icons/fa';
 import { FaWhatsapp } from 'react-icons/fa';
+import { FaQuestion, FaMoneyBillWave, FaClock, FaCog, FaInfoCircle } from 'react-icons/fa';
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://svadba2.onrender.com';
 const socket = io(API_URL);
@@ -39,6 +40,9 @@ export default function ChatWidget({ onClose }) {
   const [skip, setSkip] = useState(0);
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [showQuickQuestions, setShowQuickQuestions] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [showDirectAdminChat, setShowDirectAdminChat] = useState(false);
   const limit = 20;
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -68,6 +72,7 @@ export default function ChatWidget({ onClose }) {
     setMessages([]);
     setSkip(0);
     setHasMore(true);
+    setSelectedCategory(null);
     (async () => {
       // Получаем общее количество сообщений
       const countRes = await fetch(`${API_URL}/api/messages/${chatId}/count`);
@@ -172,9 +177,9 @@ export default function ChatWidget({ onClose }) {
         setError(data.error || 'Ошибка отправки');
         // Удаляем временное сообщение при ошибке
         setMessages((prev) => prev.filter((msg) => msg._id !== tempId));
-      } else {
-        setText('');
-      }
+              } else {
+          setText('');
+        }
     } catch (err) {
       setError('Ошибка сети');
       setMessages((prev) => prev.filter((msg) => msg._id !== tempId));
@@ -230,6 +235,123 @@ export default function ChatWidget({ onClose }) {
 
   const isMobile = window.innerWidth <= 700;
 
+  // Быстрые вопросы и категории
+  const quickQuestions = {
+    'prices': {
+      title: '💰 Цены и стоимость',
+      icon: <FaMoneyBillWave size={16} />,
+      questions: [
+        'Сколько стоит слайд-шоу?',
+        'Есть ли скидки?',
+        'Что входит в стоимость?',
+        'Можно ли рассчитать индивидуально?'
+      ]
+    },
+    'timing': {
+      title: '⏰ Сроки и процесс',
+      icon: <FaClock size={16} />,
+      questions: [
+        'За сколько дней делаете?',
+        'Можно ли ускорить?',
+        'Как происходит работа?',
+        'Когда можно получить результат?'
+      ]
+    },
+    'process': {
+      title: '⚙️ Как заказать',
+      icon: <FaCog size={16} />,
+      questions: [
+        'Как оформить заказ?',
+        'Какие фото нужны?',
+        'Можно ли внести правки?',
+        'Как оплачивать?'
+      ]
+    },
+    'general': {
+      title: 'ℹ️ Общая информация',
+      icon: <FaInfoCircle size={16} />,
+      questions: [
+        'Какие форматы видео?',
+        'Можно ли с музыкой?',
+        'Есть ли примеры работ?',
+        'Работаете ли с видео?'
+      ]
+    }
+  };
+
+
+
+  // Автоответы на базовые вопросы
+  const autoAnswers = {
+    'Сколько стоит слайд-шоу?': 'Стоимость слайд-шоу начинается от 5 000 ₽. Точная цена зависит от сложности, количества фото и ваших пожеланий. Хотите, чтобы я рассчитал стоимость для вас?',
+    'Есть ли скидки?': 'Да, у нас есть скидки для молодоженов! При заказе за месяц до свадьбы - скидка 15%, при заказе двух услуг - скидка 20%. Подробности расскажу в личном сообщении.',
+    'Что входит в стоимость?': 'В стоимость входит: профессиональный монтаж, подбор музыки, цветокоррекция, спецэффекты, готовое видео в HD качестве. Длительность 3-5 минут.',
+    'Можно ли рассчитать индивидуально?': 'Конечно! Пришлите мне примеры ваших фото и расскажите о пожеланиях. Я рассчитаю точную стоимость для вашего проекта.',
+    'За сколько дней делаете?': 'Обычно слайд-шоу готово за 2-3 дня. При срочном заказе можем сделать за 1 день (доплата 30%).',
+    'Можно ли ускорить?': 'Да, можем ускорить! За срочность доплата 30%. Минимальный срок - 1 день.',
+    'Как происходит работа?': '1) Вы присылаете фото и пожелания\n2) Мы делаем черновик\n3) Вы вносите правки\n4) Готовое видео!',
+    'Когда можно получить результат?': 'Результат готов через 2-3 дня. Присылаем ссылку для скачивания и дублируем в WhatsApp.',
+    'Как оформить заказ?': 'Просто напишите мне "Хочу заказать" и пришлите фото. Я помогу оформить заказ и рассчитать стоимость.',
+    'Какие фото нужны?': 'Нужны фото в хорошем качестве (минимум 20-30 штук). Форматы: JPG, PNG. Желательно без водяных знаков.',
+    'Можно ли внести правки?': 'Да, конечно! Включаем 2 бесплатные правки. Дополнительные правки - 500 ₽ за каждую.',
+    'Как оплачивать?': 'Оплата после одобрения черновика. Принимаем: карты, СБП, наличные при встрече.',
+    'Какие форматы видео?': 'Готовое видео в форматах: MP4 (HD), MOV. Также можем сделать версию для Instagram Stories.',
+    'Можно ли с музыкой?': 'Да! Подбираем музыку под настроение или используем вашу. Учитываем авторские права.',
+    'Есть ли примеры работ?': 'Конечно! У нас есть портфолио. Могу показать примеры в личном сообщении.',
+    'Работаете ли с видео?': 'Да, работаем! Можем добавить видеофрагменты в слайд-шоу или создать отдельный клип.'
+  };
+
+  const handleQuickQuestion = (question) => {
+    setText(question);
+    setShowQuickQuestions(false);
+    inputRef.current?.focus();
+    
+    // Автоматически отправляем автоответ
+    setTimeout(() => {
+      if (autoAnswers[question]) {
+        const autoMessage = {
+          _id: `auto-${Date.now()}`,
+          chatId: chatId,
+          sender: 'admin',
+          text: autoAnswers[question],
+          createdAt: new Date(),
+          delivered: true,
+          viewed: false,
+          isAutoReply: true
+        };
+        setMessages(prev => [...prev, autoMessage]);
+      }
+    }, 1000);
+  };
+
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+  };
+
+  const handleBackToCategories = () => {
+    setSelectedCategory(null);
+  };
+
+  const handleDirectAdminChat = () => {
+    setShowDirectAdminChat(true);
+    setShowQuickQuestions(false);
+    setSelectedCategory(null);
+    // Отправляем системное сообщение о начале прямого чата
+    const systemMessage = {
+      _id: `system-${Date.now()}`,
+      chatId: chatId,
+      sender: 'admin',
+      text: '👋 Здравствуйте! Я готов помочь вам с любыми вопросами. Что вас интересует?',
+      createdAt: new Date(),
+      delivered: true,
+      viewed: false,
+      isSystemMessage: true
+    };
+    setMessages(prev => [...prev, systemMessage]);
+  };
+
+
+
   return (
     <div style={fullscreen || isMobile ? styles.overlayFull : styles.overlay}>
       <div style={fullscreen || isMobile ? styles.chatBoxFull : styles.chatBox}>
@@ -247,6 +369,9 @@ export default function ChatWidget({ onClose }) {
               {fullscreen ? <FiMinimize2 size={22} /> : <FiMaximize2 size={22} />}
             </button>
           )}
+          
+
+
           <button onClick={() => setShowCodeInput(s => !s)} style={styles.codeBtn} title="Ввести код чата">🔑</button>
           <button onClick={onClose} style={styles.closeBtn} title="Закрыть">×</button>
         </div>
@@ -267,15 +392,64 @@ export default function ChatWidget({ onClose }) {
           </form>
         )}
         <div style={styles.messages}>
+          {/* Умная воронка вопросов */}
+          {showQuickQuestions && !selectedCategory && (
+            <div style={styles.quickQuestionsContainer}>
+              <div style={styles.quickQuestionsHeader}>
+                <FaQuestion size={20} color="#7CA7CE" />
+                <span style={styles.quickQuestionsTitle}>Выберите категорию вопроса:</span>
+              </div>
+              <div style={styles.categoriesGrid}>
+                {Object.entries(quickQuestions).map(([key, category]) => (
+                  <button
+                    key={key}
+                    onClick={() => handleCategorySelect(key)}
+                    style={styles.categoryButton}
+                    className="category-button"
+                  >
+                    <div style={styles.categoryIcon}>{category.icon}</div>
+                    <span style={styles.categoryTitle}>{category.title}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Вопросы выбранной категории */}
+          {selectedCategory && (
+            <div style={styles.questionsContainer}>
+              <div style={styles.questionsHeader}>
+                <button onClick={handleBackToCategories} style={styles.backButton} className="back-button">
+                  ← Назад к категориям
+                </button>
+                <span style={styles.questionsTitle}>{quickQuestions[selectedCategory].title}</span>
+              </div>
+              <div style={styles.questionsList}>
+                {quickQuestions[selectedCategory].questions.map((question, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleQuickQuestion(question)}
+                    style={styles.questionButton}
+                    className="question-button"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+
+
           {hasMore && (
             <button style={styles.loadMoreBtn} onClick={loadMore}>Показать ещё</button>
           )}
-          {messages.length === 0 && (
+          {messages.length === 0 && !selectedCategory && (
             <div style={styles.emptyMsg}>Задайте вопрос — мы ответим!</div>
           )}
           {messages.map((msg, i) => (
             <div key={msg._id || i} style={msg.sender === 'user' ? styles.userMsgWrap : styles.adminMsgWrap}>
-              <div style={msg.sender === 'user' ? styles.userMsg : styles.adminMsg}>
+              <div style={msg.sender === 'user' ? styles.userMsg : msg.isAutoReply ? styles.autoReplyMsg : styles.adminMsg}>
                 {msg.fileUrl ? (
                   msg.fileType && msg.fileType.startsWith('image/') ? (
                     <img src={msg.fileUrl} alt="file" style={{maxWidth:180,maxHeight:180,borderRadius:12,marginBottom:6}} />
@@ -295,7 +469,29 @@ export default function ChatWidget({ onClose }) {
                       {msg.pending ? '...' : (msg.viewed ? '✓✓' : (msg.delivered ? '✓' : '...'))}
                     </span>
                   )}
+                  {msg.isAutoReply && (
+                    <span style={styles.autoReplyLabel}>🤖 Автоответ</span>
+                  )}
                 </div>
+                {/* Быстрые действия после автоответов */}
+                {msg.isAutoReply && (
+                  <div style={styles.quickActions}>
+                    <button 
+                      onClick={() => setText('Хочу заказать')}
+                      style={styles.quickActionBtn}
+                      className="quick-action-btn"
+                    >
+                      🛒 Заказать
+                    </button>
+                    <button 
+                      onClick={handleDirectAdminChat}
+                      style={styles.quickActionBtn}
+                      className="quick-action-btn"
+                    >
+                      💬 Консультация
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -348,10 +544,43 @@ export default function ChatWidget({ onClose }) {
             font-weight: 700 !important;
             -webkit-text-fill-color: #23243a !important;
           }
-          .whatsapp-btn:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 6px 20px #25D36644 !important;
-          }
+                  .whatsapp-btn:hover {
+          transform: translateY(-2px) !important;
+          box-shadow: 0 6px 20px #25D36644 !important;
+        }
+        
+        /* Hover эффекты для воронки вопросов */
+        .category-button:hover {
+          transform: translateY(-2px) !important;
+          box-shadow: 0 6px 20px rgba(124, 167, 206, 0.4) !important;
+        }
+        
+        .question-button:hover {
+          background: rgba(255,255,255,0.15) !important;
+          border-color: rgba(255,255,255,0.3) !important;
+          transform: translateY(-1px) !important;
+        }
+        
+        .back-button:hover {
+          background: rgba(124, 167, 206, 0.1) !important;
+          color: #BFD7ED !important;
+        }
+        
+        .quick-questions-btn:hover {
+          opacity: 1 !important;
+          background: rgba(255,255,255,0.1) !important;
+        }
+        
+        .quick-action-btn:hover {
+          background: rgba(255,255,255,0.25) !important;
+          border-color: rgba(255,255,255,0.5) !important;
+          transform: translateY(-1px) !important;
+        }
+        
+        .analytics-btn:hover {
+          opacity: 1 !important;
+          background: rgba(255,255,255,0.1) !important;
+        }
         `}</style>
       </div>
     </div>
@@ -427,6 +656,10 @@ const styles = {
   adminMsg: {
     background: 'var(--accent-primary)', color: '#fff', borderRadius: '16px 16px 16px 4px', padding: '10px 16px', fontSize: 15, maxWidth: '75%',
     boxShadow: '0 2px 8px #BFD7ED33', alignSelf: 'flex-start',
+  },
+  autoReplyMsg: {
+    background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)', color: '#fff', borderRadius: '16px 16px 16px 4px', padding: '10px 16px', fontSize: 15, maxWidth: '75%',
+    boxShadow: '0 2px 8px #4CAF5033', alignSelf: 'flex-start', border: '2px solid #66BB6A',
   },
   inputForm: {
     display: 'flex', borderTop: '1.5px solid #e6e6f6', padding: '10px 12px', background: '#23243a',
@@ -505,4 +738,133 @@ const styles = {
     fontSize: 14,
     fontWeight: 600,
   },
+  // Стили для умной воронки вопросов
+
+  quickQuestionsContainer: {
+    background: 'rgba(255,255,255,0.05)',
+    borderRadius: 16,
+    padding: '20px',
+    marginBottom: '20px',
+    border: '1px solid rgba(255,255,255,0.1)',
+  },
+  quickQuestionsHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: '20px',
+    justifyContent: 'center',
+  },
+  quickQuestionsTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 600,
+    textAlign: 'center',
+  },
+  categoriesGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+    gap: '12px',
+  },
+  categoryButton: {
+    background: 'linear-gradient(135deg, #7CA7CE 0%, #BFD7ED 100%)',
+    border: 'none',
+    borderRadius: 12,
+    padding: '16px 12px',
+    cursor: 'pointer',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '8px',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 12px rgba(124, 167, 206, 0.3)',
+  },
+  categoryIcon: {
+    color: '#fff',
+    fontSize: 20,
+  },
+  categoryTitle: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 600,
+    textAlign: 'center',
+    lineHeight: 1.2,
+  },
+  questionsContainer: {
+    background: 'rgba(255,255,255,0.05)',
+    borderRadius: 16,
+    padding: '20px',
+    marginBottom: '20px',
+    border: '1px solid rgba(255,255,255,0.1)',
+  },
+  questionsHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: '20px',
+    justifyContent: 'space-between',
+  },
+  backButton: {
+    background: 'none',
+    border: 'none',
+    color: '#7CA7CE',
+    fontSize: 14,
+    cursor: 'pointer',
+    padding: '8px 12px',
+    borderRadius: '8px',
+    transition: 'all 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+  },
+  questionsTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 600,
+    textAlign: 'center',
+    flex: 1,
+  },
+  questionsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+  },
+  questionButton: {
+    background: 'rgba(255,255,255,0.1)',
+    border: '1px solid rgba(255,255,255,0.2)',
+    borderRadius: '10px',
+    padding: '14px 16px',
+    cursor: 'pointer',
+    color: '#fff',
+    fontSize: 14,
+    textAlign: 'left',
+    transition: 'all 0.2s ease',
+    lineHeight: 1.4,
+  },
+  autoReplyLabel: {
+    fontSize: 11,
+    color: '#66BB6A',
+    fontWeight: 600,
+    marginLeft: 8,
+  },
+  quickActions: {
+    display: 'flex',
+    gap: '8px',
+    marginTop: '12px',
+    flexWrap: 'wrap',
+  },
+  quickActionBtn: {
+    background: 'rgba(255,255,255,0.15)',
+    border: '1px solid rgba(255,255,255,0.3)',
+    borderRadius: '8px',
+    padding: '8px 12px',
+    cursor: 'pointer',
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 500,
+    transition: 'all 0.2s ease',
+    whiteSpace: 'nowrap',
+  },
+  // Стили для аналитики
+
+
 }; 
