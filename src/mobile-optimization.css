@@ -75,10 +75,6 @@
   }
 }
 
-/* Улучшенная поддержка для устройств с ограниченной памятью */
-@media (max-width: 480px) {
-  * {
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
-}
+/* Удалено: глобальный translateZ(0) ломает position: fixed в мобильных браузерах */
+
+

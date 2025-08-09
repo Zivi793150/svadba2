@@ -110,7 +110,7 @@ const Carousel = ({ items = [] }) => {
                 ) : null}
               </div>
               <button className="carousel-order-btn">
-                <span className="order-text">Заказать</span>
+                <span className="order-text">Подробнее</span>
               </button>
             </div>
           );

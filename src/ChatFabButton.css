@@ -1,61 +1,31 @@
 .chat-fab-new {
-  position: fixed !important;
-  right: 36px !important;
-  bottom: 36px !important;
-  z-index: 99999 !important;
-  width: 64px !important;
-  height: 64px !important;
-  border: none !important;
-  border-radius: 50% !important;
-  background: var(--bg-secondary) !important;
-  box-shadow: 0 4px 24px var(--shadow-color) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  transition: box-shadow 0.2s, transform 0.2s !important;
-  outline: none !important;
-  padding: 0 !important;
+  position: fixed;
+  right: 36px;
+  bottom: 36px;
+  z-index: 1001;
+  width: 64px;
+  height: 64px;
+  border: none;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  box-shadow: 0 4px 24px var(--shadow-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+  outline: none;
+  padding: 0;
 }
-
 .chat-fab-new:hover {
-  box-shadow: 0 8px 32px rgba(124,167,206,0.18) !important;
-  transform: translateY(-2px) scale(1.045) !important;
+  box-shadow: 0 8px 32px rgba(124,167,206,0.18);
+  transform: translateY(-2px) scale(1.045);
 }
-
 @media (max-width: 700px) {
   .chat-fab-new {
-    position: fixed !important;
-    right: 20px !important;
-    bottom: 20px !important;
-    width: 60px !important;
-    height: 60px !important;
-    z-index: 99999 !important;
-    background: var(--bg-secondary) !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    border-radius: 50% !important;
-    border: none !important;
-    outline: none !important;
-    padding: 0 !important;
-    transform: none !important;
-    will-change: transform !important;
-    pointer-events: auto !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    top: auto !important;
-    left: auto !important;
-  }
-  
-  /* Принудительное отображение на мобильных */
-  .chat-fab-new,
-  .chat-fab-new * {
-    position: fixed !important;
-    z-index: 99999 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    right: 16px;
+    bottom: 16px;
+    width: 54px;
+    height: 54px;
   }
 } 

@@ -3,7 +3,7 @@ import { MdOutlinePhotoCamera, MdOutlineConstruction, MdOutlineAccessTime } from
 import Carousel from "./Carousel";
 import "./Catalogs.css";
 
-function Catalog({ title, badge, description, icon, info, video, poster, isInDevelopment }) {
+function Catalog({ title, badge, description, icon, info, video, poster, isInDevelopment, onShowDetails }) {
   const isMain = description === 'Презентация вашей пары-ожившая история вашей любви';
   const handleTimeUpdate = (e) => {
     if (e.target.currentTime > 30) {
@@ -90,12 +90,17 @@ function Catalog({ title, badge, description, icon, info, video, poster, isInDev
           )
         ) : null}
       </div>
-      <button className="carousel-order-btn"><span className="order-text">Заказать</span></button>
+      <button className="carousel-order-btn" onClick={() => {
+        console.log('Кнопка "Подробнее" нажата!');
+        if (onShowDetails) {
+          onShowDetails();
+        }
+      }}><span className="order-text">Подробнее</span></button>
     </div>
   );
 }
 
-function CatalogCarousel({ title, items }) {
+function CatalogCarousel({ title, items, onShowDetails }) {
   const scrollRef = useRef();
   const [scroll, setScroll] = useState(0);
   const cardWidth = 340 + 32; // ширина карточки + gap
@@ -127,13 +132,13 @@ function CatalogCarousel({ title, items }) {
         )}
       </div>
       <div className="catalog-carousel-list" ref={scrollRef} tabIndex={0}>
-        {items.map((cat, i) => <Catalog key={cat.title + i} {...cat} />)}
+        {items.map((cat, i) => <Catalog key={cat.title + i} {...cat} onShowDetails={onShowDetails} />)}
       </div>
     </div>
   );
 }
 
-export default function Catalogs() {
+export default function Catalogs({ onShowDetails }) {
   const presentations = [
     { title: '', badge: '', description: 'Презентация вашей пары-ожившая история вашей любви', icon: <MdOutlinePhotoCamera size={28} color="#a18fff" />, info: '5 минут', video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
   ];
@@ -151,7 +156,7 @@ export default function Catalogs() {
   ];
   return (
     <section className="catalogs-multi" id="catalogs">
-      <CatalogCarousel title="" items={presentations} />
+      <CatalogCarousel title="" items={presentations} onShowDetails={onShowDetails} />
       <section className="catalog-section">
         <h2 className="catalog-main-title" style={{textAlign:'center', marginTop:40, marginBottom:8}}>Welcome-видео</h2>
         <div className="catalog-mini-desc" style={{textAlign:'center', marginBottom:24}}>Видеофон из ваших фото</div>

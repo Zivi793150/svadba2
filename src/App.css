@@ -63,23 +63,31 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
   transition: background 0.22s, color 0.22s, box-shadow 0.22s, border 0.22s, transform 0.18s;
 }
 
-/* Принудительное отображение кнопки чата */
-.chat-fab-new {
+/* Принудительное полноэкранное отображение чата */
+.chat-widget-overlay {
   position: fixed !important;
-  z-index: 99999 !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 10000 !important;
 }
 
-@media (max-width: 700px) {
-  .chat-fab-new {
-    position: fixed !important;
-    right: 20px !important;
-    bottom: 20px !important;
-    z-index: 99999 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
+/* Принудительное центрирование окна подробностей */
+.slideshow-details-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 10000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* Улучшенная поддержка для мобильных устройств */
@@ -88,11 +96,7 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
     font-size: 14px;
   }
   
-  /* Улучшение производительности на мобильных */
-  * {
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
+  /* Удалено: глобальный translateZ(0) ломал position: fixed у элементов */
   
   /* Оптимизация для устройств с ограниченной производительностью */
   video {

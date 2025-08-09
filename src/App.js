@@ -10,6 +10,7 @@ import Footer from "./Footer";
 // import ContactForm from "./ContactForm";
 import ChatFabButton from "./ChatFabButton";
 import ChatWidget from './ChatWidget';
+import SlideshowDetails from './SlideshowDetails';
 import io from 'socket.io-client';
 
 // Lazy loading для тяжелых компонентов
@@ -88,6 +89,7 @@ export default function App() {
   const [chatOpen, setChatOpen] = useState(false);
   const [hasNewMsg, setHasNewMsg] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSlideshowDetails, setShowSlideshowDetails] = useState(false);
   const chatIdRef = useRef(localStorage.getItem('chatSessionId'));
   const socketRef = useRef(null);
 
@@ -119,6 +121,15 @@ export default function App() {
     setHasNewMsg(false);
   };
 
+  const handleShowSlideshowDetails = () => {
+    console.log('Открываем страницу подробностей!');
+    setShowSlideshowDetails(true);
+  };
+
+  const handleCloseSlideshowDetails = () => {
+    setShowSlideshowDetails(false);
+  };
+
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark');
   }, []);
@@ -130,7 +141,7 @@ export default function App() {
       <div className="hero-wave-overlap">
         <Hero />
       </div>
-      <Catalogs />
+      <Catalogs onShowDetails={handleShowSlideshowDetails} />
       <HowItWorks />
       <Advantages />
       <Reviews />
@@ -140,6 +151,12 @@ export default function App() {
         <Suspense fallback={<div>Загрузка чата...</div>}>
           <LazyChatWidget onClose={() => setChatOpen(false)} />
         </Suspense>
+      )}
+      {showSlideshowDetails && (
+        <SlideshowDetails 
+          onClose={handleCloseSlideshowDetails} 
+          onContactClick={handleOpenChat}
+        />
       )}
       <Footer />
     </div>
