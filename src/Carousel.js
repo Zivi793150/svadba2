@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { MdOutlineConstruction, MdOutlineAccessTime } from 'react-icons/md';
 import './Carousel.css';
 
-const Carousel = ({ items = [] }) => {
+const Carousel = ({ items = [], onShowDetails }) => {
   const carouselRef = useRef(null);
   const handleTimeUpdate = (e) => {
     if (e.target.currentTime > 30) {
@@ -87,6 +87,14 @@ const Carousel = ({ items = [] }) => {
                     <div className="placeholder-text">Подготовка контента</div>
                   </div>
                 </div>
+                <button className="carousel-order-btn" onClick={() => {
+                  console.log('Кнопка "Подробнее" нажата для карточки в разработке!');
+                  if (onShowDetails) {
+                    onShowDetails(item.videoData);
+                  }
+                }}>
+                  <span className="order-text">Подробнее</span>
+                </button>
               </div>
             );
           }
@@ -109,7 +117,12 @@ const Carousel = ({ items = [] }) => {
                   />
                 ) : null}
               </div>
-              <button className="carousel-order-btn">
+              <button className="carousel-order-btn" onClick={() => {
+                console.log('Кнопка "Подробнее" нажата в карусели!');
+                if (onShowDetails) {
+                  onShowDetails(item.videoData);
+                }
+              }}>
                 <span className="order-text">Подробнее</span>
               </button>
             </div>

@@ -121,13 +121,17 @@ export default function App() {
     setHasNewMsg(false);
   };
 
-  const handleShowSlideshowDetails = () => {
-    console.log('Открываем страницу подробностей!');
+  const [selectedVideoData, setSelectedVideoData] = useState(null);
+
+  const handleShowSlideshowDetails = (videoData) => {
+    console.log('Открываем страницу подробностей!', videoData);
+    setSelectedVideoData(videoData);
     setShowSlideshowDetails(true);
   };
 
   const handleCloseSlideshowDetails = () => {
     setShowSlideshowDetails(false);
+    setSelectedVideoData(null);
   };
 
   React.useEffect(() => {
@@ -156,6 +160,7 @@ export default function App() {
         <SlideshowDetails 
           onClose={handleCloseSlideshowDetails} 
           onContactClick={handleOpenChat}
+          videoData={selectedVideoData}
         />
       )}
       <Footer />

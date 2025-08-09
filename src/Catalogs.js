@@ -3,7 +3,7 @@ import { MdOutlinePhotoCamera, MdOutlineConstruction, MdOutlineAccessTime } from
 import Carousel from "./Carousel";
 import "./Catalogs.css";
 
-function Catalog({ title, badge, description, icon, info, video, poster, isInDevelopment, onShowDetails }) {
+function Catalog({ title, badge, description, icon, info, video, poster, isInDevelopment, onShowDetails, videoData }) {
   const isMain = description === 'Презентация вашей пары-ожившая история вашей любви';
   const handleTimeUpdate = (e) => {
     if (e.target.currentTime > 30) {
@@ -93,7 +93,7 @@ function Catalog({ title, badge, description, icon, info, video, poster, isInDev
       <button className="carousel-order-btn" onClick={() => {
         console.log('Кнопка "Подробнее" нажата!');
         if (onShowDetails) {
-          onShowDetails();
+          onShowDetails(videoData);
         }
       }}><span className="order-text">Подробнее</span></button>
     </div>
@@ -140,19 +140,84 @@ function CatalogCarousel({ title, items, onShowDetails }) {
 
 export default function Catalogs({ onShowDetails }) {
   const presentations = [
-    { title: '', badge: '', description: 'Презентация вашей пары-ожившая история вашей любви', icon: <MdOutlinePhotoCamera size={28} color="#a18fff" />, info: '5 минут', video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' },
+    { 
+      title: '', 
+      badge: '', 
+      description: 'Презентация вашей пары-ожившая история вашей любви', 
+      icon: <MdOutlinePhotoCamera size={28} color="#a18fff" />, 
+      info: '5 минут', 
+      video: '/video5193080489858068792.mp4', 
+      poster: '/svadbabg.jpeg',
+      videoData: {
+        title: 'Презентация вашей пары',
+        video: '/video5193080489858068792.mp4',
+        description: 'Ожившая история вашей любви',
+        isVertical: false,
+        content: 'Главная часть вашего праздника — презентация молодоженов. Мы создаем уникальные слайд-шоу, которые рассказывают историю вашей любви через ваши лучшие фотографии. Профессиональный монтаж, трогательная музыка и красивые эффекты сделают этот момент незабываемым.',
+        features: [
+          'Профессиональный монтаж с плавными переходами',
+          'Подбор и наложение трогательной музыки',
+          'Специальные эффекты и анимации',
+          'Цветокоррекция и улучшение качества фото',
+          'Длительность 5-7 минут',
+          'Готовое видео в высоком качестве'
+        ],
+        price: 'от 7 000 ₽',
+        timeline: 'Создание презентации займет 3-5 дней после получения ваших фотографий. Мы создадим несколько вариантов и выберем лучший вместе с вами.'
+      }
+    },
   ];
   const welcomeItems = [
-    { video: '/video5193080489858068792.mp4', poster: '/svadbabg.jpeg' }, // Рабочая карточка
-    { isInDevelopment: true, title: 'Welcome-видео' }, // В разработке
-    { isInDevelopment: true, title: 'Welcome-видео' }, // В разработке
-    { isInDevelopment: true, title: 'Welcome-видео' }, // В разработке
+    { 
+      video: '/video5193080489858068792.mp4', 
+      poster: '/svadbabg.jpeg',
+      videoData: {
+        title: 'Welcome-видео',
+        video: '/video5193080489858068792.mp4',
+        description: 'Видеофон из ваших фото',
+        isVertical: false,
+        content: 'Welcome-видео создает атмосферу праздника с самого начала. Это красивый видеофон из ваших лучших фотографий, который будет транслироваться на экранах во время встречи гостей. Создает настроение и подготавливает всех к торжеству.',
+        features: [
+          'Видеофон из ваших лучших фотографий',
+          'Красивые переходы и эффекты',
+          'Подходящая атмосферная музыка',
+          'Длительность 10-15 минут (зацикленное)',
+          'Адаптация для любых экранов и проекторов',
+          'Готово для воспроизведения на празднике'
+        ],
+        price: 'от 4 000 ₽',
+        timeline: 'Создание Welcome-видео займет 2-3 дня. Мы создадим атмосферный видеофон, который идеально подойдет для встречи гостей.'
+      }
+    },
+    { isInDevelopment: true, title: 'Welcome-видео' },
+    { isInDevelopment: true, title: 'Welcome-видео' },
+    { isInDevelopment: true, title: 'Welcome-видео' },
   ];
   const inviteItems = [
-    { video: '/compressed_Приглашение6В.mp4', poster: '/svadbabg.jpeg' }, // Рабочая карточка
-    { isInDevelopment: true, title: 'Видео-приглашения' }, // В разработке
-    { isInDevelopment: true, title: 'Видео-приглашения' }, // В разработке
-    { isInDevelopment: true, title: 'Видео-приглашения' }, // В разработке
+    { 
+      video: '/compressed_Приглашение6В.mp4', 
+      poster: '/svadbabg.jpeg',
+      videoData: {
+        title: 'Видео-приглашения',
+        video: '/compressed_Приглашение6В.mp4',
+        description: 'Праздник начинается с приглашения',
+        isVertical: true,
+        content: 'Пригласите своих гостей красиво! Персональные видео-приглашения произведут неизгладимое впечатление на ваших близких. Мы создаем уникальные приглашения с вашими фотографиями, которые точно не останутся незамеченными.',
+        features: [
+          'Персональные видео-приглашения для каждого гостя',
+          'Красивая анимация и переходы',
+          'Торжественная музыка',
+          'Длительность 1-2 минуты',
+          'Удобный формат для отправки',
+          'Высокое качество и профессиональный дизайн'
+        ],
+        price: 'от 3 000 ₽',
+        timeline: 'Создание видео-приглашений займет 1-2 дня. Мы создадим шаблон, а затем адаптируем его для каждого гостя.'
+      }
+    },
+    { isInDevelopment: true, title: 'Видео-приглашения' },
+    { isInDevelopment: true, title: 'Видео-приглашения' },
+    { isInDevelopment: true, title: 'Видео-приглашения' },
   ];
   return (
     <section className="catalogs-multi" id="catalogs">
@@ -160,12 +225,12 @@ export default function Catalogs({ onShowDetails }) {
       <section className="catalog-section">
         <h2 className="catalog-main-title" style={{textAlign:'center', marginTop:40, marginBottom:8}}>Welcome-видео</h2>
         <div className="catalog-mini-desc" style={{textAlign:'center', marginBottom:24}}>Видеофон из ваших фото</div>
-        <Carousel items={welcomeItems} />
+        <Carousel items={welcomeItems} onShowDetails={onShowDetails} />
       </section>
       <section className="catalog-section">
         <h2 className="catalog-main-title" style={{textAlign:'center', marginTop:40, marginBottom:8}}>Видео-приглашения</h2>
         <div className="catalog-mini-desc" style={{textAlign:'center', marginBottom:24}}>Праздник начинается с приглашения</div>
-        <Carousel items={inviteItems} />
+        <Carousel items={inviteItems} onShowDetails={onShowDetails} />
       </section>
     </section>
   );
