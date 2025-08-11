@@ -7,6 +7,7 @@ import Hero from "./Hero";
 import Catalogs from "./Catalogs";
 import Reviews from "./Reviews";
 import Footer from "./Footer";
+import AboutPage from "./AboutPage";
 // import ContactForm from "./ContactForm";
 import ChatFabButton from "./ChatFabButton";
 import ChatWidget from './ChatWidget';
@@ -90,6 +91,7 @@ export default function App() {
   const [hasNewMsg, setHasNewMsg] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showSlideshowDetails, setShowSlideshowDetails] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const chatIdRef = useRef(localStorage.getItem('chatSessionId'));
   const socketRef = useRef(null);
 
@@ -134,6 +136,9 @@ export default function App() {
     setSelectedVideoData(null);
   };
 
+  const handleOpenAbout = () => setShowAbout(true);
+  const handleCloseAbout = () => setShowAbout(false);
+
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark');
   }, []);
@@ -141,7 +146,7 @@ export default function App() {
   return (
     <div className="App">
       {isLoading && <div className="loading-indicator" />}
-      <Header onContactClick={handleOpenChat} />
+      <Header onContactClick={handleOpenChat} onAboutClick={handleOpenAbout} />
       <div className="hero-wave-overlap">
         <Hero />
       </div>
@@ -163,7 +168,10 @@ export default function App() {
           videoData={selectedVideoData}
         />
       )}
-      <Footer />
+      <Footer onAboutClick={handleOpenAbout} />
+      {showAbout && (
+        <AboutPage onClose={handleCloseAbout} />
+      )}
     </div>
   );
 }

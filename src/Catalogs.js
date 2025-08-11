@@ -4,7 +4,7 @@ import Carousel from "./Carousel";
 import "./Catalogs.css";
 
 function Catalog({ title, badge, description, icon, info, video, poster, isInDevelopment, onShowDetails, videoData }) {
-  const isMain = description === 'Презентация вашей пары-ожившая история вашей любви';
+  const isMain = description === 'Презентация вашей пары-ваша ожившая история';
   const handleTimeUpdate = (e) => {
     if (e.target.currentTime > 30) {
       e.target.currentTime = 0;
@@ -57,14 +57,15 @@ function Catalog({ title, badge, description, icon, info, video, poster, isInDev
       <div className="catalog-title-row">
         {isMain && (
           <>
-            <div className="catalog-title javanese-title">Презентация вашей пары<br/>— ожившая история любви</div>
+            <div className="catalog-title javanese-title">Презентация вашей пары<br/>— ваша ожившая история</div>
             <div className="catalog-under-title" style={{
               fontSize: '1.08rem', color: '#fff', textAlign: 'center', marginBottom: 18, lineHeight: 1.3, fontWeight: 400, opacity: 0.92
             }}>
-              Ваша история в движении.<br/>Расскажите свою историю!
+              Главная часть вашей свадьбы.<br/>Расскажите свою историю!
             </div>
           </>
         )}
+
       </div>
       <div className="catalog-video-preview wow-preview">
         {video ? (
@@ -143,15 +144,16 @@ export default function Catalogs({ onShowDetails }) {
     { 
       title: '', 
       badge: '', 
-      description: 'Презентация вашей пары-ожившая история вашей любви', 
+      description: 'Презентация вашей пары-ваша ожившая история', 
       icon: <MdOutlinePhotoCamera size={28} color="#a18fff" />, 
       info: '5 минут', 
       video: '/video5193080489858068792.mp4', 
       poster: '/svadbabg.jpeg',
+      isMain: true,
       videoData: {
         title: 'Презентация вашей пары',
         video: '/video5193080489858068792.mp4',
-        description: 'Ожившая история вашей любви',
+        description: 'Ваша ожившая история',
         isVertical: false,
         content: 'Главная часть вашего праздника — презентация молодоженов. Мы создаем уникальные слайд-шоу, которые рассказывают историю вашей любви через ваши лучшие фотографии. Профессиональный монтаж, трогательная музыка и красивые эффекты сделают этот момент незабываемым.',
         features: [
@@ -172,9 +174,9 @@ export default function Catalogs({ onShowDetails }) {
       video: '/video5193080489858068792.mp4', 
       poster: '/svadbabg.jpeg',
       videoData: {
-        title: 'Welcome-видео',
+        title: 'Велком-видео',
         video: '/video5193080489858068792.mp4',
-        description: 'Видеофон из ваших фото',
+        description: 'Видео-фон из ваших ФОТО',
         isVertical: false,
         content: 'Welcome-видео создает атмосферу праздника с самого начала. Это красивый видеофон из ваших лучших фотографий, который будет транслироваться на экранах во время встречи гостей. Создает настроение и подготавливает всех к торжеству.',
         features: [
@@ -200,7 +202,7 @@ export default function Catalogs({ onShowDetails }) {
       videoData: {
         title: 'Видео-приглашения',
         video: '/compressed_Приглашение6В.mp4',
-        description: 'Праздник начинается с приглашения',
+        description: 'Ваш праздник запомнят ещё с приглашения!',
         isVertical: true,
         content: 'Пригласите своих гостей красиво! Персональные видео-приглашения произведут неизгладимое впечатление на ваших близких. Мы создаем уникальные приглашения с вашими фотографиями, которые точно не останутся незамеченными.',
         features: [
@@ -224,12 +226,12 @@ export default function Catalogs({ onShowDetails }) {
       <CatalogCarousel title="" items={presentations} onShowDetails={onShowDetails} />
       <section className="catalog-section">
         <h2 className="catalog-main-title" style={{textAlign:'center', marginTop:40, marginBottom:8}}>Welcome-видео</h2>
-        <div className="catalog-mini-desc" style={{textAlign:'center', marginBottom:24}}>Видеофон из ваших фото</div>
+        <div className="catalog-mini-desc" style={{textAlign:'center', marginBottom:24}}>Видео-фон из ваших ФОТО<br/>Покажите свои лучшие моменты</div>
         <Carousel items={welcomeItems} onShowDetails={onShowDetails} />
       </section>
       <section className="catalog-section">
         <h2 className="catalog-main-title" style={{textAlign:'center', marginTop:40, marginBottom:8}}>Видео-приглашения</h2>
-        <div className="catalog-mini-desc" style={{textAlign:'center', marginBottom:24}}>Праздник начинается с приглашения</div>
+        <div className="catalog-mini-desc" style={{textAlign:'center', marginBottom:24}}>Ваш праздник запомнят ещё с приглашения!</div>
         <Carousel items={inviteItems} onShowDetails={onShowDetails} />
       </section>
     </section>

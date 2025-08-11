@@ -13,7 +13,7 @@ function BurgerIcon({ open, onClick }) {
   );
 }
 
-function MobileMenu({ open, onClose, onContactClick, onReviewsClick }) {
+function MobileMenu({ open, onClose, onContactClick, onReviewsClick, onAboutClick }) {
   const handleReviewsClick = (e) => {
     e.preventDefault();
     onClose();
@@ -32,13 +32,14 @@ function MobileMenu({ open, onClose, onContactClick, onReviewsClick }) {
       <nav className="mobile-menu-list">
         <a href="#catalogs" onClick={onClose}>Каталоги</a>
         <a href="#reviews" onClick={handleReviewsClick}>Отзывы</a>
+        <a href="#about" onClick={(e) => { e.preventDefault(); onClose(); onAboutClick && onAboutClick(); }}>О нас</a>
         <a href="#contact" onClick={handleContactClick}>Написать нам</a>
       </nav>
     </div>
   );
 }
 
-export default function Header({ onContactClick }) {
+export default function Header({ onContactClick, onAboutClick }) {
   const [menuOpen, setMenuOpen] = useState(false);
   
   useEffect(() => {
@@ -70,10 +71,11 @@ export default function Header({ onContactClick }) {
       <nav className="nav">
         <a href="#catalogs">Каталоги</a>
         <a href="#reviews" onClick={handleReviewsClick}>Отзывы</a>
+        <a href="#about" onClick={(e) => { e.preventDefault(); onAboutClick && onAboutClick(); }}>О нас</a>
         <a href="#contact" onClick={handleContactClick}>Написать нам</a>
       </nav>
       <BurgerIcon open={menuOpen} onClick={() => setMenuOpen(!menuOpen)} />
-      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} onContactClick={onContactClick} onReviewsClick={handleReviewsClick} />
+      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} onContactClick={onContactClick} onReviewsClick={handleReviewsClick} onAboutClick={onAboutClick} />
     </header>
   );
 } 

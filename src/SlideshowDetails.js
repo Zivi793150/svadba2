@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { FaArrowLeft, FaWhatsapp, FaPaperPlane } from 'react-icons/fa';
+import { FaArrowLeft, FaWhatsapp } from 'react-icons/fa';
+import { FaTelegramPlane } from 'react-icons/fa';
 import './SlideshowDetails.css';
 
 export default function SlideshowDetails({ onClose, onContactClick, videoData }) {
@@ -15,13 +16,32 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData })
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent('Здравствуйте! Хочу заказать слайд-шоу для свадьбы. Подскажите подробности и стоимость.');
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
+    const phone = '79004511777';
+
     if (isMobile) {
-      // Для мобильных - открываем приложение WhatsApp
-      window.location.href = `whatsapp://send?phone=79000000000&text=${message}`;
+      window.location.href = `whatsapp://send?phone=${phone}&text=${message}`;
     } else {
-      // Для ПК - открываем WhatsApp Web
-      window.open(`https://web.whatsapp.com/send?phone=79000000000&text=${message}`, '_blank');
+      window.open(`https://web.whatsapp.com/send?phone=${phone}&text=${message}`, '_blank');
+    }
+  };
+
+  const handleTelegramClick = () => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const phone = '79004511777';
+    const username = '';
+
+    if (isMobile) {
+      // Прямо в приложение Telegram по номеру
+      window.location.href = `tg://resolve?phone=${phone}`;
+      return;
+    }
+
+    // На ПК: web-версия Telegram. Если известен username — используем его, иначе пробуем открыть по номеру через tgaddr
+    if (username) {
+      window.open(`https://web.telegram.org/k/#@${username}`,'_blank');
+    } else {
+      const tgaddr = encodeURIComponent(`tg://resolve?phone=${phone}`);
+      window.open(`https://web.telegram.org/k/#?tgaddr=${tgaddr}`, '_blank');
     }
   };
 
@@ -89,8 +109,8 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData })
           
           {/* Кнопки действий */}
           <div className="action-buttons">
-            <button className="btn question-btn" onClick={handleQuestionClick}>
-              <FaPaperPlane size={18} />
+            <button className="btn question-btn" onClick={handleTelegramClick}>
+              <FaTelegramPlane size={18} />
               <span>Задать вопрос</span>
             </button>
             <button className="btn order-btn" onClick={handleWhatsAppClick}>

@@ -212,25 +212,17 @@ export default function ChatWidget({ onClose }) {
   };
 
   const handleWhatsAppRedirect = () => {
-    // Номер WhatsApp (замените на ваш)
-    const phoneNumber = '79605110071'; // Замените на реальный номер
-    
-    // Информация о заказе (пока заглушка)
-    const orderInfo = `Здравствуйте! Хочу заказать слайд-шоу.
-    
-Код чата: ${chatId}
-Дата заказа: ${new Date().toLocaleDateString('ru-RU')}
-
-Готов обсудить детали заказа.`;
-
-    // Кодируем сообщение для URL
+    const phoneNumber = '79004511777';
+    const orderInfo = `Здравствуйте! Хочу заказать слайд-шоу.\n\nКод чата: ${chatId}\nДата: ${new Date().toLocaleDateString('ru-RU')}`;
     const encodedMessage = encodeURIComponent(orderInfo);
-    
-    // Создаем WhatsApp Web URL
-    const whatsappWebUrl = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
-    
-    // Открываем WhatsApp Web
-    window.open(whatsappWebUrl, '_blank');
+    const isMobileUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobileUa) {
+      window.location.href = `whatsapp://send?phone=${phoneNumber}&text=${encodedMessage}`;
+    } else {
+      const whatsappWebUrl = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
+      window.open(whatsappWebUrl, '_blank');
+    }
   };
 
   const isMobile = window.innerWidth <= 700;
