@@ -53,7 +53,7 @@ const Carousel = ({ items = [], onShowDetails }) => {
         {items.map((item, idx) => {
           // Если карточка в разработке
           if (item.isInDevelopment) {
-            const developmentVideo = item.title?.includes('Welcome') ? '/video5193080489858068792.mp4' : '/compressed_Приглашение6В.mp4';
+            const developmentVideo = item.title?.includes('Велком') ? '/video5193080489858068792.mp4' : '/compressed_Приглашение6В.mp4';
             
             return (
               <div className="carousel-card development-card" key={idx} style={{ scrollSnapAlign: 'start' }}>

@@ -31,25 +31,7 @@ export default function AboutPage({ onClose }) {
             </div>
           </section>
 
-          <section className="about-section">
-            <h2>Банковские реквизиты</h2>
-            <div className="about-grid">
-              <div className="about-item"><span>Банк</span><b>Тинькофф Банк</b></div>
-              <div className="about-item"><span>БИК</span><b>000000000</b></div>
-              <div className="about-item"><span>Корр. счёт</span><b>30101810100000000000</b></div>
-              <div className="about-item"><span>Расчётный счёт</span><b>40802810000000000000</b></div>
-            </div>
-          </section>
-
-          <section className="about-section">
-            <h2>Что требуется для включения платежей</h2>
-            <ul className="about-list">
-              <li>Настоящие товары/услуги на сайте: названия, описания, цены, фото и условия.</li>
-              <li>Информация о способах получения заказа: цифровые материалы отправляем ссылкой и на e‑mail.</li>
-              <li>Пользовательское соглашение (оферта) и политика конфиденциальности.</li>
-              <li>Контакты и реквизиты компании: телефон, e‑mail, ИНН/ОГРНИП.</li>
-            </ul>
-          </section>
+          {/* Банковские реквизиты не обязательны для публикации на сайте. Если понадобится — вернём этот блок. */}
 
           <section className="about-section">
             <h2>Оплата и безопасность</h2>

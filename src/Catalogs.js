@@ -14,7 +14,7 @@ function Catalog({ title, badge, description, icon, info, video, poster, isInDev
   
   if (isInDevelopment) {
     // Выбираем видео в зависимости от секции
-    const developmentVideo = title?.includes('Welcome') ? '/video5193080489858068792.mp4' : '/compressed_Приглашение6В.mp4';
+    const developmentVideo = title?.includes('Велком') ? '/video5193080489858068792.mp4' : '/compressed_Приглашение6В.mp4';
     
     return (
       <div className="catalog-window wow-catalog development-card">
@@ -178,7 +178,7 @@ export default function Catalogs({ onShowDetails }) {
         video: '/video5193080489858068792.mp4',
         description: 'Видео-фон из ваших ФОТО',
         isVertical: false,
-        content: 'Welcome-видео создает атмосферу праздника с самого начала. Это красивый видеофон из ваших лучших фотографий, который будет транслироваться на экранах во время встречи гостей. Создает настроение и подготавливает всех к торжеству.',
+        content: 'Велком-видео создает атмосферу праздника с самого начала. Это красивый видеофон из ваших лучших фотографий, который будет транслироваться на экранах во время встречи гостей. Создает настроение и подготавливает всех к торжеству.',
         features: [
           'Видеофон из ваших лучших фотографий',
           'Красивые переходы и эффекты',
@@ -188,12 +188,12 @@ export default function Catalogs({ onShowDetails }) {
           'Готово для воспроизведения на празднике'
         ],
         price: 'от 4 000 ₽',
-        timeline: 'Создание Welcome-видео займет 2-3 дня. Мы создадим атмосферный видеофон, который идеально подойдет для встречи гостей.'
+        timeline: 'Создание велком-видео займет 2-3 дня. Мы создадим атмосферный видеофон, который идеально подойдет для встречи гостей.'
       }
     },
-    { isInDevelopment: true, title: 'Welcome-видео' },
-    { isInDevelopment: true, title: 'Welcome-видео' },
-    { isInDevelopment: true, title: 'Welcome-видео' },
+    { isInDevelopment: true, title: 'Велком-видео' },
+    { isInDevelopment: true, title: 'Велком-видео' },
+    { isInDevelopment: true, title: 'Велком-видео' },
   ];
   const inviteItems = [
     { 
@@ -225,7 +225,7 @@ export default function Catalogs({ onShowDetails }) {
     <section className="catalogs-multi" id="catalogs">
       <CatalogCarousel title="" items={presentations} onShowDetails={onShowDetails} />
       <section className="catalog-section">
-        <h2 className="catalog-main-title" style={{textAlign:'center', marginTop:40, marginBottom:8}}>Welcome-видео</h2>
+        <h2 className="catalog-main-title" style={{textAlign:'center', marginTop:40, marginBottom:8}}>Велком-видео</h2>
         <div className="catalog-mini-desc" style={{textAlign:'center', marginBottom:24}}>Видео-фон из ваших ФОТО<br/>Покажите свои лучшие моменты</div>
         <Carousel items={welcomeItems} onShowDetails={onShowDetails} />
       </section>
