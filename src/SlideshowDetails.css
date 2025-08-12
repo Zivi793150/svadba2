@@ -67,7 +67,7 @@ body.modal-open {
 .page-content {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 1000px 40px 60px 40px;
+  padding: 100px 40px 60px 40px;
 }
 
 /* Видео по центру */
@@ -113,18 +113,18 @@ body.modal-open {
 
 /* Уменьшаем отступ сверху только для вертикальных видео (видео-приглашения) */
 .page-content:has(.vertical-video) {
-  padding-top: 600px !important;
+  padding-top: 100px !important;
 }
 
 @media (max-width: 768px) {
   .page-content:has(.vertical-video) {
-    padding-top: 700px !important;
+    padding-top: 100px !important;
   }
 }
 
 @media (max-width: 480px) {
   .page-content:has(.vertical-video) {
-    padding-top: 600px !important;
+    padding-top: 50px !important;
   }
 }
 
@@ -330,7 +330,7 @@ body.modal-open {
   }
   
   .page-content {
-    padding: 1500px 16px 30px 16px !important;
+    padding: 100px 16px 30px 16px !important;
   }
   
   .text-content h2 {

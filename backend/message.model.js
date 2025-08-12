@@ -8,6 +8,7 @@ const messageSchema = new mongoose.Schema({
   delivered: { type: Boolean, default: false },
   fileUrl: { type: String },
   fileType: { type: String },
+  fileName: { type: String },
   createdAt: { type: Date, default: Date.now },
 });
 

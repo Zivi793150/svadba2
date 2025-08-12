@@ -6,11 +6,11 @@ import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { v4 as uuidv4 } from 'uuid';
 import './ChatWidgetFix.css';
 import { FaPaperclip } from 'react-icons/fa';
-import { FaWhatsapp } from 'react-icons/fa';
+import { FaWhatsapp, FaTelegramPlane } from 'react-icons/fa';
 import { FaQuestion, FaMoneyBillWave, FaClock, FaCog, FaInfoCircle } from 'react-icons/fa';
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://svadba2.onrender.com';
-const socket = io(API_URL);
+  const socket = io(API_URL, { transports: ['websocket', 'polling'], withCredentials: false });
 
 function getSessionId() {
   let id = localStorage.getItem('chatSessionId');
@@ -142,6 +142,24 @@ export default function ChatWidget({ onClose }) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Фикс перекрытия полем ввода мобильной клавиатурой
+  useEffect(() => {
+    const onResize = () => {
+      const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      const wrap = document.querySelector('#chat-widget-root');
+      if (wrap) {
+        wrap.style.setProperty('--chat-vh', `${vh}px`);
+      }
+    };
+    onResize();
+    window.visualViewport && window.visualViewport.addEventListener('resize', onResize);
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.visualViewport && window.visualViewport.removeEventListener('resize', onResize);
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
+
   useEffect(() => {
     const handleResize = () => {
       if (!isDesktop() && !fullscreen) setFullscreen(true);
@@ -177,9 +195,11 @@ export default function ChatWidget({ onClose }) {
         setError(data.error || 'Ошибка отправки');
         // Удаляем временное сообщение при ошибке
         setMessages((prev) => prev.filter((msg) => msg._id !== tempId));
-              } else {
-          setText('');
-        }
+      } else {
+        const saved = await res.json();
+        setMessages((prev) => prev.map(m => m._id === tempId ? saved : m));
+        setText('');
+      }
     } catch (err) {
       setError('Ошибка сети');
       setMessages((prev) => prev.filter((msg) => msg._id !== tempId));
@@ -204,10 +224,40 @@ export default function ChatWidget({ onClose }) {
     formData.append('chatId', chatId);
     formData.append('sender', 'user');
     formData.append('text', '');
-    await fetch(`${API_URL}/api/messages/file`, {
+    // Оптимистичный превью для изображений
+    if (file.type && file.type.startsWith('image/')) {
+      const tempId = 'pending-file-' + uuidv4();
+      const localUrl = URL.createObjectURL(file);
+      const optimisticMsg = {
+        _id: tempId,
+        chatId,
+        sender: 'user',
+        text: '',
+        fileUrl: localUrl,
+        fileType: file.type,
+        fileName: file.name,
+        createdAt: new Date().toISOString(),
+        pending: true
+      };
+      setMessages(prev => [...prev, optimisticMsg]);
+    }
+    const res = await fetch(`${API_URL}/api/messages/file`, {
       method: 'POST',
       body: formData
     });
+    if (res.ok) {
+      const saved = await res.json();
+      setMessages(prev => {
+        // Заменим временное превью по имени файла, если есть совпадение
+        const idx = prev.findIndex(m => m.pending && m.fileName === file.name);
+        if (idx !== -1) {
+          const copy = [...prev];
+          copy[idx] = saved;
+          return copy;
+        }
+        return [...prev, saved];
+      });
+    }
     fileInputRef.current.value = '';
   };
 
@@ -223,6 +273,19 @@ export default function ChatWidget({ onClose }) {
       const whatsappWebUrl = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
       window.open(whatsappWebUrl, '_blank');
     }
+  };
+
+  const handleTelegramRedirect = () => {
+    const phone = '79004511777';
+    const isMobileUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobileUa) {
+      // Прямо в приложение TG по номеру
+      window.location.href = `tg://resolve?phone=${phone}`;
+      return;
+    }
+    // ПК — web-версия TG по номеру
+    const tgaddr = encodeURIComponent(`tg://resolve?phone=${phone}`);
+    window.open(`https://web.telegram.org/k/#?tgaddr=${tgaddr}`, '_blank');
   };
 
   const isMobile = window.innerWidth <= 700;
@@ -345,7 +408,7 @@ export default function ChatWidget({ onClose }) {
 
 
   return (
-    <div style={fullscreen || isMobile ? styles.overlayFull : styles.overlay}>
+    <div id="chat-widget-root" style={fullscreen || isMobile ? styles.overlayFull : styles.overlay}>
       <div style={fullscreen || isMobile ? styles.chatBoxFull : styles.chatBox}>
         <div style={styles.header}>
           <div style={styles.headerLeft}>
@@ -453,6 +516,15 @@ export default function ChatWidget({ onClose }) {
                     </a>
                   )
                 ) : null}
+                {msg.fileUrl && msg.fileType && !msg.fileType.startsWith('image/') && !msg.fileType.startsWith('video/') && (
+                  <a href={msg.fileUrl}
+                     download={msg.fileName || undefined}
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     style={{color:'#7CA7CE',wordBreak:'break-all',display:'block',marginBottom:6}}>
+                    📎 Скачать {msg.fileName || 'файл'}
+                  </a>
+                )}
                 <span>{msg.text}</span>
                 <div style={styles.msgMeta}>
                   <span style={styles.msgTime}>{formatTime(msg.createdAt)}</span>
@@ -489,7 +561,7 @@ export default function ChatWidget({ onClose }) {
           ))}
           <div ref={messagesEndRef} />
           
-          {/* Кнопка WhatsApp */}
+          {/* Переходы в мессенджеры */}
           <div style={styles.whatsappContainer}>
             <button 
               onClick={handleWhatsAppRedirect}
@@ -500,13 +572,22 @@ export default function ChatWidget({ onClose }) {
               <FaWhatsapp size={isMobile ? 24 : 20} />
               <span style={styles.whatsappText}>Хотите перейти в WhatsApp?</span>
             </button>
+            <button 
+              onClick={handleTelegramRedirect}
+              style={{...styles.whatsappBtn, background: 'linear-gradient(135deg, #7CA7CE 0%, #5B8FB9 100%)', boxShadow: '0 4px 16px #7CA7CE33', marginLeft: 12}}
+              className="telegram-btn"
+              title="Перейти в Telegram для заказа"
+            >
+              <FaTelegramPlane size={isMobile ? 24 : 20} />
+              <span style={styles.whatsappText}>Или в Telegram</span>
+            </button>
           </div>
         </div>
         <form onSubmit={sendMessage} style={styles.inputForm} autoComplete="off">
           <button type="button" onClick={() => fileInputRef.current.click()} style={{...styles.sendBtn, marginRight: 8, background: 'linear-gradient(135deg, #BFD7ED 0%, #7CA7CE 100%)'}} title="Прикрепить файл">
             <FaPaperclip size={isMobile ? 24 : 18} />
           </button>
-          <input type="file" ref={fileInputRef} style={{display:'none'}} onChange={handleFileChange} />
+          <input type="file" ref={fileInputRef} style={{display:'none'}} onChange={handleFileChange} accept="image/*,video/*,.png,.jpg,.jpeg,.gif,.mp4,.mov,.avi,.pdf,.doc,.docx" />
           <input
             ref={inputRef}
             className="ChatWidget-input"
@@ -588,11 +669,7 @@ const styles = {
     position: 'fixed', left: 0, top: 0, right: 0, bottom: 0, zIndex: 5000,
     display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,19,0.92)',
     width: '100vw', height: '100vh',
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    height: 'calc(var(--chat-vh, 100vh))',
   },
   chatBox: {
     width: 370, background: '#23243a', borderRadius: 18, boxShadow: '0 8px 32px rgba(0,0,0,0.25)',

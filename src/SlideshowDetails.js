@@ -101,18 +101,18 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData })
               )}
             </ul>
           </div>
-          
+
           {/* Кнопки действий */}
           <div className="action-buttons">
             <button className="btn question-btn" onClick={handleTelegramClick}>
               <FaTelegramPlane size={18} />
-              <span>Задать вопрос</span>
-            </button>
+            <span>Задать вопрос</span>
+          </button>
             <button className="btn order-btn" onClick={handleWhatsAppClick}>
-              <FaWhatsapp size={18} />
+            <FaWhatsapp size={18} />
               <span>Задать вопрос</span>
-            </button>
-          </div>
+          </button>
+        </div>
         </main>
       </div>
     </div>

@@ -107,8 +107,11 @@ app.post('/api/messages/file', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'Файл не загружен' });
     }
     // Загружаем файл в Cloudinary из памяти
+    const originalName = file.originalname || 'file';
+    const publicIdBase = `${chatId}_${Date.now()}`;
+
     const stream = cloudinary.uploader.upload_stream(
-      { folder: 'svadba_chat', resource_type: 'auto' },
+      { folder: 'svadba_chat', resource_type: 'auto', public_id: publicIdBase, use_filename: true, unique_filename: true, filename_override: originalName },
       async (error, result) => {
         if (error) {
           console.error('Ошибка загрузки файла в Cloudinary:', error);
@@ -116,7 +119,8 @@ app.post('/api/messages/file', upload.single('file'), async (req, res) => {
         }
         const fileUrl = result.secure_url;
         const fileType = result.resource_type;
-        const message = new Message({ chatId, sender, text, fileUrl, fileType, delivered: true });
+        const fileName = originalName;
+        const message = new Message({ chatId, sender, text, fileUrl, fileType, fileName, delivered: true });
         await message.save();
         io.to(chatId).emit('message', message);
         res.status(201).json(message);
