@@ -360,22 +360,7 @@
   min-height: 40px !important;
   max-height: 70px !important;
 }
-.catalogs-multi > .catalog-carousel:first-child .catalog-video-preview.wow-preview {
-  height: 220px;
-  min-height: 180px;
-  max-height: 260px;
-  border-radius: 14px;
-  margin-bottom: 12px;
-}
-@media (max-width: 700px) {
-  .catalogs-multi > .catalog-carousel:first-child .catalog-video-preview.wow-preview {
-    height: 110px;
-    min-height: 90px;
-    max-height: 120px;
-    border-radius: 14px;
-    margin-bottom: 8px;
-  }
-}
+/* Дубликаты размеров wow-preview удалены. Актуальные размеры заданы выше. */
 
 /* === Кнопка заказа === */
 .catalog-order-btn {

@@ -63,32 +63,7 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
   transition: background 0.22s, color 0.22s, box-shadow 0.22s, border 0.22s, transform 0.18s;
 }
 
-/* Принудительное полноэкранное отображение чата */
-.chat-widget-overlay {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  z-index: 10000 !important;
-}
-
-/* Принудительное центрирование окна подробностей */
-.slideshow-details-overlay {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  z-index: 10000 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
+/* Перемещено в профильные файлы стилей компонентов для исключения дублирования */
 
 /* Улучшенная поддержка для мобильных устройств */
 @media (max-width: 700px) {
@@ -129,10 +104,8 @@ button, .hero-btn, .catalog-select, .catalog-duration, .contact-form button, .up
   box-shadow: 0 12px 40px rgba(191,215,237,0.15);
 }
 
-/* Плавные переходы для всех элементов */
-* {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* Удалён глобальный transition для всех элементов во имя производительности.
+   Переходы заданы точечно для интерактивных компонентов (кнопки, карточки и т.д.) */
 
 /* Улучшенная доступность */
 button:focus,

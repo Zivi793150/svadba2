@@ -100,11 +100,6 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData })
                 </>
               )}
             </ul>
-            
-            <h3>Стоимость: {videoData?.price || 'от 5 000 ₽'}</h3>
-            <p>
-              {videoData?.timeline || 'Создание слайд-шоу займет 2-3 дня после получения ваших фотографий. Мы обязательно учтем все ваши пожелания и внесем правки при необходимости.'}
-            </p>
           </div>
           
           {/* Кнопки действий */}
@@ -115,7 +110,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData })
             </button>
             <button className="btn order-btn" onClick={handleWhatsAppClick}>
               <FaWhatsapp size={18} />
-              <span>Заказать</span>
+              <span>Задать вопрос</span>
             </button>
           </div>
         </main>

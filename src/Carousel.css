@@ -4,6 +4,8 @@
   overflow: hidden;
   position: relative;
   padding: 0 20px;
+  content-visibility: auto;
+  contain: layout style paint;
 }
 
 .carousel-list, .catalog-carousel-list {
@@ -22,6 +24,7 @@
   -ms-overflow-style: none !important;
   scroll-snap-type: x mandatory !important;
   scroll-padding: 0 40px !important;
+  contain: layout paint;
 }
 
 @media (max-width: 900px) {
@@ -135,24 +138,7 @@
     padding-bottom: 32px !important;
   }
 }
-@media (max-width: 700px) {
-  .carousel-card {
-    width: 90vw !important;
-    min-width: 90vw !important;
-    max-width: 98vw !important;
-    margin: 0 auto 12px auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    padding-top: 28px !important;
-    padding-bottom: 28px !important;
-    height: auto !important;
-    min-height: unset !important;
-    max-height: unset !important;
-    padding-bottom: 20px !important;
-  }
-}
+/* Дубликат мобильного блока для .carousel-card удалён. Актуальный блок уже задан выше. */
 .carousel-card:hover {
   box-shadow: 0 16px 48px 0 var(--shadow-color), 0 2px 8px var(--shadow-color) !important;
   border: none !important;

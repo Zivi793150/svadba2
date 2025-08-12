@@ -67,7 +67,7 @@ body.modal-open {
 .page-content {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 720px 40px 60px 40px;
+  padding: 1000px 40px 60px 40px;
 }
 
 /* Видео по центру */
@@ -75,6 +75,8 @@ body.modal-open {
   text-align: center;
   margin-bottom: 60px;
   position: relative;
+  content-visibility: auto;
+  contain: layout style paint;
 }
 
 /* Уменьшаем отступ между видео и текстом на мобильных */
@@ -97,6 +99,7 @@ body.modal-open {
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   background: #000;
+  will-change: transform;
 }
 
 /* Стили для вертикальных видео */
@@ -106,6 +109,23 @@ body.modal-open {
   width: auto;
   height: auto;
   object-fit: contain;
+}
+
+/* Уменьшаем отступ сверху только для вертикальных видео (видео-приглашения) */
+.page-content:has(.vertical-video) {
+  padding-top: 600px !important;
+}
+
+@media (max-width: 768px) {
+  .page-content:has(.vertical-video) {
+    padding-top: 700px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-content:has(.vertical-video) {
+    padding-top: 600px !important;
+  }
 }
 
 /* Кастомные контролы для видео */
@@ -246,7 +266,7 @@ body.modal-open {
   }
   
   .page-content {
-    padding: 820px 20px 40px 20px !important;
+    padding: 1000px 20px 40px 20px !important;
   }
   
   .main-video {
@@ -310,7 +330,7 @@ body.modal-open {
   }
   
   .page-content {
-    padding: 720px 16px 30px 16px !important;
+    padding: 1500px 16px 30px 16px !important;
   }
   
   .text-content h2 {
