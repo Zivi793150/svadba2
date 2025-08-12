@@ -108,7 +108,10 @@ app.post('/api/messages/file', upload.single('file'), async (req, res) => {
     }
     // Загружаем файл в Cloudinary из памяти
     const originalName = file.originalname || 'file';
-    const publicIdBase = `${chatId}_${Date.now()}`;
+    // Пытаемся сохранять расширение, но избегая коллизий
+    const stamp = Date.now();
+    const safeBase = originalName.replace(/[^a-zA-Z0-9._-]+/g, '_');
+    const publicIdBase = `${chatId}_${stamp}_${safeBase}`;
 
     const stream = cloudinary.uploader.upload_stream(
       { folder: 'svadba_chat', resource_type: 'auto', public_id: publicIdBase, use_filename: true, unique_filename: true, filename_override: originalName },
@@ -117,6 +120,7 @@ app.post('/api/messages/file', upload.single('file'), async (req, res) => {
           console.error('Ошибка загрузки файла в Cloudinary:', error);
           return res.status(500).json({ error: 'Ошибка загрузки файла' });
         }
+        // Принудительно меняем delivery URL для изображений на raw с сохранением имени (для корректного скачивания)
         const fileUrl = result.secure_url;
         const fileType = result.resource_type;
         const fileName = originalName;

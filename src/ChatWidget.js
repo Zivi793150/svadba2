@@ -99,12 +99,19 @@ export default function ChatWidget({ onClose }) {
     const onMsg = (msg) => {
       console.log('Получено сообщение через socket:', msg);
       setMessages((prev) => {
-        // Если есть pending сообщение с таким же текстом и sender, заменяем его на настоящее
-        const idx = prev.findIndex(m => m.pending && m.text === msg.text && m.sender === msg.sender);
+        // Если такое сообщение уже есть (по _id) — не дублируем
+        if (msg._id && prev.some(m => m._id === msg._id)) {
+          return prev;
+        }
+        // Заменяем pending по совпадению текста или имени файла
+        const idx = prev.findIndex(m => m.pending && m.sender === msg.sender && (
+          (m.text && msg.text && m.text === msg.text) ||
+          (m.fileName && msg.fileName && m.fileName === msg.fileName)
+        ));
         if (idx !== -1) {
-          const newArr = [...prev];
-          newArr[idx] = msg;
-          return newArr;
+          const copy = [...prev];
+          copy[idx] = msg;
+          return copy;
         }
         return [...prev, msg];
       });
@@ -227,7 +234,7 @@ export default function ChatWidget({ onClose }) {
     // Оптимистичный превью для изображений
     if (file.type && file.type.startsWith('image/')) {
       const tempId = 'pending-file-' + uuidv4();
-      const localUrl = URL.createObjectURL(file);
+          const localUrl = URL.createObjectURL(file);
       const optimisticMsg = {
         _id: tempId,
         chatId,
