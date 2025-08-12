@@ -66,7 +66,7 @@
 /* How It Works стили */
   .how-it-works {
     margin-top: 0px;
-    padding: 0px 0 120px 0;
+    padding: 0px 0 60px 0;
     background: var(--bg-primary);
     position: relative;
     overflow: hidden;
@@ -163,32 +163,32 @@
   transform: translateY(0) translateX(0) scale(0.98);
 }
 
+/* Лесенка: на десктопе диагональная, на планшете мягче */
 .hiw-steps-animated-active .hiw-step-animated {
   opacity: 1;
-  transform: translateY(calc(var(--hiw-idx, 0) * 60px)) translateX(calc(var(--hiw-idx, 0) * 60px)) scale(1.04);
+  transform: translateY(calc(var(--hiw-idx, 0) * var(--step-y, 50px))) translateX(calc(var(--dir, 1) * var(--hiw-idx, 0) * var(--step-x, 50px))) scale(1.04);
   transition-delay: calc(var(--hiw-idx, 0) * 0.13s);
 }
 
 .hiw-steps-animated-active .hiw-step-animated:hover {
   box-shadow: 0 16px 48px 0 var(--shadow-color), 0 2px 16px var(--shadow-color);
-  border: 2.5px solid var(--accent-primary);
   z-index: 10;
-  transform: scale(1.08) translateY(calc(var(--hiw-idx, 0) * 60px)) translateX(calc(var(--hiw-idx, 0) * 60px));
+  transform: scale(1.08) translateY(calc(var(--hiw-idx, 0) * var(--step-y-hover, 60px))) translateX(calc(var(--dir, 1) * var(--hiw-idx, 0) * var(--step-x-hover, 60px)));
 }
 
 .hiw-step-number {
-  width: 54px;
-  height: 54px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
-  background: linear-gradient(90deg, #BFD7ED 0%, #C7C6E5 100%);
+  background: radial-gradient(circle at 30% 30%, #BFD7ED 0%, #7CA7CE 40%, #2e2f4a 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.1rem;
   font-weight: 900;
-  color: #7CA7CE;
+  color: #fff;
   margin-bottom: 18px;
-  box-shadow: 0 2px 12px #BFD7ED33;
+  box-shadow: 0 6px 22px #7CA7CE44, 0 0 0 2px #BFD7EDAA inset;
   letter-spacing: 1px;
   user-select: none;
 }
@@ -254,16 +254,21 @@
   font-weight: 500;
   min-height: 36px;
   text-align: center;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 10;
+  -webkit-box-orient: vertical;
 }
 
 .creative-step {
-  background: var(--bg-secondary);
+  background: linear-gradient(120deg, var(--bg-secondary) 85%, var(--bg-primary) 100%);
   border-radius: 24px;
-  box-shadow: 0 4px 24px 0 var(--shadow-color);
-  padding: 38px 28px 28px 28px;
-  min-width: 260px;
-  max-width: 320px;
-  width: 100%;
+  box-shadow: 0 6px 28px 0 var(--shadow-color);
+  padding: 28px 22px 22px 22px;
+  min-width: 300px;
+  max-width: 300px;
+  width: 300px;
+  min-height: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -272,6 +277,25 @@
   opacity: 0;
   transform: translateY(60px) scale(0.97);
   will-change: opacity, transform;
+  position: relative;
+  overflow: visible;
+}
+
+/* Неоновая округлая обводка через псевдоэлемент */
+.creative-step::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(135deg, #5ee7ff, #a18fff);
+  -webkit-mask: 
+    linear-gradient(#000 0 0) content-box, 
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  filter: drop-shadow(0 0 8px rgba(94,231,255,0.6)) drop-shadow(0 0 12px rgba(161,143,255,0.5));
 }
 
 .creative-step-stairs {
@@ -295,14 +319,13 @@
 }
 
 .hiw-step-colored {
-  background: linear-gradient(120deg, var(--bg-secondary) 80%, var(--bg-primary) 100%);
-  border: 2.5px solid var(--accent-secondary);
-  box-shadow: 0 8px 32px 0 var(--shadow-color), 0 2px 8px var(--shadow-color);
+  background: linear-gradient(120deg, var(--bg-secondary) 85%, var(--bg-primary) 100%);
+  border-color: transparent;
+  box-shadow: 0 10px 36px 0 var(--shadow-color), 0 2px 10px var(--shadow-color);
 }
 
 .hiw-step-colored:hover {
-  box-shadow: 0 16px 48px 0 var(--shadow-color), 0 2px 16px var(--shadow-color);
-  border: 2.5px solid var(--accent-primary);
+  box-shadow: 0 18px 56px 0 var(--shadow-color), 0 4px 18px var(--shadow-color);
 }
 
 /* Conveyor стили */
@@ -622,3 +645,38 @@
     height: 38px;
   }
 } 
+
+/* Чуть компактнее тексты для длинных описаний шагов */
+.hiw-step-desc {
+  line-height: 1.4;
+}
+
+/* Крупные экраны: аккуратная двухколоночная лента с небольшим overlap */
+@media (min-width: 1101px) {
+  .hiw-steps {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: minmax(280px, auto);
+    gap: 24px 36px;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 12px;
+    align-items: start;
+  }
+  .hiw-steps-animated-active .hiw-step-animated { transform: none !important; opacity: 1 !important; }
+  .hiw-step-animated { justify-self: center; position: relative; }
+  .hiw-step-animated:hover { transform: translateY(-4px) scale(1.02) !important; z-index: 20; }
+
+  .hiw-step-animated:nth-child(1) { grid-column: 1; grid-row: 1; z-index: 10; }
+  .hiw-step-animated:nth-child(2) { grid-column: 2; grid-row: 2; margin-top: -48px; z-index: 11; }
+  .hiw-step-animated:nth-child(3) { grid-column: 1; grid-row: 3; margin-top: -48px; z-index: 12; }
+  .hiw-step-animated:nth-child(4) { grid-column: 2; grid-row: 4; margin-top: -48px; z-index: 13; }
+  .hiw-step-animated:nth-child(5) { grid-column: 1; grid-row: 5; margin-top: -48px; z-index: 14; }
+
+  /* Карточки шире для читаемости */
+  .creative-step { min-width: 320px; width: 320px; }
+  /* Вторая карточка шире, чтобы поместился длинный текст */
+  .hiw-step-animated:nth-child(2) { min-width: 360px; width: 360px; }
+  /* На десктопе показываем весь текст */
+  .hiw-step-desc { display: block; -webkit-line-clamp: unset; }
+}

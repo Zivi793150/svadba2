@@ -57,7 +57,7 @@ function Catalog({ title, badge, description, icon, info, video, poster, isInDev
       <div className="catalog-title-row">
         {isMain && (
           <>
-            <div className="catalog-title javanese-title">Презентация вашей пары<br/>— ваша ожившая история</div>
+            <div className="catalog-title javanese-title">Свадебная презентация вашей пары<br/>— ваша ожившая история</div>
             <div className="catalog-under-title" style={{
               fontSize: '1.08rem', color: '#fff', textAlign: 'center', marginBottom: 18, lineHeight: 1.3, fontWeight: 400, opacity: 0.92
             }}>
@@ -151,7 +151,7 @@ export default function Catalogs({ onShowDetails }) {
       poster: '/svadbabg.jpeg',
       isMain: true,
       videoData: {
-        title: 'Презентация вашей пары',
+        title: 'Свадебная презентация вашей пары',
         video: '/video5193080489858068792.mp4',
         description: 'Ваша ожившая история',
         isVertical: false,

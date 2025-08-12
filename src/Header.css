@@ -25,14 +25,31 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 2.2rem;
+  font-size: 2.5rem;
   font-weight: 900;
   letter-spacing: 2px;
   color: var(--accent-primary);
-  margin-right: 32px;
+  margin-right: 0;
   white-space: nowrap;
   background: none;
-  font-family: 'Javanese Text', sans-serif;
+  font-family: 'Monotype Corsiva', 'Javanese Text', cursive, sans-serif;
+}
+.logo-wrap { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; margin-right: 32px; }
+
+.dev-subtitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  line-height: 1;
+  background: linear-gradient(90deg, #ffe066, #a18fff, #5ee7ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 10px rgba(161,143,255,0.25), 0 0 6px rgba(94,231,255,0.15);
+}
+
+@media (max-width: 700px) {
+  .dev-subtitle { display: none; }
 }
 .nav {
   position: absolute;

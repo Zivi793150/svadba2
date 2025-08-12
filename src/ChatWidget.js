@@ -512,18 +512,13 @@ export default function ChatWidget({ onClose }) {
           {messages.map((msg, i) => (
             <div key={msg._id || i} style={msg.sender === 'user' ? styles.userMsgWrap : styles.adminMsgWrap}>
               <div style={msg.sender === 'user' ? styles.userMsg : msg.isAutoReply ? styles.autoReplyMsg : styles.adminMsg}>
-                {msg.fileUrl ? (
-                  msg.fileType && msg.fileType.startsWith('image/') ? (
-                    <img src={msg.fileUrl} alt="file" style={{maxWidth:180,maxHeight:180,borderRadius:12,marginBottom:6}} />
-                  ) : msg.fileType && msg.fileType.startsWith('video/') ? (
-                    <video src={msg.fileUrl} controls style={{maxWidth:220,maxHeight:180,borderRadius:12,marginBottom:6,background:'#000'}} />
-                  ) : (
-                    <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" style={{color:'#7CA7CE',wordBreak:'break-all',display:'block',marginBottom:6}}>
-                      📎 Скачать файл
-                    </a>
-                  )
-                ) : null}
-                {msg.fileUrl && msg.fileType && !msg.fileType.startsWith('image/') && !msg.fileType.startsWith('video/') && (
+                {(msg.fileUrl && msg.fileType && (msg.fileType === 'image' || msg.fileType.startsWith?.('image/'))) && (
+                  <img src={msg.fileUrl} alt={msg.fileName || 'image'} style={{maxWidth:180,maxHeight:180,borderRadius:12,marginBottom:6}} />
+                )}
+                {(msg.fileUrl && msg.fileType && (msg.fileType === 'video' || msg.fileType.startsWith?.('video/'))) && (
+                  <video src={msg.fileUrl} controls style={{maxWidth:220,maxHeight:180,borderRadius:12,marginBottom:6,background:'#000'}} />
+                )}
+                {msg.fileUrl && msg.fileType && !(msg.fileType === 'image' || msg.fileType.startsWith?.('image/')) && !(msg.fileType === 'video' || msg.fileType.startsWith?.('video/')) && (
                   <a href={msg.fileUrl}
                      download={msg.fileName || undefined}
                      target="_blank"

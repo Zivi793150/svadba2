@@ -21,18 +21,38 @@ const API_URL = 'https://svadba2.onrender.com';
 const socket = io(API_URL);
 
 // Временная реализация, если нет отдельных файлов:
-function HowItWorks() {
+  function HowItWorks() {
   const steps = [
-    { title: 'Загрузите фото и пожелания', desc: 'Отправьте нам ваши фотографии и пожелания к видео.' },
-    { title: 'Выберите стиль и музыку', desc: 'Подберите шаблон, музыку и стиль оформления.' },
-    { title: 'Получите готовое видео', desc: 'Мы создаём слайд-шоу и отправляем вам ссылку.' }
+    {
+      title: 'Оформите заказ',
+      desc: 'Выберите то, что хотите заказать. Оформите заказ, сделав предоплату через форму «Заказать».',
+    },
+    {
+      title: 'Соберите материалы',
+      desc: 'Подберите фотографии, которые хотите использовать, и составьте описания: ваши биографии, информацию о родителях, подписи к фото, историю знакомства — всё, что хотите рассказать гостям. Заполните высланную вам форму, внимательно проверьте и согласуйте текст с близкими. Подтвердите, что это окончательный вариант данных, и мы приступим к работе.',
+    },
+    {
+      title: 'Параметры экрана',
+      desc: 'Определитесь с экраном для демонстрации и сообщите нам его технические данные: пропорции и размер.',
+    },
+    {
+      title: 'Черновик и правки',
+      desc: 'Мы пришлём подготовленный вариант презентации на согласование. Если есть правки по тексту или по фотографиям (при варианте без «оживления»), укажите их в форме и отправьте на доработку.',
+    },
+    {
+      title: 'Согласование и готовность',
+      desc: 'После внесения правок присылаем финальное видео на согласование. После подтверждения — доплатите 70% суммы заказа, и мы вышлем вам свадебную презентацию через Яндекс.Диск.',
+    },
   ];
   return (
     <section className="how-it-works creative-hiw">
-      <h2>Как это работает?</h2>
+      <h2>Как это работает</h2>
       <div className="hiw-steps hiw-steps-animated hiw-steps-animated-active">
-        {steps.map((step, i) => (
-          <div className="hiw-step creative-step hiw-step-colored hiw-step-animated hiw-step-animated-active" key={i} style={{'--hiw-idx': i}}>
+        {steps.map((step, i) => {
+          // Первые три идут вправо, 4 и 5 — влево
+          const dir = i <= 2 ? 1 : -1;
+          return (
+          <div className="hiw-step creative-step hiw-step-colored hiw-step-animated hiw-step-animated-active" key={i} style={{'--hiw-idx': i, '--dir': dir}}>
             <div className="hiw-step-number creative-step-number hiw-step-gradient">
               <span>{i + 1}</span>
               <span className="hiw-step-bg-circle" />
@@ -40,7 +60,7 @@ function HowItWorks() {
             <div className="hiw-step-title">{step.title}</div>
             <div className="hiw-step-desc">{step.desc}</div>
           </div>
-        ))}
+        )})}
       </div>
     </section>
   );
