@@ -254,7 +254,7 @@ bot.on('callback_query', async (query) => {
     const keyboard = {
       inline_keyboard: [
         [
-          { text: '📲 Открыть Telegram', url: 'https://t.me/79004511777' },
+          { text: '📲 Открыть Telegram', url: 'https://t.me/feiero' },
           { text: '📲 Открыть WhatsApp', url: 'https://wa.me/79004511777' }
         ],
         [{ text: '⬅️ Назад', callback_data: backCb }]
