@@ -233,6 +233,8 @@ bot.on('callback_query', async (query) => {
   const chatId = query.message.chat.id;
   const data = query.data;
   const messageId = query.message.message_id;
+  const state = userStates.get(chatId) || {};
+  const currentCategory = state.category;
   
   // Отвечаем на callback
   await bot.answerCallbackQuery(query.id);
@@ -247,31 +249,39 @@ bot.on('callback_query', async (query) => {
     const key = parts[2];
     await showQuestion(chatId, messageId, category, key);
   } else if (data === 'consultation') {
-    const text = `💬 Для связи с менеджером:\n\nНапишите нам в мессенджер и мы ответим максимально быстро.`;
+    const text = `💬 Для связи с менеджером:\n\nНапишите нам в мессенджер — ответим максимально быстро.`;
+    const backCb = currentCategory ? `back_to_category_${currentCategory}` : 'back_to_main';
     const keyboard = {
       inline_keyboard: [
         [
           { text: '📲 Открыть Telegram', url: 'https://t.me/feyero_bot?start=consultation' },
           { text: '📲 Открыть WhatsApp', url: 'https://wa.me/79004511777' }
         ],
-        [{ text: '⬅️ Назад', callback_data: 'back_to_main' }]
+        [{ text: '⬅️ Назад', callback_data: backCb }]
       ]
     };
-    await bot.editMessageText(text, { chat_id: chatId, message_id: messageId, reply_markup: keyboard });
+    try {
+      await bot.editMessageText(text, { chat_id: chatId, message_id: messageId, reply_markup: keyboard });
+    } catch (e) {
+      await bot.sendMessage(chatId, text, { reply_markup: keyboard });
+    }
   } else if (data === 'order') {
-    const text = `🛒 Для оформления заказа:\n\n1️⃣ Выберите мессенджер и напишите нам.\n2️⃣ Укажите: тип услуги, объём материалов и сроки.`;
+    const text = `🛒 Для оформления заказа перейдите на сайт и оставьте заявку:`;
+    const backCb = currentCategory ? `back_to_category_${currentCategory}` : 'back_to_main';
     const keyboard = {
       inline_keyboard: [
-        [
-          { text: '📲 Написать в Telegram', url: 'https://t.me/feyero_bot?start=order' },
-          { text: '📲 Написать в WhatsApp', url: 'https://wa.me/79004511777' }
-        ],
-        [{ text: '⬅️ Назад', callback_data: 'back_to_main' }]
+        [ { text: '🌐 Оформить заказ на сайте', url: 'https://xn--e1aalvju.xn--p1ai' } ],
+        [{ text: '⬅️ Назад', callback_data: backCb }]
       ]
     };
-    await bot.editMessageText(text, { chat_id: chatId, message_id: messageId, reply_markup: keyboard });
+    try {
+      await bot.editMessageText(text, { chat_id: chatId, message_id: messageId, reply_markup: keyboard });
+    } catch (e) {
+      await bot.sendMessage(chatId, text, { reply_markup: keyboard });
+    }
   } else if (data.startsWith('back_to_category_')) {
     const category = data.replace('back_to_category_', '');
+    userStates.set(chatId, { state: 'category', category });
     await showCategoryMenu(chatId, messageId, category);
   } else if (data === 'back_to_main') {
     userStates.set(chatId, { state: 'main' });
