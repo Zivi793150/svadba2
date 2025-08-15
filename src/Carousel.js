@@ -100,8 +100,21 @@ const Carousel = ({ items = [], onShowDetails }) => {
           }
 
           // Обычная карточка
+          const isVertical = item?.videoData?.isVertical;
+          const useRibbon = !!(isVertical || item?.title === '' || item?.videoData?.title?.includes('Свадебная презентация'));
           return (
             <div className="carousel-card" key={idx} style={{ scrollSnapAlign: 'start' }}>
+              {useRibbon ? (
+                <div className="promo-ribbon" title="Цены снижены на период разработки сайта">
+                  <span className="r-def">АКЦИЯ</span>
+                  <span className="r-hov">ЗАПУСК САЙТА</span>
+                </div>
+              ) : (
+                <div className="promo-badge promo-bottom" title="Цены снижены на период разработки сайта">
+                  <span className="b-def">Акция</span>
+                  <span className="b-hov">Запуск сайта</span>
+                </div>
+              )}
               <div className="card-video">
                 {item.video ? (
                   <video

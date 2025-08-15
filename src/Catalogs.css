@@ -25,6 +25,74 @@
   position: relative;
   animation: fadeInCatalog 1.1s cubic-bezier(.23,1.01,.32,1);
 }
+
+/* Бейдж акции запуска */
+.promo-badge {
+  position: absolute !important;
+  top: 6px !important;
+  left: 6px !important;
+  z-index: 20 !important;
+  background: linear-gradient(135deg, #ff8a00, #e52e71) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  font-size: 0.7rem !important;
+  padding: 4px 8px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
+  letter-spacing: 0.2px !important;
+  /* даём возможность наведения, но не мешаем кликам по карточке */
+  pointer-events: auto !important;
+  display: grid !important;
+  place-items: center !important;
+  height: auto !important;
+  width: auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.promo-badge .b-def,
+.promo-badge .b-hov {
+  grid-area: 1 / 1;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.promo-badge .b-def { font-weight: 900; opacity: 1; transform: translateY(0); }
+.promo-badge .b-hov { font-weight: 800; opacity: 0; transform: translateY(4px); }
+/* hover по самой плашке */
+.promo-badge:hover .b-def { opacity: 0; transform: translateY(-4px); }
+.promo-badge:hover .b-hov { opacity: 1; transform: translateY(0); }
+/* и hover по карточке, если плашка пропускает клики */
+.catalog-window:hover .promo-badge .b-def,
+.carousel-card:hover .promo-badge .b-def { opacity: 0; transform: translateY(-4px); }
+.catalog-window:hover .promo-badge .b-hov,
+.carousel-card:hover .promo-badge .b-hov { opacity: 1; transform: translateY(0); }
+/* автосмена текста через класс is-alt */
+.promo-badge.is-alt .b-def { opacity: 0; transform: translateY(-4px); }
+.promo-badge.is-alt .b-hov { opacity: 1; transform: translateY(0); }
+
+/* Вариант размещения внизу, чтобы не перекрывать заголовок/текст */
+.promo-badge.promo-bottom {
+  top: auto !important;
+  left: 8px !important;
+  bottom: 8px !important;
+}
+
+/* Гарантируем корректное позиционирование в карточках и превью */
+.carousel-card,
+.catalog-window,
+.card-video,
+.catalog-video-preview {
+  position: relative !important;
+}
+
+/* Вертикальные карточки: бейдж остаётся в углу контейнера */
+.catalog-section:last-child .carousel-card .promo-badge,
+.catalog-section:last-child .catalog-window .promo-badge {
+  top: 6px !important;
+  left: 6px !important;
+  bottom: auto !important;
+}
 .catalog-window:hover, .wow-catalog:hover {
   box-shadow: 0 12px 48px 0 #BFD7ED, 0 2px 16px 0 #C7C6E5;
   transform: translateY(-6px) scale(1.035);
@@ -285,6 +353,58 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Декоративная ленточка для узких (вертикальных) карточек */
+.promo-ribbon {
+  position: absolute !important;
+  top: 8px !important;
+  left: -8px !important;
+  width: 0;
+  height: 0;
+}
+.promo-ribbon .r-def,
+.promo-ribbon .r-hov {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: linear-gradient(135deg, #ff8a00, #e52e71);
+  color: #fff;
+  font-weight: 900;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 6px 12px 6px 24px;
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  z-index: 3;
+}
+.promo-ribbon .r-def,
+.promo-ribbon .r-hov { transition: opacity 200ms ease, transform 200ms ease; }
+.promo-ribbon .r-def { opacity: 1; transform: translateY(0); }
+.promo-ribbon .r-hov { opacity: 0; transform: translateY(4px); }
+.promo-ribbon:hover .r-def { opacity: 0; transform: translateY(-4px); }
+.promo-ribbon:hover .r-hov { opacity: 1; transform: translateY(0); }
+/* на hover карточки тоже переключаем, чтобы работать при pointer-events:none */
+.catalog-window:hover .promo-ribbon .r-def,
+.carousel-card:hover .promo-ribbon .r-def { opacity: 0; transform: translateY(-4px); }
+.catalog-window:hover .promo-ribbon .r-hov,
+.carousel-card:hover .promo-ribbon .r-hov { opacity: 1; transform: translateY(0); }
+/* автосмена текста через класс is-alt */
+.promo-ribbon.is-alt .r-def { opacity: 0; transform: translateY(-4px); }
+.promo-ribbon.is-alt .r-hov { opacity: 1; transform: translateY(0); }
+.promo-ribbon:after {
+  content: '';
+  position: absolute;
+  top: 22px;
+  left: 0;
+  border-left: 8px solid #b3475f;
+  border-top: 8px solid transparent;
+  z-index: 2;
+}
+
+/* Чуть ниже плашка акции для "Свадебной презентации" (wow-catalog) */
+.catalogs-multi > .catalog-carousel:first-child .promo-ribbon {
+  top: 80px !important;
 }
 
 /* === Специальные стили для видео в карточках "Видео-приглашения" === */
@@ -656,6 +776,9 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  /* Стабильная высота превью для крупных карточек */
+  aspect-ratio: 16/9;
+  min-height: 200px;
 }
 
 .development-preview video {

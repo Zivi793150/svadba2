@@ -369,6 +369,9 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  /* Стабильная высота превью, чтобы карточки не «скукоживались» */
+  aspect-ratio: 16/9;
+  min-height: 160px;
 }
 
 .carousel-card .development-preview video {

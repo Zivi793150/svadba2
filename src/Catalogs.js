@@ -1,10 +1,28 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { MdOutlinePhotoCamera, MdOutlineConstruction, MdOutlineAccessTime } from 'react-icons/md';
 import Carousel from "./Carousel";
 import "./Catalogs.css";
 
 function Catalog({ title, badge, description, icon, info, video, poster, isInDevelopment, onShowDetails, videoData }) {
   const isMain = description === 'Презентация вашей пары-ваша ожившая история';
+  const [isAltPromo, setIsAltPromo] = useState(false);
+
+  useEffect(() => {
+    const isMobileDevice = (() => {
+      if (typeof window !== 'undefined' && window.matchMedia) {
+        try {
+          if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return true;
+        } catch (_) {}
+      }
+      if (typeof navigator !== 'undefined') {
+        return /Mobi|Android|iPhone|iPad|iPod|Windows Phone|Mobile/i.test(navigator.userAgent);
+      }
+      return false;
+    })();
+    const intervalMs = isMobileDevice ? 15000 : 30000;
+    const id = setInterval(() => setIsAltPromo(prev => !prev), intervalMs);
+    return () => clearInterval(id);
+  }, []);
   const handleTimeUpdate = (e) => {
     if (e.target.currentTime > 30) {
       e.target.currentTime = 0;
@@ -52,8 +70,21 @@ function Catalog({ title, badge, description, icon, info, video, poster, isInDev
     );
   }
 
+  const isVertical = videoData?.isVertical;
+  const useRibbon = isVertical || isMain;
   return (
     <div className="catalog-window wow-catalog">
+      {useRibbon ? (
+        <div className={`promo-ribbon${isAltPromo ? ' is-alt' : ''}`} title="Цены снижены на период разработки сайта">
+          <span className="r-def">АКЦИЯ</span>
+          <span className="r-hov">СНИЖЕННЫЕ ЦЕНЫ</span>
+        </div>
+      ) : (
+        <div className={`promo-badge promo-bottom${isAltPromo ? ' is-alt' : ''}`} title="Цены снижены на период разработки сайта">
+          <span className="b-def">Акция</span>
+          <span className="b-hov">Сниженные цены</span>
+        </div>
+      )}
       <div className="catalog-title-row">
         {isMain && (
           <>
@@ -175,7 +206,32 @@ export default function Catalogs({ onShowDetails }) {
 
 - Пока музыкальное оформление презентации тоже только в одном варианте. В дальнейшем будут добавлены и другие аудио-подложки.
 
-После завершения мы присылаем вам видео на согласование. Допускается 1 правка по тексту.`,
+После завершения мы присылаем вам видео на согласование. Допускается 1 правка по тексту.
+
+Стоимость и сроки:
+
+Презентация без оживления фото (фото без движения) и описанием к каждому фото на 300 символов (как
+в шаблоне):
+
+4 разворота (16 фото, 6:23 мин) – 10000р / срок 3-4 дня
+5 разворотов (20 фото, 8 мин) – 10500 / срок 3-4  дня 
+6 разворотов (24 фото, 10 мин) – 11000 / срок 4-5 дней 
+7 разворотов (28 фото, 12 мин) – 11500 / срок 4-5 дней
+
+Цены с оживлением фото и текстом в описании к каждому фото 300 символов (как шаблон):
+4 разворота (16 фото,
+6:23 мин) – 12000р / срок 4-5 дней
+5 разворотов (20 фото, 8 мин) – 1300 / срок 4-5  дней 
+6 разворотов (24 фото, 10 мин) – 13500 / срок 5-6 дней 
+7 разворотов (28 фото, 12 мин) – 14000 / срок 5-6 дней
+
+За каждые 300+ символов к тексту для фото - 200р (рекомендация:
+оставлять текст на 300 символов под каждое фото, иначе будет смотреться занудно. Если хочется больше описания — добавляйте лучше фотографии и развороты,
+будет смотреться намного лучше)
+
+Сроки могут варьироваться в зависимости от загруженности и сложности работы. Увеличиваться  по
+согласованию с заказчиком. 
+Все остальные вопросы вы можете задать в чате.`,
         features: [
           '16 фотографий и 4 разворота в базовом варианте',
           'Возможность добавить еще 4 фото и дополнительный разворот',
@@ -191,6 +247,8 @@ export default function Catalogs({ onShowDetails }) {
   ];
   const welcomeItems = [
     { 
+      title: 'Велком-видео',
+      isInDevelopment: true,
       video: '/video5193080489858068792.mp4', 
       poster: '/svadbabg.jpeg',
       videoData: {
@@ -222,7 +280,21 @@ export default function Catalogs({ onShowDetails }) {
         video: '/compressed_Приглашение6В.mp4',
         description: 'Ваш праздник запомнят ещё с приглашения!',
         isVertical: true,
-        content: 'Пригласите своих гостей красиво! Персональные видео-приглашения произведут неизгладимое впечатление на ваших близких. Мы создаем уникальные приглашения с вашими фотографиями, которые точно не останутся незамеченными.',
+        content: `Пригласите своих гостей феерично и создайте WOW-эффект еще в самом начале!
+
+Наши персональные видео-приглашения удивят и произведут WOW– эффект на ваших гостей. Они запомнят вашу свадьбу еще с приглашения и точно
+захотят на нее прийти.
+Возможно сделать просто приглашение, одинаковое для всех, без обращения к гостю. без имени вначале.  А можно сделать именное приглашение для каждого, как в шаблоне. 
+гостя отдельно. 
+Стоимость и сроки: 
+Неименное приглашение: 
+замена информации о мероприятии без имени – 3000 р./ срок – 1 день
+ Именное приглашение:  
+С обращением и указанием каждого имени вначале: 
+до 25 имен – 4000 р, 
+до 50 имен – 5000 р, 
+ 51-100 имен – 7000 р 
+Срок исполнения 3-5 дней, возможно быстрее по загруженности.`,
         features: [
           'Персональные видео-приглашения для каждого гостя',
           'Красивая анимация и переходы',

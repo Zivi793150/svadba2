@@ -67,7 +67,7 @@ body.modal-open {
 .page-content {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 100px 40px 60px 40px;
+  padding: 130px 40px 60px 40px;
 }
 
 /* Видео по центру */
@@ -193,6 +193,7 @@ body.modal-open {
   font-size: 1.1rem;
   margin-bottom: 20px;
   color: #d6d6f7;
+  white-space: pre-line;
 }
 
 .text-content ul {
@@ -266,7 +267,7 @@ body.modal-open {
   }
   
   .page-content {
-    padding: 1000px 20px 40px 20px !important;
+    padding: 1030px 20px 40px 20px !important;
   }
   
   .main-video {

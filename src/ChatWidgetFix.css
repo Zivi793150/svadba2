@@ -17,6 +17,19 @@
   -webkit-text-fill-color: #999 !important;
 }
 
+/* Избегаем «пропасти» при открытии клавиатуры на мобильных */
+#chat-widget-root input,
+#chat-widget-root textarea,
+#chat-widget-root button {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Не даём странице под чатом прокручиваться при открытой клавиатуре */
+body:has(#chat-widget-root) {
+  overflow: hidden;
+}
+
 /* Дополнительные стили для мобильных устройств */
 @media (max-width: 700px) {
 

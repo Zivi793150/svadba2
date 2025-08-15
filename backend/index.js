@@ -61,6 +61,10 @@ db.once('open', () => {
 
 const Message = require('./message.model');
 
+// Подключение ботов
+const telegramBot = require('./telegram-bot');
+const whatsappBot = require('./whatsapp-bot');
+
 const lastMessageTimestamps = {};
 
 // Получить все сообщения по chatId с поддержкой пагинации
@@ -177,6 +181,10 @@ app.post('/api/messages/viewed/:chatId', async (req, res) => {
 app.get('/', (req, res) => {
   res.send('Backend работает!');
 });
+
+// Webhook для WhatsApp бота
+app.post('/webhook/whatsapp', whatsappBot.handleWebhook);
+app.get('/webhook/whatsapp', whatsappBot.verifyWebhook);
 
 // Раздача файлов из папки uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
