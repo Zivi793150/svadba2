@@ -3,6 +3,15 @@ require('dotenv').config();
 
 // Токен бота из переменных окружения
 const token = process.env.TELEGRAM_BOT_TOKEN;
+
+// Проверяем наличие токена
+if (!token) {
+  console.error('❌ TELEGRAM_BOT_TOKEN не найден в переменных окружения!');
+  console.error('Добавьте TELEGRAM_BOT_TOKEN в .env файл или переменные окружения Render');
+  process.exit(1);
+}
+
+console.log('✅ TELEGRAM_BOT_TOKEN найден');
 const bot = new TelegramBot(token, { polling: true }); // Включаем polling обратно
 
 // Состояния пользователей
@@ -101,6 +110,8 @@ const mainMenu = {
 
 // Обработка команды /start
 bot.onText(/\/start/, (msg) => {
+  console.log('🎯 Получена команда /start от:', msg.from.first_name, 'ID:', msg.chat.id);
+  
   const chatId = msg.chat.id;
   const userName = msg.from.first_name;
   
@@ -114,11 +125,15 @@ bot.onText(/\/start/, (msg) => {
 
 Выберите интересующий вас вопрос:`;
   
-  bot.sendMessage(chatId, welcomeMessage, mainMenu);
+  bot.sendMessage(chatId, welcomeMessage, mainMenu)
+    .then(() => console.log('✅ Приветственное сообщение отправлено'))
+    .catch(err => console.error('❌ Ошибка отправки приветственного сообщения:', err));
 });
 
 // Обработка callback запросов
 bot.on('callback_query', async (query) => {
+  console.log('🔘 Получен callback от:', query.from.first_name, 'Данные:', query.data);
+  
   const chatId = query.message.chat.id;
   const data = query.data;
   
@@ -235,6 +250,8 @@ bot.on('callback_query', async (query) => {
 
 // Обработка обычных сообщений
 bot.on('message', (msg) => {
+  console.log('📨 Получено сообщение от:', msg.from.first_name, 'Текст:', msg.text);
+  
   const chatId = msg.chat.id;
   
   // Если это не команда /start, предлагаем вернуться к меню
@@ -249,22 +266,28 @@ bot.on('message', (msg) => {
       }
     };
     
-    bot.sendMessage(chatId, helpMessage, helpKeyboard);
+    bot.sendMessage(chatId, helpMessage, helpKeyboard)
+      .then(() => console.log('✅ Помощь отправлена'))
+      .catch(err => console.error('❌ Ошибка отправки помощи:', err));
   }
 });
 
-// Обработка ошибок
+
+
+console.log('Telegram bot started...');
+
+// Проверяем, что polling запустился
 bot.on('polling_error', (error) => {
-  console.error('Polling error:', error);
+  console.error('❌ Polling error:', error);
   
   // Если ошибка 409 (конфликт), пробуем перезапустить polling через 5 секунд
   if (error.code === 'ETELEGRAM' && error.response && error.response.statusCode === 409) {
-    console.log('Bot conflict detected, restarting polling in 5 seconds...');
+    console.log('🔄 Bot conflict detected, restarting polling in 5 seconds...');
     setTimeout(() => {
       bot.stopPolling().then(() => {
         setTimeout(() => {
           bot.startPolling();
-          console.log('Bot polling restarted');
+          console.log('✅ Bot polling restarted');
         }, 1000);
       });
     }, 5000);
@@ -272,9 +295,12 @@ bot.on('polling_error', (error) => {
 });
 
 bot.on('error', (error) => {
-  console.error('Bot error:', error);
+  console.error('❌ Bot error:', error);
 });
 
-console.log('Telegram bot started...');
+// Логируем успешный запуск
+setTimeout(() => {
+  console.log('✅ Telegram bot polling активен и готов к работе');
+}, 2000);
 
 module.exports = bot;
