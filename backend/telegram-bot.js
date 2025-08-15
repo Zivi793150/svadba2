@@ -12,7 +12,7 @@ if (!token) {
 }
 
 console.log('✅ TELEGRAM_BOT_TOKEN найден');
-const bot = new TelegramBot(token, { polling: true }); // Включаем polling обратно
+const bot = new TelegramBot(token, { polling: false }); // В проде работаем через webhook
 
 // Состояния пользователей
 const userStates = new Map();
@@ -307,31 +307,22 @@ bot.on('message', (msg) => {
 
 console.log('Telegram bot started...');
 
-// Проверяем, что polling запустился
-bot.on('polling_error', (error) => {
-  console.error('❌ Polling error:', error);
-  
-  // Если ошибка 409 (конфликт), пробуем перезапустить polling через 5 секунд
-  if (error.code === 'ETELEGRAM' && error.response && error.response.statusCode === 409) {
-    console.log('🔄 Bot conflict detected, restarting polling in 5 seconds...');
-    setTimeout(() => {
-      bot.stopPolling().then(() => {
-        setTimeout(() => {
-          bot.startPolling();
-          console.log('✅ Bot polling restarted');
-        }, 1000);
-      });
-    }, 5000);
+// Включаем webhook-режим, предварительно удалив старый webhook и polling
+(async () => {
+  try {
+    await bot.deleteWebHook({ drop_pending_updates: true });
+    console.log('Webhook удалён (если был).');
+  } catch (e) {
+    console.warn('Не удалось удалить webhook:', e.message);
   }
-});
 
-bot.on('error', (error) => {
-  console.error('❌ Bot error:', error);
-});
-
-// Логируем успешный запуск
-setTimeout(() => {
-  console.log('✅ Telegram bot polling активен и готов к работе');
-}, 2000);
+  try {
+    const webhookUrl = `${process.env.FRONTEND_URL || 'https://svadba2.onrender.com'}/webhook/telegram`;
+    await bot.setWebHook(webhookUrl); // у node-telegram-bot-api метод setWebHook
+    console.log('Webhook установлен на:', webhookUrl);
+  } catch (e) {
+    console.error('Ошибка установки webhook:', e);
+  }
+})();
 
 module.exports = bot;

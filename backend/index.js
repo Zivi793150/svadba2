@@ -186,6 +186,17 @@ app.get('/', (req, res) => {
 app.post('/webhook/whatsapp', whatsappBot.handleWebhook);
 app.get('/webhook/whatsapp', whatsappBot.verifyWebhook);
 
+// Webhook для Telegram бота
+app.post('/webhook/telegram', (req, res) => {
+  try {
+    telegramBot.processUpdate(req.body);
+    res.sendStatus(200);
+  } catch (e) {
+    console.error('Telegram webhook error:', e);
+    res.sendStatus(500);
+  }
+});
+
 // Раздача файлов из папки uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
