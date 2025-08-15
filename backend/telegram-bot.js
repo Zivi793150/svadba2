@@ -3,7 +3,7 @@ require('dotenv').config();
 
 // Токен бота из переменных окружения
 const token = process.env.TELEGRAM_BOT_TOKEN;
-const bot = new TelegramBot(token, { polling: false }); // Отключаем polling
+const bot = new TelegramBot(token, { polling: true }); // Включаем polling обратно
 
 // Состояния пользователей
 const userStates = new Map();
@@ -256,25 +256,24 @@ bot.on('message', (msg) => {
 // Обработка ошибок
 bot.on('polling_error', (error) => {
   console.error('Polling error:', error);
+  
+  // Если ошибка 409 (конфликт), пробуем перезапустить polling через 5 секунд
+  if (error.code === 'ETELEGRAM' && error.response && error.response.statusCode === 409) {
+    console.log('Bot conflict detected, restarting polling in 5 seconds...');
+    setTimeout(() => {
+      bot.stopPolling().then(() => {
+        setTimeout(() => {
+          bot.startPolling();
+          console.log('Bot polling restarted');
+        }, 1000);
+      });
+    }, 5000);
+  }
 });
 
 bot.on('error', (error) => {
   console.error('Bot error:', error);
 });
-
-// Функция для установки webhook
-async function setWebhook() {
-  try {
-    const webhookUrl = `${process.env.FRONTEND_URL || 'https://svadba2.onrender.com'}/webhook/telegram`;
-    await bot.setWebhook(webhookUrl);
-    console.log(`Telegram webhook set to: ${webhookUrl}`);
-  } catch (error) {
-    console.error('Error setting webhook:', error);
-  }
-}
-
-// Устанавливаем webhook при запуске
-setWebhook();
 
 console.log('Telegram bot started...');
 
