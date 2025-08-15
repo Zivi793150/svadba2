@@ -3,7 +3,7 @@ import { FaArrowLeft, FaWhatsapp } from 'react-icons/fa';
 import { FaTelegramPlane } from 'react-icons/fa';
 import './SlideshowDetails.css';
 
-export default function SlideshowDetails({ onClose, onContactClick, videoData }) {
+export default function SlideshowDetails({ onClose, onContactClick, videoData, onOrder }) {
   const videoRef = useRef(null);
   const generalInfoWedding = `1. Сначала до заказа необходимо  определиться с экраном, который хотите использовать для демонстрации.
 Для показа подойдут не все экраны, а только с пропорциями 16:9 и 16:10. Уточните пропорции у владельца экрана, а также его размер, и сообщите нам перед заказом.
@@ -33,6 +33,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData })
       document.body.classList.remove('modal-open');
     };
   }, []);
+
   const handleWhatsAppClick = () => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const botPhone = '79004511777'; // Номер WhatsApp бота
@@ -45,26 +46,24 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData })
     }
   };
 
-              const handleTelegramClick = () => {
-              const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-              const botUsername = 'feyero_bot'; // Username Telegram бота
+  const handleTelegramClick = () => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const botUsername = 'feyero_bot'; // Username Telegram бота
 
-              if (isMobile) {
-                window.location.href = `tg://msg?to=@${botUsername}&text=${encodeURIComponent('/start')}`;
-                // Fallback на веб-версию через 1 секунду
-                setTimeout(() => {
-                  window.open(`https://t.me/${botUsername}?text=${encodeURIComponent('/start')}`, '_blank');
-                }, 1000);
-              } else {
-                window.open(`https://t.me/${botUsername}?text=${encodeURIComponent('/start')}`, '_blank');
-              }
-            };
+    if (isMobile) {
+      window.location.href = `tg://msg?to=@${botUsername}&text=${encodeURIComponent('/start')}`;
+      // Fallback на веб-версию через 1 секунду
+      setTimeout(() => {
+        window.open(`https://t.me/${botUsername}?text=${encodeURIComponent('/start')}`, '_blank');
+      }, 1000);
+    } else {
+      window.open(`https://t.me/${botUsername}?text=${encodeURIComponent('/start')}`, '_blank');
+    }
+  };
 
   const handleQuestionClick = () => {
     onContactClick();
   };
-
-
 
   return (
     <div className="slideshow-details-overlay">
@@ -89,8 +88,6 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData })
               <source src={videoData?.video || './video5193080489858068792.mp4'} type="video/mp4" />
               Ваш браузер не поддерживает видео.
             </video>
-            
-
           </div>
           
           {/* Текстовый контент */}
@@ -121,13 +118,20 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData })
           <div className="action-buttons">
             <button className="btn question-btn" onClick={handleTelegramClick}>
               <FaTelegramPlane size={18} />
-            <span>Задать вопрос</span>
-          </button>
-            <button className="btn order-btn" onClick={handleWhatsAppClick}>
-            <FaWhatsapp size={18} />
               <span>Задать вопрос</span>
-          </button>
-        </div>
+            </button>
+            <button className="btn whatsapp-btn" onClick={handleWhatsAppClick}>
+              <FaWhatsapp size={18} />
+              <span>Написать нам</span>
+            </button>
+          </div>
+          
+          {/* Кнопка заказа */}
+          <div className="action-buttons" style={{marginTop: 16}}>
+            <button className="btn order-btn" onClick={() => onOrder && onOrder()}>
+              <span>Заказать</span>
+            </button>
+          </div>
         </main>
       </div>
     </div>

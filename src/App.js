@@ -12,6 +12,7 @@ import AboutPage from "./AboutPage";
 import ChatFabButton from "./ChatFabButton";
 import ChatWidget from './ChatWidget';
 import SlideshowDetails from './SlideshowDetails';
+import OrderPage from './OrderPage';
 import io from 'socket.io-client';
 
 // Lazy loading для тяжелых компонентов
@@ -111,6 +112,7 @@ export default function App() {
   const [hasNewMsg, setHasNewMsg] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showSlideshowDetails, setShowSlideshowDetails] = useState(false);
+  const [showOrder, setShowOrder] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const chatIdRef = useRef(localStorage.getItem('chatSessionId'));
   const socketRef = useRef(null);
@@ -156,6 +158,16 @@ export default function App() {
     setSelectedVideoData(null);
   };
 
+  const handleOpenOrder = (product) => {
+    setSelectedVideoData(product);
+    setShowOrder(true);
+  };
+  const handleCloseOrder = () => {
+    setShowOrder(false);
+    // Не сбрасываем selectedVideoData, чтобы при возврате со страницы заказа
+    // страница с подробностями сохраняла свои данные
+  };
+
   const handleOpenAbout = () => setShowAbout(true);
   const handleCloseAbout = () => setShowAbout(false);
 
@@ -186,7 +198,11 @@ export default function App() {
           onClose={handleCloseSlideshowDetails} 
           onContactClick={handleOpenChat}
           videoData={selectedVideoData}
+          onOrder={() => handleOpenOrder(selectedVideoData)}
         />
+      )}
+      {showOrder && (
+        <OrderPage onClose={handleCloseOrder} product={selectedVideoData} />
       )}
       <Footer onAboutClick={handleOpenAbout} />
       {showAbout && (

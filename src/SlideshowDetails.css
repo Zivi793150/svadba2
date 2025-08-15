@@ -100,6 +100,7 @@ body.modal-open {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   background: #000;
   will-change: transform;
+  object-fit: contain;
 }
 
 /* Стили для вертикальных видео */
@@ -120,11 +121,30 @@ body.modal-open {
   .page-content:has(.vertical-video) {
     padding-top: 100px !important;
   }
+  
+  .main-video {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+  
+  .main-video.vertical-video {
+    max-width: 250px;
+    max-height: 350px;
+  }
 }
 
 @media (max-width: 480px) {
   .page-content:has(.vertical-video) {
     padding-top: 50px !important;
+  }
+  
+  .main-video {
+    max-width: 90%;
+  }
+  
+  .main-video.vertical-video {
+    max-width: 200px;
+    max-height: 280px;
   }
 }
 
@@ -245,14 +265,39 @@ body.modal-open {
   box-shadow: 0 8px 24px rgba(124, 167, 206, 0.4);
 }
 
-.order-btn {
+.whatsapp-btn {
   background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
   color: #fff;
 }
 
-.order-btn:hover {
+.whatsapp-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+}
+
+.order-btn {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #fff;
+  border: 2px solid #7CA7CE;
+  border-radius: 12px;
+  padding: 16px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  min-width: 180px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.order-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(124, 167, 206, 0.4);
+  background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+  border-color: #BFD7ED;
 }
 
 /* Мобильные устройства */
@@ -267,7 +312,7 @@ body.modal-open {
   }
   
   .page-content {
-    padding: 1030px 20px 40px 20px !important;
+    padding: 100px 20px 40px 20px !important;
   }
   
   .main-video {

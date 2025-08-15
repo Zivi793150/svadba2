@@ -107,12 +107,12 @@ const Carousel = ({ items = [], onShowDetails }) => {
               {useRibbon ? (
                 <div className="promo-ribbon" title="Цены снижены на период разработки сайта">
                   <span className="r-def">АКЦИЯ</span>
-                  <span className="r-hov">ЗАПУСК САЙТА</span>
+                  <span className="r-hov">СНИЖЕННЫЕ ЦЕНЫ</span>
                 </div>
               ) : (
                 <div className="promo-badge promo-bottom" title="Цены снижены на период разработки сайта">
                   <span className="b-def">Акция</span>
-                  <span className="b-hov">Запуск сайта</span>
+                  <span className="b-hov">Сниженные цены</span>
                 </div>
               )}
               <div className="card-video">
