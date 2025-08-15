@@ -2,7 +2,7 @@
   position: fixed;
   right: 36px;
   bottom: 36px;
-  z-index: 1001;
+  z-index: 99999;
   width: 64px;
   height: 64px;
   border: none;
@@ -27,5 +27,7 @@
     bottom: 16px;
     width: 54px;
     height: 54px;
+    z-index: 99999 !important;
+    position: fixed !important;
   }
 } 
