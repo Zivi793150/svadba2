@@ -59,6 +59,21 @@ export default function ChatWidget({ onClose }) {
     }
   }, [text]);
 
+  // Управление состоянием чата для мобильных устройств
+  useEffect(() => {
+    const isMobile = window.innerWidth <= 700;
+    
+    if (isMobile) {
+      // Добавляем класс к body при открытии чата
+      document.body.classList.add('chat-open');
+      
+      return () => {
+        // Убираем класс при закрытии чата
+        document.body.classList.remove('chat-open');
+      };
+    }
+  }, []);
+
   // Получить общее количество сообщений
   async function fetchTotal() {
     const res = await fetch(`${API_URL}/api/messages/${chatId}?count=1`);
@@ -146,36 +161,33 @@ export default function ChatWidget({ onClose }) {
   };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [messages]);
 
-  // Фикс перекрытия полем ввода мобильной клавиатурой
+  // Плавный подъезд поля ввода при появлении клавиатуры (mobile)
   useEffect(() => {
-    const onResize = () => {
-      const viewport = window.visualViewport;
-      const vh = viewport ? viewport.height : window.innerHeight;
-      const wrap = document.querySelector('#chat-widget-root');
-      if (wrap) {
-        wrap.style.setProperty('--chat-vh', `${vh}px`);
-      }
-      // Подстраиваем прокрутку к низу при появлении клавиатуры
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'instant', block: 'end' });
-      }, 0);
+    const root = document.getElementById('chat-widget-root');
+    if (!root) return;
+    const updateViewportVars = () => {
+      const vp = window.visualViewport;
+      const viewportHeight = vp ? vp.height : window.innerHeight;
+      const keyboardOffset = Math.max(0, window.innerHeight - viewportHeight);
+      root.style.setProperty('--chat-vh', `${viewportHeight}px`);
+      root.style.setProperty('--kb-offset', `${keyboardOffset}px`);
     };
-    onResize();
+    updateViewportVars();
     const vp = window.visualViewport;
     if (vp) {
-      vp.addEventListener('resize', onResize);
-      vp.addEventListener('scroll', onResize);
+      vp.addEventListener('resize', updateViewportVars);
+      vp.addEventListener('scroll', updateViewportVars);
     }
-    window.addEventListener('resize', onResize);
+    window.addEventListener('resize', updateViewportVars);
     return () => {
       if (vp) {
-        vp.removeEventListener('resize', onResize);
-        vp.removeEventListener('scroll', onResize);
+        vp.removeEventListener('resize', updateViewportVars);
+        vp.removeEventListener('scroll', updateViewportVars);
       }
-      window.removeEventListener('resize', onResize);
+      window.removeEventListener('resize', updateViewportVars);
     };
   }, []);
 
@@ -218,6 +230,10 @@ export default function ChatWidget({ onClose }) {
         const saved = await res.json();
         setMessages((prev) => prev.map(m => m._id === tempId ? saved : m));
         setText('');
+        // Отслеживаем отправку сообщения
+        if (window.trackMessageSent) {
+          window.trackMessageSent();
+        }
       }
     } catch (err) {
       setError('Ошибка сети');
@@ -295,19 +311,19 @@ export default function ChatWidget({ onClose }) {
   };
 
   const handleTelegramRedirect = () => {
-                  const botUsername = 'feyero_bot';
+    const botUsername = 'feyero_bot';
     const isMobileUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     if (isMobileUa) {
-      // Открываем приложение Telegram напрямую
-      window.location.href = `tg://msg?to=@${botUsername}&text=${encodeURIComponent('/start')}`;
-      // Fallback на веб-версию через 1 секунду
+      // Пробуем открыть приложение Telegram напрямую
+      window.open(`tg://resolve?domain=${botUsername}&start=`, '_blank');
+      // Если не сработало, через 100ms открываем веб-версию
       setTimeout(() => {
-        window.open(`https://t.me/${botUsername}?text=${encodeURIComponent('/start')}`, '_blank');
-      }, 1000);
+        window.open(`https://t.me/${botUsername}?start=`, '_blank');
+      }, 100);
     } else {
-      // На ПК открываем веб-версию Telegram
-      window.open(`https://t.me/${botUsername}?text=${encodeURIComponent('/start')}`, '_blank');
+      // На ПК открываем веб-версию бота
+      window.open(`https://t.me/${botUsername}?start=`, '_blank');
     }
   };
 
@@ -418,7 +434,7 @@ export default function ChatWidget({ onClose }) {
   const handleQuickQuestion = (question) => {
     setText(question);
     setShowQuickQuestions(false);
-    inputRef.current?.focus();
+    // Убираем автофокус - пользователь сам решит, когда начать печатать
     
     // Автоматически отправляем автоответ
     setTimeout(() => {
@@ -489,21 +505,22 @@ export default function ChatWidget({ onClose }) {
           <button onClick={() => setShowCodeInput(s => !s)} style={styles.codeBtn} title="Ввести код чата">🔑</button>
           <button onClick={onClose} style={styles.closeBtn} title="Закрыть">×</button>
         </div>
-        <div style={styles.codeBox}>
-          <span style={styles.codeLabel}>Код чата:</span>
-          <span style={styles.codeValue}>{chatId}</span>
-        </div>
         {showCodeInput && (
-          <form onSubmit={handleCodeSubmit} style={styles.codeInputForm}>
-            <input
-              style={styles.codeInput}
-              value={codeInput}
-              onChange={e => setCodeInput(e.target.value)}
-              placeholder="Введите код чата..."
-              autoFocus
-            />
-            <button type="submit" style={styles.codeInputBtn}>ОК</button>
-          </form>
+          <>
+            <div style={styles.codeBox}>
+              <span style={styles.codeLabel}>Код чата:</span>
+              <span style={styles.codeValue}>{chatId}</span>
+            </div>
+            <form onSubmit={handleCodeSubmit} style={styles.codeInputForm}>
+              <input
+                style={styles.codeInput}
+                value={codeInput}
+                onChange={e => setCodeInput(e.target.value)}
+                placeholder="Введите код чата..."
+              />
+              <button type="submit" style={styles.codeInputBtn}>ОК</button>
+            </form>
+          </>
         )}
         <div style={styles.messages}>
           {/* Умная воронка вопросов */}
@@ -637,7 +654,7 @@ export default function ChatWidget({ onClose }) {
             </button>
           </div>
         </div>
-        <form onSubmit={sendMessage} style={styles.inputForm} autoComplete="off">
+        <form onSubmit={sendMessage} className="chat-widget-input-container" style={styles.inputForm} autoComplete="off">
           <button type="button" onClick={() => fileInputRef.current.click()} style={{...styles.sendBtn, marginRight: 8, background: 'linear-gradient(135deg, #BFD7ED 0%, #7CA7CE 100%)'}} title="Прикрепить файл">
             <FaPaperclip size={isMobile ? 24 : 18} />
           </button>
@@ -650,9 +667,8 @@ export default function ChatWidget({ onClose }) {
             onChange={e => setText(e.target.value)}
             placeholder="Введите сообщение..."
             maxLength={1000}
-            autoFocus
           />
-          <button type="submit" style={{...styles.sendBtn, fontSize: isMobile ? 22 : 18, borderRadius: isMobile ? 18 : 12, padding: isMobile ? '0 24px' : '0 16px', minWidth: isMobile ? 56 : 40, minHeight: isMobile ? 56 : 40}} title="Отправить" disabled={!text.trim() || text.length > 1000 || sending}>
+          <button type="submit" className="chat-send-btn" style={{...styles.sendBtn, fontSize: isMobile ? 22 : 18, borderRadius: isMobile ? 18 : 12, padding: isMobile ? '0 24px' : '0 16px', minWidth: isMobile ? 56 : 40, minHeight: isMobile ? 56 : 40}} title="Отправить" disabled={!text.trim() || text.length > 1000 || sending}>
             <FaPaperPlane size={isMobile ? 26 : 20} />
           </button>
         </form>
@@ -731,7 +747,7 @@ const styles = {
     fontFamily: 'inherit',
   },
   chatBoxFull: {
-    width: '100vw', height: '100vh', maxWidth: '100vw', maxHeight: '100vh', background: '#23243a', borderRadius: 0, boxShadow: 'none',
+    width: '100vw', height: 'calc(var(--chat-vh, 100vh))', maxWidth: '100vw', maxHeight: 'calc(var(--chat-vh, 100vh))', background: '#23243a', borderRadius: 0, boxShadow: 'none',
     display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: 'inherit',
   },
   header: {

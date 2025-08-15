@@ -44,6 +44,11 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
     } else {
       window.open(`https://web.whatsapp.com/send?phone=${botPhone}&text=${message}`, '_blank');
     }
+    
+    // Отслеживаем клик по WhatsApp
+    if (window.trackWhatsAppClick) {
+      window.trackWhatsAppClick();
+    }
   };
 
   const handleTelegramClick = () => {
@@ -51,13 +56,20 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
     const botUsername = 'feyero_bot'; // Username Telegram бота
 
     if (isMobile) {
-      window.location.href = `tg://msg?to=@${botUsername}&text=${encodeURIComponent('/start')}`;
-      // Fallback на веб-версию через 1 секунду
+      // Пробуем открыть приложение Telegram напрямую
+      window.open(`tg://resolve?domain=${botUsername}&start=`, '_blank');
+      // Если не сработало, через 100ms открываем веб-версию
       setTimeout(() => {
-        window.open(`https://t.me/${botUsername}?text=${encodeURIComponent('/start')}`, '_blank');
-      }, 1000);
+        window.open(`https://t.me/${botUsername}?start=`, '_blank');
+      }, 100);
     } else {
-      window.open(`https://t.me/${botUsername}?text=${encodeURIComponent('/start')}`, '_blank');
+      // На ПК открываем веб-версию бота
+      window.open(`https://t.me/${botUsername}?start=`, '_blank');
+    }
+    
+    // Отслеживаем клик по Telegram
+    if (window.trackTelegramClick) {
+      window.trackTelegramClick();
     }
   };
 
@@ -89,7 +101,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
               Ваш браузер не поддерживает видео.
             </video>
           </div>
-          
+
           {/* Текстовый контент */}
           <div className="text-content">
             <h2>{videoData?.description || 'Создайте незабываемое слайд-шоу для вашей свадьбы'}</h2>
@@ -125,13 +137,19 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
               <span>Написать нам</span>
             </button>
           </div>
-          
+
           {/* Кнопка заказа */}
           <div className="action-buttons" style={{marginTop: 16}}>
-            <button className="btn order-btn" onClick={() => onOrder && onOrder()}>
-              <span>Заказать</span>
-            </button>
-          </div>
+            <button className="btn order-btn" onClick={() => {
+              if (onOrder) onOrder();
+              // Отслеживаем переход на страницу заказа
+              if (window.trackOrderPage) {
+                window.trackOrderPage();
+              }
+            }}>
+            <span>Заказать</span>
+          </button>
+        </div>
         </main>
       </div>
     </div>

@@ -10,7 +10,7 @@ export default function Footer({ onAboutClick }) {
       <div className="footer-links">
         <a href="#about" onClick={(e) => { e.preventDefault(); onAboutClick && onAboutClick(); }}>О нас</a> |
         <a href="#"><FaVk size={20} style={{verticalAlign:'middle',marginRight:4}}/>VK</a> |
-        <a href="#"><FaTelegramPlane size={20} style={{verticalAlign:'middle',marginRight:4}}/>Telegram</a> |
+        <a href="https://t.me/feiero" target="_blank" rel="noopener noreferrer"><FaTelegramPlane size={20} style={{verticalAlign:'middle',marginRight:4}}/>Telegram</a> |
         <a href="#"><FiInstagram size={20} style={{verticalAlign:'middle',marginRight:4}}/>Instagram</a>
       </div>
     </footer>

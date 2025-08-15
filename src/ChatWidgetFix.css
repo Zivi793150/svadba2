@@ -17,76 +17,53 @@
   -webkit-text-fill-color: #999 !important;
 }
 
-/* Избегаем «пропасти» при открытии клавиатуры на мобильных */
-#chat-widget-root input,
-#chat-widget-root textarea,
-#chat-widget-root button {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
-/* Не даём странице под чатом прокручиваться при открытой клавиатуре */
-body:has(#chat-widget-root) {
-  overflow: hidden;
-}
-
 /* Обеспечиваем, чтобы чат был поверх всех страниц */
 #chat-widget-root {
   z-index: 99999 !important;
-  position: relative;
+  will-change: transform !important;
+  transform: translateZ(0) !important;
 }
 
-/* Гарантируем, что чат всегда поверх всех элементов */
-body:has(#chat-widget-root) #chat-widget-root {
-  z-index: 99999 !important;
-}
-
-/* Принудительно устанавливаем высокий z-index для всех элементов чата */
-#chat-widget-root * {
-  z-index: inherit;
-}
-
-/* Основные элементы чата */
 .chat-widget-overlay {
   z-index: 99999 !important;
+  animation: chatFadeIn 0.55s cubic-bezier(.22,1,.36,1) !important;
+  will-change: opacity !important;
+  transform: translateZ(0) !important;
 }
 
 .chat-widget-container {
   z-index: 99999 !important;
+  animation: chatSlideUp 0.55s cubic-bezier(.22,1,.36,1) !important;
+  will-change: transform, opacity !important;
+  transform: translateZ(0) !important;
 }
 
-/* Дополнительные элементы чата */
-.chat-widget-header,
-.chat-widget-messages,
-.chat-widget-input-container,
-.chat-widget-quick-actions,
-.chat-widget-categories {
-  z-index: 99999 !important;
+/* Плавная анимация появления чата */
+@keyframes chatFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-/* Кнопки и интерактивные элементы чата */
-.chat-widget-button,
-.chat-widget-close,
-.chat-widget-minimize,
-.chat-widget-maximize {
-  z-index: 99999 !important;
-}
-
-/* Все возможные классы чата */
-[class*="chat-widget"] {
-  z-index: 99999 !important;
-}
-
-/* Специальные стили для элементов, которые могут быть скрыты */
-.chat-widget-hidden,
-.chat-widget-minimized {
-  z-index: 99999 !important;
+/* Плавная анимация подъема контейнера */
+@keyframes chatSlideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Дополнительные стили для мобильных устройств */
 @media (max-width: 700px) {
 
-  /* Принудительное полноэкранное отображение чата */
+  /* Простое полноэкранное отображение чата */
   .chat-widget-overlay {
     position: fixed !important;
     top: 0 !important;
@@ -96,6 +73,7 @@ body:has(#chat-widget-root) #chat-widget-root {
     width: 100vw !important;
     height: 100vh !important;
     z-index: 99999 !important;
+    animation: chatFadeIn 0.6s cubic-bezier(.22,1,.36,1) !important;
   }
   
   .chat-widget-container {
@@ -105,6 +83,9 @@ body:has(#chat-widget-root) #chat-widget-root {
     max-height: 100vh !important;
     border-radius: 0 !important;
     z-index: 99999 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    animation: chatSlideUp 0.6s cubic-bezier(.22,1,.36,1) !important;
   }
   
   /* Гарантируем, что чат поверх всех элементов на мобильных */
@@ -115,5 +96,145 @@ body:has(#chat-widget-root) #chat-widget-root {
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
+    will-change: transform !important;
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+  }
+
+  /* Простая структура чата */
+  .chat-widget-messages {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    padding: 10px !important;
+    animation: chatContentFadeIn 0.65s cubic-bezier(.22,1,.36,1) 0.1s both !important;
+    will-change: transform, opacity !important;
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+  }
+
+  .chat-widget-input-container {
+    padding: 10px !important;
+    background: white !important;
+    border-top: 1px solid #eee !important;
+    animation: chatInputFadeIn 0.65s cubic-bezier(.22,1,.36,1) 0.2s both !important;
+    will-change: transform, opacity !important;
+    transform: translateZ(0) !important;
+    -webkit-transform: translateZ(0) !important;
+  }
+
+  /* Простое поле ввода */
+  .chat-widget-input-container input,
+  .chat-widget-input-container textarea {
+    font-size: 16px !important;
+    padding: 10px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 5px !important;
+    background: white !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    outline: none !important;
+  }
+
+  /* Предотвращаем автоматическое масштабирование */
+  .chat-widget-input-container input:focus,
+  .chat-widget-input-container textarea:focus {
+    font-size: 16px !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+  }
+
+  /* Простая кнопка */
+  .chat-widget-input-container button {
+    padding: 10px 15px !important;
+    background: #007bff !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    margin-left: 10px !important;
+  }
+
+  /* Простой заголовок */
+  .chat-widget-header {
+    padding: 10px !important;
+    background: #f8f9fa !important;
+    border-bottom: 1px solid #eee !important;
+    animation: chatHeaderFadeIn 0.5s cubic-bezier(.22,1,.36,1) 0.05s both !important;
+  }
+}
+
+/* Smooth input bar slide above keyboard */
+@media (max-width: 700px) {
+  #chat-widget-root .chat-widget-input-container,
+  #chat-widget-root form[style*="inputForm"] {
+    transform: translateY(calc(-1 * var(--kb-offset, 0px)));
+    transition: transform 260ms cubic-bezier(.22,1,.36,1);
+  }
+}
+
+/* Дополнительные анимации для мобильных */
+@keyframes chatContentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes chatInputFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes chatHeaderFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} 
+
+@media (max-width: 700px) {
+  /* No gap: container fills visual viewport */
+  .chat-widget-container {
+    height: calc(var(--chat-vh, 100vh)) !important;
+    max-height: calc(var(--chat-vh, 100vh)) !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Messages take remaining space and avoid bottom gap */
+  #chat-widget-root .chat-widget-messages, 
+  #chat-widget-root [style*="messages"] {
+    flex: 1 !important;
+    padding-bottom: 8px !important;
+    margin: 0 !important;
+  }
+
+  /* Input bar sits exactly above keyboard */
+  #chat-widget-root .chat-widget-input-container, 
+  #chat-widget-root form.chat-widget-input-container {
+    transform: translateY(calc(-1 * var(--kb-offset, 0px)));
+    transition: transform 150ms ease-out;
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Ensure send button visible and not clipped */
+  #chat-widget-root .chat-widget-input-container .chat-send-btn {
+    min-width: 52px !important;
+    min-height: 44px !important;
   }
 } 

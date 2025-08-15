@@ -60,12 +60,227 @@ db.once('open', () => {
 });
 
 const Message = require('./message.model');
+const { PageView, ButtonClick, UserSession, Conversion, ChatEngagement } = require('./analytics.model');
 
 // Подключение ботов
 const telegramBot = require('./telegram-bot');
 const whatsappBot = require('./whatsapp-bot');
 
 const lastMessageTimestamps = {};
+
+// Функция для определения типа устройства
+const getDeviceType = (userAgent) => {
+  if (/Mobile|Android|iPhone|iPad/.test(userAgent)) {
+    return /iPad/.test(userAgent) ? 'tablet' : 'mobile';
+  }
+  return 'desktop';
+};
+
+// Функция для генерации sessionId
+const generateSessionId = () => {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+};
+
+// API для аналитики
+app.post('/api/analytics/pageview', async (req, res) => {
+  try {
+    const { page, userAgent, referrer } = req.body;
+    const ip = req.ip || req.connection.remoteAddress;
+    const sessionId = req.headers['x-session-id'] || generateSessionId();
+    const deviceType = getDeviceType(userAgent);
+    
+    const pageView = new PageView({
+      page,
+      userAgent,
+      ip,
+      referrer,
+      sessionId,
+      deviceType,
+      screenResolution: req.body.screenResolution,
+      language: req.body.language
+    });
+    
+    await pageView.save();
+    
+    // Обновляем или создаем сессию
+    let session = await UserSession.findOne({ sessionId });
+    if (!session) {
+      session = new UserSession({
+        sessionId,
+        userAgent,
+        ip,
+        deviceType,
+        pages: [page]
+      });
+    } else {
+      if (!session.pages.includes(page)) {
+        session.pages.push(page);
+      }
+      session.isActive = true;
+    }
+    await session.save();
+    
+    res.json({ success: true, sessionId });
+  } catch (err) {
+    console.error('PageView error:', err);
+    res.status(500).json({ error: 'Ошибка сохранения просмотра' });
+  }
+});
+
+app.post('/api/analytics/button-click', async (req, res) => {
+  try {
+    const { buttonId, buttonText, page } = req.body;
+    const ip = req.ip || req.connection.remoteAddress;
+    const sessionId = req.headers['x-session-id'];
+    
+    const buttonClick = new ButtonClick({
+      buttonId,
+      buttonText,
+      page,
+      sessionId,
+      userAgent: req.body.userAgent,
+      ip
+    });
+    
+    await buttonClick.save();
+    res.json({ success: true });
+  } catch (err) {
+    console.error('ButtonClick error:', err);
+    res.status(500).json({ error: 'Ошибка сохранения клика' });
+  }
+});
+
+app.post('/api/analytics/conversion', async (req, res) => {
+  try {
+    const { action, page, metadata } = req.body;
+    const ip = req.ip || req.connection.remoteAddress;
+    const sessionId = req.headers['x-session-id'];
+    
+    const conversion = new Conversion({
+      action,
+      page,
+      sessionId,
+      userAgent: req.body.userAgent,
+      ip,
+      metadata
+    });
+    
+    await conversion.save();
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Conversion error:', err);
+    res.status(500).json({ error: 'Ошибка сохранения конверсии' });
+  }
+});
+
+app.post('/api/analytics/chat-engagement', async (req, res) => {
+  try {
+    const { chatId, messagesSent, messagesReceived, filesSent, timeInChat } = req.body;
+    const sessionId = req.headers['x-session-id'];
+    
+    const engagement = new ChatEngagement({
+      sessionId,
+      chatId,
+      messagesSent,
+      messagesReceived,
+      filesSent,
+      timeInChat
+    });
+    
+    await engagement.save();
+    res.json({ success: true });
+  } catch (err) {
+    console.error('ChatEngagement error:', err);
+    res.status(500).json({ error: 'Ошибка сохранения вовлеченности' });
+  }
+});
+
+app.get('/api/analytics', async (req, res) => {
+  try {
+    // Получаем данные за последние 30 дней
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    
+    // Просмотры страниц
+    const pageViews = await PageView.find({ timestamp: { $gte: thirtyDaysAgo } });
+    
+    // Устройства
+    const devices = await PageView.aggregate([
+      { $match: { timestamp: { $gte: thirtyDaysAgo } } },
+      { $group: { _id: '$deviceType', count: { $sum: 1 } } }
+    ]);
+    const devicesMap = {};
+    devices.forEach(d => devicesMap[d._id] = d.count);
+    
+    // Клики по кнопкам
+    const buttonClicks = await ButtonClick.aggregate([
+      { $match: { timestamp: { $gte: thirtyDaysAgo } } },
+      { $group: { _id: '$buttonText', count: { $sum: 1 } } }
+    ]);
+    const buttonClicksMap = {};
+    buttonClicks.forEach(b => buttonClicksMap[b._id] = b.count);
+    
+    // Сессии пользователей
+    const userSessions = await UserSession.find({ startTime: { $gte: thirtyDaysAgo } });
+    
+    // Популярные страницы
+    const popularPages = await PageView.aggregate([
+      { $match: { timestamp: { $gte: thirtyDaysAgo } } },
+      { $group: { _id: '$page', count: { $sum: 1 } } }
+    ]);
+    const popularPagesMap = {};
+    popularPages.forEach(p => popularPagesMap[p._id] = p.count);
+    
+    // Время на сайте
+    const timeOnSite = userSessions
+      .filter(s => s.duration)
+      .map(s => s.duration);
+    
+    // Конверсии
+    const conversions = await Conversion.aggregate([
+      { $match: { timestamp: { $gte: thirtyDaysAgo } } },
+      { $group: { _id: '$action', count: { $sum: 1 } } }
+    ]);
+    const conversionsMap = {};
+    conversions.forEach(c => conversionsMap[c._id] = c.count);
+    
+    // Вовлеченность в чат
+    const chatEngagement = await ChatEngagement.aggregate([
+      { $match: { timestamp: { $gte: thirtyDaysAgo } } },
+      {
+        $group: {
+          _id: null,
+          totalMessagesSent: { $sum: '$messagesSent' },
+          totalMessagesReceived: { $sum: '$messagesReceived' },
+          totalFilesSent: { $sum: '$filesSent' },
+          avgTimeInChat: { $avg: '$timeInChat' },
+          totalSessions: { $sum: 1 }
+        }
+      }
+    ]);
+    
+    const chatEngagementMap = chatEngagement[0] ? {
+      'Всего сообщений отправлено': chatEngagement[0].totalMessagesSent,
+      'Всего сообщений получено': chatEngagement[0].totalMessagesReceived,
+      'Всего файлов отправлено': chatEngagement[0].totalFilesSent,
+      'Среднее время в чате': Math.round(chatEngagement[0].avgTimeInChat / 1000 / 60) + ' мин',
+      'Сессий с чатом': chatEngagement[0].totalSessions
+    } : {};
+    
+    res.json({
+      pageViews,
+      devices: devicesMap,
+      buttonClicks: buttonClicksMap,
+      userSessions,
+      popularPages: popularPagesMap,
+      timeOnSite,
+      conversions: conversionsMap,
+      chatEngagement: chatEngagementMap
+    });
+  } catch (err) {
+    console.error('Analytics error:', err);
+    res.status(500).json({ error: 'Ошибка получения аналитики' });
+  }
+});
 
 // Получить все сообщения по chatId с поддержкой пагинации
 app.get('/api/messages/:chatId', async (req, res) => {

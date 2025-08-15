@@ -14,6 +14,7 @@ import ChatWidget from './ChatWidget';
 import SlideshowDetails from './SlideshowDetails';
 import OrderPage from './OrderPage';
 import io from 'socket.io-client';
+import analyticsTracker from './AnalyticsTracker';
 
 // Lazy loading для тяжелых компонентов
 const LazyChatWidget = lazy(() => import('./ChatWidget'));
@@ -143,6 +144,10 @@ export default function App() {
   const handleOpenChat = () => {
     setChatOpen(true);
     setHasNewMsg(false);
+    // Отслеживаем открытие чата
+    if (window.trackChatOpen) {
+      window.trackChatOpen();
+    }
   };
 
   const [selectedVideoData, setSelectedVideoData] = useState(null);
