@@ -3,7 +3,7 @@ require('dotenv').config();
 
 // Токен бота из переменных окружения
 const token = process.env.TELEGRAM_BOT_TOKEN;
-const bot = new TelegramBot(token, { polling: true });
+const bot = new TelegramBot(token, { polling: false }); // Отключаем polling
 
 // Состояния пользователей
 const userStates = new Map();
@@ -261,6 +261,20 @@ bot.on('polling_error', (error) => {
 bot.on('error', (error) => {
   console.error('Bot error:', error);
 });
+
+// Функция для установки webhook
+async function setWebhook() {
+  try {
+    const webhookUrl = `${process.env.FRONTEND_URL || 'https://svadba2.onrender.com'}/webhook/telegram`;
+    await bot.setWebhook(webhookUrl);
+    console.log(`Telegram webhook set to: ${webhookUrl}`);
+  } catch (error) {
+    console.error('Error setting webhook:', error);
+  }
+}
+
+// Устанавливаем webhook при запуске
+setWebhook();
 
 console.log('Telegram bot started...');
 

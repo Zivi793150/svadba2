@@ -45,20 +45,20 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData })
     }
   };
 
-  const handleTelegramClick = () => {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const botUsername = 'svadba_presentation_bot'; // Username Telegram бота
+              const handleTelegramClick = () => {
+              const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+              const botUsername = 'feyero_bot'; // Username Telegram бота
 
-    if (isMobile) {
-      window.location.href = `tg://msg?to=@${botUsername}&text=${encodeURIComponent('/start')}`;
-      // Fallback на веб-версию через 1 секунду
-      setTimeout(() => {
-        window.open(`https://t.me/${botUsername}?text=${encodeURIComponent('/start')}`, '_blank');
-      }, 1000);
-    } else {
-      window.open(`https://t.me/${botUsername}?text=${encodeURIComponent('/start')}`, '_blank');
-    }
-  };
+              if (isMobile) {
+                window.location.href = `tg://msg?to=@${botUsername}&text=${encodeURIComponent('/start')}`;
+                // Fallback на веб-версию через 1 секунду
+                setTimeout(() => {
+                  window.open(`https://t.me/${botUsername}?text=${encodeURIComponent('/start')}`, '_blank');
+                }, 1000);
+              } else {
+                window.open(`https://t.me/${botUsername}?text=${encodeURIComponent('/start')}`, '_blank');
+              }
+            };
 
   const handleQuestionClick = () => {
     onContactClick();

@@ -295,7 +295,7 @@ export default function ChatWidget({ onClose }) {
   };
 
   const handleTelegramRedirect = () => {
-    const botUsername = 'svadba_presentation_bot';
+                  const botUsername = 'feyero_bot';
     const isMobileUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     if (isMobileUa) {
