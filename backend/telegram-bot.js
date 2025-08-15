@@ -108,6 +108,102 @@ const mainMenu = {
   }
 };
 
+// Вспомогательные функции для редактирования одного сообщения
+async function showMainMenu(chatId, messageId) {
+  const text = 'Выберите интересующий вас вопрос:';
+  try {
+    await bot.editMessageText(text, {
+      chat_id: chatId,
+      message_id: messageId,
+      reply_markup: mainMenu.reply_markup,
+      parse_mode: 'Markdown'
+    });
+  } catch (err) {
+    // Если сообщение нельзя отредактировать (например, первое после /start), отправим новое
+    await bot.sendMessage(chatId, text, { reply_markup: mainMenu.reply_markup });
+  }
+}
+
+function buildCategoryMenu(category) {
+  if (category === 'invitations') {
+    return {
+      text: 'Выберите интересующий вас вопрос о видео-приглашениях:',
+      markup: {
+        inline_keyboard: [
+          [{ text: '📋 Общая информация', callback_data: 'question_invitations_info' }],
+          [{ text: '💰 Цены и сроки', callback_data: 'question_invitations_price' }],
+          [{ text: '❓ Индивидуальный заказ', callback_data: 'question_invitations_custom' }],
+          [{ text: '⬅️ Назад в главное меню', callback_data: 'back_to_main' }]
+        ]
+      }
+    };
+  }
+  return {
+    text: 'Выберите интересующий вас вопрос о свадебной презентации:',
+    markup: {
+      inline_keyboard: [
+        [{ text: '📋 Общая информация', callback_data: 'question_presentations_info' }],
+        [{ text: '💰 Цены и сроки', callback_data: 'question_presentations_price' }],
+        [{ text: '❓ Индивидуальный заказ', callback_data: 'question_presentations_custom' }],
+        [{ text: '⬅️ Назад в главное меню', callback_data: 'back_to_main' }]
+      ]
+    }
+  };
+}
+
+async function showCategoryMenu(chatId, messageId, category) {
+  const { text, markup } = buildCategoryMenu(category);
+  try {
+    await bot.editMessageText(text, {
+      chat_id: chatId,
+      message_id: messageId,
+      reply_markup: markup,
+      parse_mode: 'Markdown'
+    });
+  } catch (err) {
+    await bot.sendMessage(chatId, text, { reply_markup: markup });
+  }
+}
+
+const questionKeyToTitle = {
+  'invitations_info': 'Видео-приглашения — общая информация',
+  'invitations_price': 'Видео-приглашения — цены и сроки',
+  'invitations_custom': 'Можно ли заказать индивидуальное приглашение?',
+  'presentations_info': 'Свадебная презентация — общая информация',
+  'presentations_price': 'Свадебная презентация — цены и сроки',
+  'presentations_custom': 'Можно ли заказать индивидуальную презентацию?'
+};
+
+async function showQuestion(chatId, messageId, category, questionKey) {
+  const title = questionKeyToTitle[`${category}_${questionKey}`];
+  const questionData = quickQuestions[title];
+  if (!questionData) return;
+
+  const quickActionsRow = [
+    { text: '🛒 Заказать', callback_data: 'order' },
+    { text: '💬 Консультация', callback_data: 'consultation' }
+  ];
+
+  const keyboard = {
+    inline_keyboard: [
+      quickActionsRow,
+      [{ text: '⬅️ Назад к вопросам', callback_data: `back_to_category_${category}` }],
+      [{ text: '🏠 Главное меню', callback_data: 'back_to_main' }]
+    ]
+  };
+
+  try {
+    await bot.editMessageText(questionData.answer, {
+      chat_id: chatId,
+      message_id: messageId,
+      reply_markup: keyboard,
+      parse_mode: 'Markdown'
+    });
+  } catch (err) {
+    await bot.sendMessage(chatId, questionData.answer, { reply_markup: keyboard, parse_mode: 'Markdown' });
+  }
+}
+
 // Обработка команды /start
 bot.onText(/\/start/, (msg) => {
   console.log('🎯 Получена команда /start от:', msg.from.first_name, 'ID:', msg.chat.id);
@@ -136,115 +232,50 @@ bot.on('callback_query', async (query) => {
   
   const chatId = query.message.chat.id;
   const data = query.data;
+  const messageId = query.message.message_id;
   
   // Отвечаем на callback
   await bot.answerCallbackQuery(query.id);
   
   if (data.startsWith('category_')) {
     const category = data.replace('category_', '');
-    
-    if (category === 'invitations') {
-      const invitationsMenu = {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: '📋 Общая информация', callback_data: 'question_invitations_info' }],
-            [{ text: '💰 Цены и сроки', callback_data: 'question_invitations_price' }],
-            [{ text: '❓ Индивидуальный заказ', callback_data: 'question_invitations_custom' }],
-            [{ text: '⬅️ Назад в главное меню', callback_data: 'back_to_main' }]
-          ]
-        }
-      };
-      bot.sendMessage(chatId, 'Выберите интересующий вас вопрос о видео-приглашениях:', invitationsMenu);
-    } else if (category === 'presentations') {
-      const presentationsMenu = {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: '📋 Общая информация', callback_data: 'question_presentations_info' }],
-            [{ text: '💰 Цены и сроки', callback_data: 'question_presentations_price' }],
-            [{ text: '❓ Индивидуальный заказ', callback_data: 'question_presentations_custom' }],
-            [{ text: '⬅️ Назад в главное меню', callback_data: 'back_to_main' }]
-          ]
-        }
-      };
-      bot.sendMessage(chatId, 'Выберите интересующий вас вопрос о свадебной презентации:', presentationsMenu);
-    }
+    userStates.set(chatId, { state: 'category', category });
+    await showCategoryMenu(chatId, messageId, category);
   } else if (data.startsWith('question_')) {
-    const questionKey = data.replace('question_', '');
-    const questionMap = {
-      'invitations_info': 'Видео-приглашения — общая информация',
-      'invitations_price': 'Видео-приглашения — цены и сроки',
-      'invitations_custom': 'Можно ли заказать индивидуальное приглашение?',
-      'presentations_info': 'Свадебная презентация — общая информация',
-      'presentations_price': 'Свадебная презентация — цены и сроки',
-      'presentations_custom': 'Можно ли заказать индивидуальную презентацию?'
-    };
-    
-    const question = questionMap[questionKey];
-    const questionData = quickQuestions[question];
-    
-    if (questionData) {
-      const quickActionsKeyboard = {
-        reply_markup: {
-          inline_keyboard: [
-            questionData.quickActions.map(action => [{
-              text: action === 'Заказать' ? '🛒 Заказать' : '💬 Консультация',
-              callback_data: action === 'Заказать' ? 'order' : 'consultation'
-            }]),
-            [{ text: '⬅️ Назад к категориям', callback_data: 'back_to_main' }]
-          ]
-        }
-      };
-      
-      bot.sendMessage(chatId, questionData.answer, quickActionsKeyboard);
-    }
+    const parts = data.split('_'); // ['question', '<category>', '<key>']
+    const category = parts[1];
+    const key = parts[2];
+    await showQuestion(chatId, messageId, category, key);
   } else if (data === 'consultation') {
-    const consultationMessage = `💬 Для связи с менеджером:
-
-📱 **WhatsApp:** +7 900 451-17-77
-📱 **Telegram:** @svadba_manager
-📧 **Email:** info@svadba-presentation.ru
-
-⏰ **Время работы:** Пн-Пт 9:00-18:00
-
-Менеджер ответит вам в течение 30 минут в рабочее время.`;
-    
-    const backKeyboard = {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '⬅️ Назад к вопросам', callback_data: 'back_to_main' }]
-        ]
-      }
+    const text = `💬 Для связи с менеджером:\n\nНапишите нам в мессенджер и мы ответим максимально быстро.`;
+    const keyboard = {
+      inline_keyboard: [
+        [
+          { text: '📲 Открыть Telegram', url: 'https://t.me/feyero_bot?start=consultation' },
+          { text: '📲 Открыть WhatsApp', url: 'https://wa.me/79004511777' }
+        ],
+        [{ text: '⬅️ Назад', callback_data: 'back_to_main' }]
+      ]
     };
-    
-    bot.sendMessage(chatId, consultationMessage, backKeyboard);
+    await bot.editMessageText(text, { chat_id: chatId, message_id: messageId, reply_markup: keyboard });
   } else if (data === 'order') {
-    const orderMessage = `🛒 Для оформления заказа:
-
-1️⃣ **Свяжитесь с менеджером:**
-   📱 WhatsApp: +7 900 451-17-77
-   📱 Telegram: @svadba_manager
-
-2️⃣ **Укажите:**
-   - Тип услуги (презентация/приглашения)
-   - Количество фото/разворотов
-   - Нужно ли оживление фото
-   - Желаемые сроки
-
-3️⃣ **Предоплата:** 30% от стоимости
-
-Менеджер подготовит для вас индивидуальное предложение!`;
-    
-    const backKeyboard = {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '⬅️ Назад к вопросам', callback_data: 'back_to_main' }]
-        ]
-      }
+    const text = `🛒 Для оформления заказа:\n\n1️⃣ Выберите мессенджер и напишите нам.\n2️⃣ Укажите: тип услуги, объём материалов и сроки.`;
+    const keyboard = {
+      inline_keyboard: [
+        [
+          { text: '📲 Написать в Telegram', url: 'https://t.me/feyero_bot?start=order' },
+          { text: '📲 Написать в WhatsApp', url: 'https://wa.me/79004511777' }
+        ],
+        [{ text: '⬅️ Назад', callback_data: 'back_to_main' }]
+      ]
     };
-    
-    bot.sendMessage(chatId, orderMessage, backKeyboard);
+    await bot.editMessageText(text, { chat_id: chatId, message_id: messageId, reply_markup: keyboard });
+  } else if (data.startsWith('back_to_category_')) {
+    const category = data.replace('back_to_category_', '');
+    await showCategoryMenu(chatId, messageId, category);
   } else if (data === 'back_to_main') {
-    bot.sendMessage(chatId, 'Выберите интересующий вас вопрос:', mainMenu);
+    userStates.set(chatId, { state: 'main' });
+    await showMainMenu(chatId, messageId);
   }
 });
 
