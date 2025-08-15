@@ -317,7 +317,15 @@ bot.on('message', (msg) => {
 
 console.log('Telegram bot started...');
 
-// Включаем webhook-режим, предварительно удалив старый webhook и polling
+function resolveWebhookBaseUrl() {
+  const base = (process.env.TELEGRAM_WEBHOOK_BASE
+    || process.env.RENDER_EXTERNAL_URL
+    || process.env.FRONTEND_URL
+    || 'https://svadba2.onrender.com').trim();
+  return base.endsWith('/') ? base.slice(0, -1) : base;
+}
+
+// Включаем webhook-режим, предварительно удалив старый webhook
 (async () => {
   try {
     await bot.deleteWebHook({ drop_pending_updates: true });
@@ -327,7 +335,8 @@ console.log('Telegram bot started...');
   }
 
   try {
-    const webhookUrl = `${process.env.FRONTEND_URL || 'https://svadba2.onrender.com'}/webhook/telegram`;
+    const base = resolveWebhookBaseUrl();
+    const webhookUrl = `${base}/webhook/telegram`;
     await bot.setWebHook(webhookUrl); // у node-telegram-bot-api метод setWebHook
     console.log('Webhook установлен на:', webhookUrl);
   } catch (e) {

@@ -209,7 +209,8 @@ app.get('/webhook/telegram/info', async (req, res) => {
 
 app.get('/webhook/telegram/setup', async (req, res) => {
   try {
-    const url = `${process.env.FRONTEND_URL || 'https://svadba2.onrender.com'}/webhook/telegram`;
+    const base = (process.env.TELEGRAM_WEBHOOK_BASE || process.env.RENDER_EXTERNAL_URL || process.env.FRONTEND_URL || 'https://svadba2.onrender.com').replace(/\/$/, '');
+    const url = `${base}/webhook/telegram`;
     await telegramBot.setWebHook(url);
     res.json({ ok: true, url });
   } catch (e) {
