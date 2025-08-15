@@ -197,6 +197,35 @@ app.post('/webhook/telegram', (req, res) => {
   }
 });
 
+// Диагностика Telegram webhook
+app.get('/webhook/telegram/info', async (req, res) => {
+  try {
+    const info = await telegramBot.getWebHookInfo();
+    res.json(info);
+  } catch (e) {
+    res.status(500).json({ error: String(e.message || e) });
+  }
+});
+
+app.get('/webhook/telegram/setup', async (req, res) => {
+  try {
+    const url = `${process.env.FRONTEND_URL || 'https://svadba2.onrender.com'}/webhook/telegram`;
+    await telegramBot.setWebHook(url);
+    res.json({ ok: true, url });
+  } catch (e) {
+    res.status(500).json({ error: String(e.message || e) });
+  }
+});
+
+app.get('/webhook/telegram/delete', async (req, res) => {
+  try {
+    await telegramBot.deleteWebHook({ drop_pending_updates: true });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: String(e.message || e) });
+  }
+});
+
 // Раздача файлов из папки uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

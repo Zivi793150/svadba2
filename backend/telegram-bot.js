@@ -333,6 +333,24 @@ console.log('Telegram bot started...');
   } catch (e) {
     console.error('Ошибка установки webhook:', e);
   }
+  try {
+    const me = await bot.getMe();
+    console.log('Бот авторизован как @' + me.username + ' (id ' + me.id + ')');
+  } catch (e) {
+    console.error('Не удалось получить данные бота getMe:', e.message);
+  }
+  try {
+    const info = await bot.getWebHookInfo();
+    console.log('Webhook Info:', {
+      url: info.url,
+      has_custom_certificate: info.has_custom_certificate,
+      pending_update_count: info.pending_update_count,
+      last_error_message: info.last_error_message,
+      last_error_date: info.last_error_date
+    });
+  } catch (e) {
+    console.error('Не удалось получить getWebHookInfo:', e.message);
+  }
 })();
 
 module.exports = bot;
