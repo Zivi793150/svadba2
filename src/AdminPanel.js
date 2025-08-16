@@ -149,7 +149,7 @@ const AdminPanel = () => {
       weeklyActivity
     } = analytics;
 
-    return (
+  return (
       <div className="analytics-container">
         {/* Период и обновление */}
         <div className="analytics-header">
@@ -175,7 +175,7 @@ const AdminPanel = () => {
           <div className="metric-card primary">
             <div className="metric-icon">👥</div>
             <div className="metric-content">
-              <h3>Посетители</h3>
+              <h3>Уникальные посетители</h3>
               <div className="metric-value">{formatNumber(overview.totalVisitors)}</div>
               <div className="metric-change positive">
                 +{calculateGrowth(overview.totalVisitors, overview.previousVisitors)}% vs предыдущий период
@@ -186,7 +186,7 @@ const AdminPanel = () => {
           <div className="metric-card primary">
             <div className="metric-icon">📄</div>
             <div className="metric-content">
-              <h3>Просмотры</h3>
+              <h3>Просмотры страниц</h3>
               <div className="metric-value">{formatNumber(overview.totalPageViews)}</div>
               <div className="metric-change positive">
                 +{calculateGrowth(overview.totalPageViews, overview.previousPageViews)}% vs предыдущий период
@@ -249,6 +249,45 @@ const AdminPanel = () => {
           <div className="metric-card">
             <div className="metric-icon">📈</div>
             <div className="metric-content">
+              <h3>Страниц/посетитель</h3>
+              <div className="metric-value">{overview.avgPagesPerVisitor}</div>
+              <div className="metric-subtitle">в среднем</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Дополнительные метрики */}
+        <div className="metrics-grid secondary">
+          <div className="metric-card">
+            <div className="metric-icon">⏱️</div>
+            <div className="metric-content">
+              <h3>Время на сайте</h3>
+              <div className="metric-value">{formatDuration(overview.avgSessionDuration)}</div>
+              <div className="metric-subtitle">в среднем</div>
+            </div>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-icon">📱</div>
+            <div className="metric-content">
+              <h3>Мобильные</h3>
+              <div className="metric-value">{overview.mobilePercentage}%</div>
+              <div className="metric-subtitle">от всех посетителей</div>
+            </div>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-icon">🔄</div>
+            <div className="metric-content">
+              <h3>Возвраты</h3>
+              <div className="metric-value">{overview.bounceRate}%</div>
+              <div className="metric-subtitle">процент отказов</div>
+            </div>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-icon">📊</div>
+            <div className="metric-content">
               <h3>Страниц/сессия</h3>
               <div className="metric-value">{overview.pagesPerSession}</div>
               <div className="metric-subtitle">в среднем</div>
@@ -259,6 +298,7 @@ const AdminPanel = () => {
         {/* Устройства */}
         <div className="analytics-section">
           <h2>📱 Устройства ({getPeriodLabel()})</h2>
+          <div className="section-subtitle">Показывает уникальных посетителей по типам устройств</div>
           <div className="devices-grid">
             {devices.map((device, index) => (
               <div key={index} className="device-card">
@@ -281,6 +321,7 @@ const AdminPanel = () => {
         {/* Популярные страницы */}
         <div className="analytics-section">
           <h2>📄 Популярные страницы ({getPeriodLabel()})</h2>
+          <div className="section-subtitle">Показывает просмотры и уникальных посетителей</div>
           <div className="pages-list">
             {popularPages.map((page, index) => (
               <div key={index} className="page-item">
@@ -291,6 +332,7 @@ const AdminPanel = () => {
                 </div>
                 <div className="page-stats">
                   <div className="page-views">{formatNumber(page.views)} просмотров</div>
+                  <div className="page-visitors">{formatNumber(page.uniqueVisitors)} посетителей</div>
                   <div className="page-percentage">{page.percentage}%</div>
                 </div>
                 <div className="page-bar">
@@ -304,6 +346,7 @@ const AdminPanel = () => {
         {/* Клики по кнопкам */}
         <div className="analytics-section">
           <h2>🖱️ Популярные кнопки ({getPeriodLabel()})</h2>
+          <div className="section-subtitle">Показывает общее количество кликов</div>
           <div className="buttons-grid">
             {buttonClicks.map((button, index) => (
               <div key={index} className="button-card">
@@ -327,6 +370,7 @@ const AdminPanel = () => {
         {/* Конверсии */}
         <div className="analytics-section">
           <h2>🎯 Конверсии ({getPeriodLabel()})</h2>
+          <div className="section-subtitle">Показывает действия и уникальных посетителей</div>
           <div className="conversions-grid">
             {conversions.map((conversion, index) => (
               <div key={index} className="conversion-card">
@@ -347,6 +391,7 @@ const AdminPanel = () => {
                 </div>
                 <div className="conversion-stats">
                   <div className="conversion-count">{formatNumber(conversion.count)}</div>
+                  <div className="conversion-visitors">{formatNumber(conversion.uniqueVisitors)} посетителей</div>
                   <div className="conversion-rate">{conversion.rate}%</div>
                 </div>
               </div>
@@ -440,6 +485,7 @@ const AdminPanel = () => {
         {topReferrers && (
           <div className="analytics-section">
             <h2>🔗 Источники трафика ({getPeriodLabel()})</h2>
+            <div className="section-subtitle">Показывает переходы и уникальных посетителей</div>
             <div className="referrers-list">
               {topReferrers.map((referrer, index) => (
                 <div key={index} className="referrer-item">
@@ -449,7 +495,8 @@ const AdminPanel = () => {
                     <div className="referrer-url">{referrer.url}</div>
                   </div>
                   <div className="referrer-stats">
-                    <div className="referrer-visits">{formatNumber(referrer.visits)} визитов</div>
+                    <div className="referrer-visits">{formatNumber(referrer.visits)} переходов</div>
+                    <div className="referrer-visitors">{formatNumber(referrer.uniqueVisitors)} посетителей</div>
                     <div className="referrer-percentage">{referrer.percentage}%</div>
                   </div>
                 </div>
@@ -493,6 +540,7 @@ const AdminPanel = () => {
         {hourlyActivity && (
           <div className="analytics-section">
             <h2>🕐 Почасовая активность ({getPeriodLabel()})</h2>
+            <div className="section-subtitle">Показывает уникальных посетителей по часам</div>
             <div className="hourly-chart">
               {hourlyActivity.map((hour, index) => (
                 <div key={index} className="hour-bar">
@@ -500,16 +548,17 @@ const AdminPanel = () => {
                   <div className="hour-value" style={{ height: `${hour.percentage}%` }}>
                     <span className="hour-count">{formatNumber(hour.count)}</span>
                   </div>
-                </div>
-              ))}
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
         )}
 
         {/* Недельная активность */}
         {weeklyActivity && (
           <div className="analytics-section">
             <h2>📅 Недельная активность ({getPeriodLabel()})</h2>
+            <div className="section-subtitle">Показывает уникальных посетителей по дням недели</div>
             <div className="weekly-chart">
               {weeklyActivity.map((day, index) => (
                 <div key={index} className="day-bar">
@@ -517,10 +566,10 @@ const AdminPanel = () => {
                   <div className="day-value" style={{ height: `${day.percentage}%` }}>
                     <span className="day-count">{formatNumber(day.count)}</span>
                   </div>
-                </div>
+                  </div>
               ))}
-            </div>
-          </div>
+                  </div>
+                </div>
         )}
       </div>
     );
@@ -616,10 +665,10 @@ const AdminPanel = () => {
             />
             <button type="submit">Войти</button>
           </form>
-        </div>
       </div>
-    );
-  }
+    </div>
+  );
+} 
 
   return (
     <div className="admin-panel">

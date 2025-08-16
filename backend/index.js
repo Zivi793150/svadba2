@@ -248,26 +248,45 @@ app.get('/api/analytics', async (req, res) => {
       timestamp: { $gte: previousStartDate, $lt: startDate } 
     });
 
-    // Анализ устройств
+    // Анализ устройств (по уникальным посетителям)
     const deviceStats = {};
+    const visitorDevices = {};
+    
     pageViews.forEach(view => {
+      const visitorId = view.sessionId || view.ip;
       const deviceType = view.deviceType || 'desktop';
-      deviceStats[deviceType] = (deviceStats[deviceType] || 0) + 1;
+      
+      // Считаем только первое посещение для каждого посетителя
+      if (!visitorDevices[visitorId]) {
+        visitorDevices[visitorId] = deviceType;
+        deviceStats[deviceType] = (deviceStats[deviceType] || 0) + 1;
+      }
     });
 
     const devices = Object.entries(deviceStats)
       .map(([type, count]) => ({
         type,
         count,
-        percentage: Math.round((count / pageViews.length) * 100)
+        percentage: Math.round((count / uniqueVisitors) * 100)
       }))
       .sort((a, b) => b.count - a.count);
 
     // Популярные страницы
     const pageStats = {};
+    const pageVisitors = {};
+    
     pageViews.forEach(view => {
       const page = view.page || '/';
+      const visitorId = view.sessionId || view.ip;
+      
+      // Считаем просмотры
       pageStats[page] = (pageStats[page] || 0) + 1;
+      
+      // Считаем уникальных посетителей для каждой страницы
+      if (!pageVisitors[page]) {
+        pageVisitors[page] = new Set();
+      }
+      pageVisitors[page].add(visitorId);
     });
 
     const popularPages = Object.entries(pageStats)
@@ -275,6 +294,7 @@ app.get('/api/analytics', async (req, res) => {
         path,
         name: path === '/' ? 'Главная' : path.split('/').pop() || path,
         views,
+        uniqueVisitors: pageVisitors[path].size,
         percentage: Math.round((views / pageViews.length) * 100)
       }))
       .sort((a, b) => b.views - a.views)
@@ -298,18 +318,29 @@ app.get('/api/analytics', async (req, res) => {
 
     // Конверсии
     const conversionStats = {};
+    const conversionVisitors = {};
+    
     conversions.forEach(conversion => {
       const key = conversion.action;
+      const visitorId = conversion.sessionId || conversion.ip;
+      
       conversionStats[key] = conversionStats[key] || { action: conversion.action, count: 0, pages: new Set() };
       conversionStats[key].count++;
       conversionStats[key].pages.add(conversion.page);
+      
+      // Считаем уникальных посетителей для каждой конверсии
+      if (!conversionVisitors[key]) {
+        conversionVisitors[key] = new Set();
+      }
+      conversionVisitors[key].add(visitorId);
     });
 
     const topConversions = Object.values(conversionStats)
       .map(conv => ({
         action: conv.action,
         count: conv.count,
-        rate: Math.round((conv.count / pageViews.length) * 100 * 100) / 100,
+        uniqueVisitors: conversionVisitors[conv.action].size,
+        rate: Math.round((conversionVisitors[conv.action].size / uniqueVisitors) * 100 * 100) / 100,
         page: Array.from(conv.pages)[0] || '/'
       }))
       .sort((a, b) => b.count - a.count);
@@ -330,12 +361,12 @@ app.get('/api/analytics', async (req, res) => {
     const newUsers = userSessions.filter(session => !session.pages || session.pages.length <= 1).length;
     const returningUsers = totalSessions - newUsers;
 
-    // Тренды (упрощенная версия)
+    // Тренды (по уникальным посетителям)
     const trends = [
       {
-        metric: 'Просмотры',
-        change: pageViews.length > 0 && previousPageViews.length > 0 
-          ? Math.round(((pageViews.length - previousPageViews.length) / previousPageViews.length) * 100)
+        metric: 'Посетители',
+        change: uniqueVisitors > 0 && previousUniqueVisitors > 0 
+          ? Math.round(((uniqueVisitors - previousUniqueVisitors) / previousUniqueVisitors) * 100)
           : 0,
         data: [60, 70, 80, 65, 90, 85, 95]
       },
@@ -348,11 +379,22 @@ app.get('/api/analytics', async (req, res) => {
       }
     ];
 
-    // Источники трафика (упрощенная версия)
+    // Источники трафика (по уникальным посетителям)
     const referrerStats = {};
+    const referrerVisitors = {};
+    
     pageViews.forEach(view => {
       const referrer = view.referrer || 'direct';
+      const visitorId = view.sessionId || view.ip;
+      
+      // Считаем переходы
       referrerStats[referrer] = (referrerStats[referrer] || 0) + 1;
+      
+      // Считаем уникальных посетителей для каждого источника
+      if (!referrerVisitors[referrer]) {
+        referrerVisitors[referrer] = new Set();
+      }
+      referrerVisitors[referrer].add(visitorId);
     });
 
     const topReferrers = Object.entries(referrerStats)
@@ -360,7 +402,8 @@ app.get('/api/analytics', async (req, res) => {
         source: source === 'direct' ? 'Прямые переходы' : source,
         url: source === 'direct' ? '-' : source,
         visits,
-        percentage: Math.round((visits / pageViews.length) * 100)
+        uniqueVisitors: referrerVisitors[source].size,
+        percentage: Math.round((referrerVisitors[source].size / uniqueVisitors) * 100)
       }))
       .sort((a, b) => b.visits - a.visits)
       .slice(0, 5);
@@ -380,41 +423,51 @@ app.get('/api/analytics', async (req, res) => {
       { name: 'macOS', percentage: 5 }
     ];
 
-    // Почасовая активность
+    // Почасовая активность (по уникальным посетителям)
     const hourlyActivity = [];
     for (let i = 0; i < 24; i++) {
-      const hourViews = pageViews.filter(view => {
+      const hourVisitors = new Set();
+      pageViews.forEach(view => {
         const hour = new Date(view.timestamp).getHours();
-        return hour === i;
-      }).length;
+        if (hour === i) {
+          hourVisitors.add(view.sessionId || view.ip);
+        }
+      });
       
       hourlyActivity.push({
         hour: i,
-        count: hourViews,
-        percentage: pageViews.length > 0 ? Math.round((hourViews / pageViews.length) * 100) : 0
+        count: hourVisitors.size,
+        percentage: uniqueVisitors > 0 ? Math.round((hourVisitors.size / uniqueVisitors) * 100) : 0
       });
     }
 
-    // Недельная активность
+    // Недельная активность (по уникальным посетителям)
     const weeklyActivity = [];
     const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
     for (let i = 0; i < 7; i++) {
-      const dayViews = pageViews.filter(view => {
+      const dayVisitors = new Set();
+      pageViews.forEach(view => {
         const day = new Date(view.timestamp).getDay();
-        return day === (i + 1) % 7; // Понедельник = 1, воскресенье = 0
-      }).length;
+        if (day === (i + 1) % 7) { // Понедельник = 1, воскресенье = 0
+          dayVisitors.add(view.sessionId || view.ip);
+        }
+      });
       
       weeklyActivity.push({
         day: days[i],
-        count: dayViews,
-        percentage: pageViews.length > 0 ? Math.round((dayViews / pageViews.length) * 100) : 0
+        count: dayVisitors.size,
+        percentage: uniqueVisitors > 0 ? Math.round((dayVisitors.size / uniqueVisitors) * 100) : 0
       });
     }
 
+    // Подсчет уникальных посетителей
+    const uniqueVisitors = new Set(pageViews.map(view => view.sessionId || view.ip)).size;
+    const previousUniqueVisitors = new Set(previousPageViews.map(view => view.sessionId || view.ip)).size;
+    
     // Обзор
     const overview = {
-      totalVisitors: pageViews.length,
-      previousVisitors: previousPageViews.length,
+      totalVisitors: uniqueVisitors,
+      previousVisitors: previousUniqueVisitors,
       totalPageViews: pageViews.length,
       previousPageViews: previousPageViews.length,
       totalChats: activeChats,
@@ -426,6 +479,9 @@ app.get('/api/analytics', async (req, res) => {
       bounceRate: 35, // Упрощенная версия
       pagesPerSession: pageViews.length > 0 && totalSessions > 0 
         ? Math.round((pageViews.length / totalSessions) * 10) / 10 
+        : 0,
+      avgPagesPerVisitor: uniqueVisitors > 0 
+        ? Math.round((pageViews.length / uniqueVisitors) * 10) / 10 
         : 0
     };
 
