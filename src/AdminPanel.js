@@ -1,127 +1,112 @@
-import React, { useState, useEffect, useRef } from 'react';
-import io from 'socket.io-client';
+import React, { useState, useEffect } from 'react';
+import './AdminPanel.css';
 
-const ADMIN_PASSWORD = 'Feyero2024!@#$Secure'; // надежный пароль для админ-панели
-const API_URL = process.env.REACT_APP_API_URL || 'https://svadba2.onrender.com';
-const socket = io(API_URL);
+const ADMIN_PASSWORD = 'Feyero2024!@#$Secure';
 
-export default function AdminPanel() {
+const AdminPanel = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
-  const [isAuth, setIsAuth] = useState(false);
-  const [activeTab, setActiveTab] = useState('chats'); // chats, analytics
+  const [activeTab, setActiveTab] = useState('chats');
   const [chats, setChats] = useState([]);
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [msg, setMsg] = useState('');
-  const [error, setError] = useState('');
-  const [analytics, setAnalytics] = useState({
-    pageViews: [],
-    devices: {},
-    buttonClicks: {},
-    userSessions: [],
-    popularPages: {},
-    timeOnSite: [],
-    chatEngagement: {},
-    conversions: {}
-  });
+  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef(null);
+  const [selectedPeriod, setSelectedPeriod] = useState('week'); // week, month, year, all
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
 
-  useEffect(() => {
-    if (isAuth) {
-      if (activeTab === 'chats') {
-        fetch(`${API_URL}/api/chats`)
-          .then(res => res.json())
-          .then(data => setChats(data))
-          .catch(() => setError('Ошибка загрузки чатов'));
-      } else if (activeTab === 'analytics') {
-        fetchAnalytics();
-      }
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (password === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      fetchChats();
+      fetchAnalytics();
+    } else {
+      alert('Неверный пароль!');
     }
-  }, [isAuth, activeTab]);
+  };
+
+  const fetchChats = async () => {
+    try {
+      const response = await fetch('https://svadba2.onrender.com/api/messages');
+      const data = await response.json();
+      setChats(data);
+    } catch (error) {
+      console.error('Error fetching chats:', error);
+    }
+  };
 
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/analytics`);
-      const data = await res.json();
+      const response = await fetch(`https://svadba2.onrender.com/api/analytics?period=${selectedPeriod}`);
+      const data = await response.json();
       setAnalytics(data);
-    } catch (err) {
-      setError('Ошибка загрузки аналитики');
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (!selectedChat) return;
-    fetch(`${API_URL}/api/messages/${selectedChat}`)
-      .then(res => res.json())
-      .then(setMessages)
-      .catch(() => setError('Ошибка загрузки сообщений'));
-    // Пометить все сообщения пользователя как просмотренные
-    fetch(`${API_URL}/api/messages/viewed/${selectedChat}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sender: 'admin' })
-    });
-    socket.emit('join', selectedChat);
-    const onMsg = (msg) => {
-      console.log('Получено сообщение через socket (admin):', msg);
-      if (msg.chatId === selectedChat) {
-        setMessages(prev => [...prev, msg]);
-        // Мгновенно помечаем сообщения пользователя как прочитанные
-        fetch(`${API_URL}/api/messages/viewed/${selectedChat}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sender: 'admin' })
-        });
-      }
-    };
-    const onViewed = (data) => {
-      if (data.chatId === selectedChat) {
-        setMessages(prev => prev.map(m => data.ids.includes(m._id) ? { ...m, viewed: true } : m));
-      }
-    };
-    socket.on('message', onMsg);
-    socket.on('viewed', onViewed);
-    return () => {
-      socket.off('message', onMsg);
-      socket.off('viewed', onViewed);
-    };
-  }, [selectedChat]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setIsAuth(true);
-      setError('');
-    } else {
-      setError('Неверный пароль');
+  const fetchChatMessages = async (chatId) => {
+    try {
+      const response = await fetch(`https://svadba2.onrender.com/api/messages/${chatId}`);
+      const data = await response.json();
+      setChatMessages(data);
+      setSelectedChat(chatId);
+    } catch (error) {
+      console.error('Error fetching chat messages:', error);
     }
   };
 
-  const sendMsg = async (e) => {
-    e.preventDefault();
-    if (!msg.trim() || !selectedChat) return;
-    await fetch(`${API_URL}/api/messages`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chatId: selectedChat, sender: 'admin', text: msg })
-    });
-    setMsg('');
+  const deleteMessage = async (messageId) => {
+    try {
+      await fetch(`https://svadba2.onrender.com/api/messages/${messageId}`, {
+        method: 'DELETE'
+      });
+      fetchChats();
+      if (selectedChat) {
+        fetchChatMessages(selectedChat);
+      }
+    } catch (error) {
+      console.error('Error deleting message:', error);
+    }
   };
 
   const formatNumber = (num) => {
-    return new Intl.NumberFormat('ru-RU').format(num);
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
   };
 
-  const getDeviceIcon = (device) => {
-    switch (device) {
+  const formatDuration = (ms) => {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) return `${days}д ${hours % 24}ч`;
+    if (hours > 0) return `${hours}ч ${minutes % 60}м`;
+    if (minutes > 0) return `${minutes}м ${seconds % 60}с`;
+    return `${seconds}с`;
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getDeviceIcon = (deviceType) => {
+    switch (deviceType) {
       case 'mobile': return '📱';
       case 'tablet': return '📱';
       case 'desktop': return '💻';
@@ -129,257 +114,541 @@ export default function AdminPanel() {
     }
   };
 
-  const renderAnalytics = () => (
-    <div style={{padding: '32px', background: 'var(--bg-primary)', height: '100vh', overflowY: 'auto'}}>
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px'}}>
-        <h1 style={{color: 'var(--accent-primary)', fontWeight: 900, fontSize: '28px', letterSpacing: 1}}>Аналитика сайта</h1>
-        <button 
-          onClick={fetchAnalytics}
-          style={{
-            background: 'linear-gradient(90deg, var(--accent-secondary) 0%, var(--accent-tertiary) 100%)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '12px',
-            padding: '12px 24px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
-        >
-          🔄 Обновить
-        </button>
-      </div>
+  const getPeriodLabel = () => {
+    switch (selectedPeriod) {
+      case 'week': return 'последняя неделя';
+      case 'month': return 'последний месяц';
+      case 'year': return 'последний год';
+      case 'all': return 'все время';
+      default: return 'последняя неделя';
+    }
+  };
 
-      {loading ? (
-        <div style={{textAlign: 'center', color: 'var(--text-secondary)', fontSize: '18px'}}>Загрузка аналитики...</div>
-      ) : (
-        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px'}}>
-          {/* Основные метрики */}
-          <div style={{background: 'var(--bg-secondary)', borderRadius: '16px', padding: '24px', border: '2px solid var(--accent-primary)'}}>
-            <h3 style={{color: 'var(--accent-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 700}}>📊 Основные метрики</h3>
-            <div style={{display: 'grid', gap: '12px'}}>
-              <div style={{display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-color)'}}>
-                <span>Просмотры страниц:</span>
-                <span style={{fontWeight: 700, color: 'var(--accent-secondary)'}}>{formatNumber(analytics.pageViews.length)}</span>
-              </div>
-              <div style={{display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-color)'}}>
-                <span>Уникальные сессии:</span>
-                <span style={{fontWeight: 700, color: 'var(--accent-secondary)'}}>{formatNumber(analytics.userSessions.length)}</span>
-              </div>
-              <div style={{display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-color)'}}>
-                <span>Активные чаты:</span>
-                <span style={{fontWeight: 700, color: 'var(--accent-secondary)'}}>{formatNumber(chats.length)}</span>
-              </div>
-              <div style={{display: 'flex', justifyContent: 'space-between', padding: '8px 0'}}>
-                <span>Среднее время на сайте:</span>
-                <span style={{fontWeight: 700, color: 'var(--accent-secondary)'}}>
-                  {analytics.timeOnSite.length > 0 
-                    ? Math.round(analytics.timeOnSite.reduce((a, b) => a + b, 0) / analytics.timeOnSite.length / 1000 / 60) + ' мин'
-                    : '0 мин'
-                  }
-                </span>
+  const calculateGrowth = (current, previous) => {
+    if (!previous || previous === 0) return 0;
+    return ((current - previous) / previous * 100).toFixed(1);
+  };
+
+  const renderAnalytics = () => {
+    if (!analytics) return <div className="loading">Загрузка аналитики...</div>;
+
+    const {
+      overview,
+      pageViews,
+      devices,
+      popularPages,
+      buttonClicks,
+      conversions,
+      chatEngagement,
+      userSessions,
+      trends,
+      topReferrers,
+      browserStats,
+      osStats,
+      hourlyActivity,
+      weeklyActivity
+    } = analytics;
+
+    return (
+      <div className="analytics-container">
+        {/* Период и обновление */}
+        <div className="analytics-header">
+          <div className="period-selector">
+            <label>Период:</label>
+            <select value={selectedPeriod} onChange={(e) => {
+              setSelectedPeriod(e.target.value);
+              setTimeout(fetchAnalytics, 100);
+            }}>
+              <option value="week">Последняя неделя</option>
+              <option value="month">Последний месяц</option>
+              <option value="year">Последний год</option>
+              <option value="all">Все время</option>
+            </select>
+          </div>
+          <button onClick={fetchAnalytics} className="refresh-btn" disabled={loading}>
+            {loading ? '🔄' : '🔄'} Обновить
+          </button>
+        </div>
+
+        {/* Основные метрики */}
+        <div className="metrics-grid">
+          <div className="metric-card primary">
+            <div className="metric-icon">👥</div>
+            <div className="metric-content">
+              <h3>Посетители</h3>
+              <div className="metric-value">{formatNumber(overview.totalVisitors)}</div>
+              <div className="metric-change positive">
+                +{calculateGrowth(overview.totalVisitors, overview.previousVisitors)}% vs предыдущий период
               </div>
             </div>
           </div>
 
-          {/* Устройства */}
-          <div style={{background: 'var(--bg-secondary)', borderRadius: '16px', padding: '24px', border: '2px solid var(--accent-primary)'}}>
-            <h3 style={{color: 'var(--accent-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 700}}>📱 Устройства</h3>
-            <div style={{display: 'grid', gap: '12px'}}>
-              {Object.entries(analytics.devices).map(([device, count]) => (
-                <div key={device} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border-color)'}}>
-                  <span style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                    {getDeviceIcon(device)} {device}
-                  </span>
-                  <span style={{fontWeight: 700, color: 'var(--accent-secondary)'}}>{formatNumber(count)}</span>
+          <div className="metric-card primary">
+            <div className="metric-icon">📄</div>
+            <div className="metric-content">
+              <h3>Просмотры</h3>
+              <div className="metric-value">{formatNumber(overview.totalPageViews)}</div>
+              <div className="metric-change positive">
+                +{calculateGrowth(overview.totalPageViews, overview.previousPageViews)}% vs предыдущий период
+              </div>
+            </div>
+          </div>
+
+          <div className="metric-card primary">
+            <div className="metric-icon">💬</div>
+            <div className="metric-content">
+              <h3>Чаты</h3>
+              <div className="metric-value">{formatNumber(overview.totalChats)}</div>
+              <div className="metric-change positive">
+                +{calculateGrowth(overview.totalChats, overview.previousChats)}% vs предыдущий период
+              </div>
+            </div>
+          </div>
+
+          <div className="metric-card primary">
+            <div className="metric-icon">🎯</div>
+            <div className="metric-content">
+              <h3>Конверсии</h3>
+              <div className="metric-value">{formatNumber(overview.totalConversions)}</div>
+              <div className="metric-change positive">
+                +{calculateGrowth(overview.totalConversions, overview.previousConversions)}% vs предыдущий период
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Дополнительные метрики */}
+        <div className="metrics-grid secondary">
+          <div className="metric-card">
+            <div className="metric-icon">⏱️</div>
+            <div className="metric-content">
+              <h3>Время на сайте</h3>
+              <div className="metric-value">{formatDuration(overview.avgSessionDuration)}</div>
+              <div className="metric-subtitle">в среднем</div>
+            </div>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-icon">📱</div>
+            <div className="metric-content">
+              <h3>Мобильные</h3>
+              <div className="metric-value">{overview.mobilePercentage}%</div>
+              <div className="metric-subtitle">от всех посетителей</div>
+            </div>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-icon">🔄</div>
+            <div className="metric-content">
+              <h3>Возвраты</h3>
+              <div className="metric-value">{overview.bounceRate}%</div>
+              <div className="metric-subtitle">процент отказов</div>
+            </div>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-icon">📈</div>
+            <div className="metric-content">
+              <h3>Страниц/сессия</h3>
+              <div className="metric-value">{overview.pagesPerSession}</div>
+              <div className="metric-subtitle">в среднем</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Устройства */}
+        <div className="analytics-section">
+          <h2>📱 Устройства ({getPeriodLabel()})</h2>
+          <div className="devices-grid">
+            {devices.map((device, index) => (
+              <div key={index} className="device-card">
+                <div className="device-icon">{getDeviceIcon(device.type)}</div>
+                <div className="device-info">
+                  <h3>{device.type === 'mobile' ? 'Мобильные' : device.type === 'tablet' ? 'Планшеты' : 'Десктопы'}</h3>
+                  <div className="device-stats">
+                    <div className="device-percentage">{device.percentage}%</div>
+                    <div className="device-count">{formatNumber(device.count)} посетителей</div>
+                  </div>
+                </div>
+                <div className="device-bar">
+                  <div className="device-bar-fill" style={{ width: `${device.percentage}%` }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Популярные страницы */}
+        <div className="analytics-section">
+          <h2>📄 Популярные страницы ({getPeriodLabel()})</h2>
+          <div className="pages-list">
+            {popularPages.map((page, index) => (
+              <div key={index} className="page-item">
+                <div className="page-rank">#{index + 1}</div>
+                <div className="page-info">
+                  <div className="page-name">{page.name}</div>
+                  <div className="page-path">{page.path}</div>
+                </div>
+                <div className="page-stats">
+                  <div className="page-views">{formatNumber(page.views)} просмотров</div>
+                  <div className="page-percentage">{page.percentage}%</div>
+                </div>
+                <div className="page-bar">
+                  <div className="page-bar-fill" style={{ width: `${page.percentage}%` }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Клики по кнопкам */}
+        <div className="analytics-section">
+          <h2>🖱️ Популярные кнопки ({getPeriodLabel()})</h2>
+          <div className="buttons-grid">
+            {buttonClicks.map((button, index) => (
+              <div key={index} className="button-card">
+                <div className="button-rank">#{index + 1}</div>
+                <div className="button-info">
+                  <h3>{button.text}</h3>
+                  <div className="button-id">{button.id}</div>
+                </div>
+                <div className="button-stats">
+                  <div className="button-clicks">{formatNumber(button.clicks)} кликов</div>
+                  <div className="button-percentage">{button.percentage}%</div>
+                </div>
+                <div className="button-bar">
+                  <div className="button-bar-fill" style={{ width: `${button.percentage}%` }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Конверсии */}
+        <div className="analytics-section">
+          <h2>🎯 Конверсии ({getPeriodLabel()})</h2>
+          <div className="conversions-grid">
+            {conversions.map((conversion, index) => (
+              <div key={index} className="conversion-card">
+                <div className="conversion-icon">
+                  {conversion.action === 'chat_opened' ? '💬' :
+                   conversion.action === 'telegram_clicked' ? '📱' :
+                   conversion.action === 'whatsapp_clicked' ? '📞' :
+                   conversion.action === 'order_page_visited' ? '🛒' : '🎯'}
+                </div>
+                <div className="conversion-info">
+                  <h3>
+                    {conversion.action === 'chat_opened' ? 'Открытие чата' :
+                     conversion.action === 'telegram_clicked' ? 'Клик Telegram' :
+                     conversion.action === 'whatsapp_clicked' ? 'Клик WhatsApp' :
+                     conversion.action === 'order_page_visited' ? 'Страница заказа' : conversion.action}
+                  </h3>
+                  <div className="conversion-page">{conversion.page}</div>
+                </div>
+                <div className="conversion-stats">
+                  <div className="conversion-count">{formatNumber(conversion.count)}</div>
+                  <div className="conversion-rate">{conversion.rate}%</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Вовлеченность в чат */}
+        <div className="analytics-section">
+          <h2>💬 Вовлеченность в чат ({getPeriodLabel()})</h2>
+          <div className="chat-stats-grid">
+            <div className="chat-stat-card">
+              <div className="chat-stat-icon">💬</div>
+              <div className="chat-stat-info">
+                <h3>Сообщений отправлено</h3>
+                <div className="chat-stat-value">{formatNumber(chatEngagement.messagesSent)}</div>
+              </div>
+            </div>
+            <div className="chat-stat-card">
+              <div className="chat-stat-icon">📤</div>
+              <div className="chat-stat-info">
+                <h3>Файлов отправлено</h3>
+                <div className="chat-stat-value">{formatNumber(chatEngagement.filesSent)}</div>
+              </div>
+            </div>
+            <div className="chat-stat-card">
+              <div className="chat-stat-icon">⏱️</div>
+              <div className="chat-stat-info">
+                <h3>Время в чате</h3>
+                <div className="chat-stat-value">{formatDuration(chatEngagement.avgTimeInChat)}</div>
+              </div>
+            </div>
+            <div className="chat-stat-card">
+              <div className="chat-stat-icon">👥</div>
+              <div className="chat-stat-info">
+                <h3>Активных чатов</h3>
+                <div className="chat-stat-value">{formatNumber(chatEngagement.activeChats)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Сессии пользователей */}
+        <div className="analytics-section">
+          <h2>🕐 Сессии пользователей ({getPeriodLabel()})</h2>
+          <div className="sessions-stats">
+            <div className="session-stat">
+              <h3>Всего сессий</h3>
+              <div className="session-value">{formatNumber(userSessions.total)}</div>
+            </div>
+            <div className="session-stat">
+              <h3>Средняя длительность</h3>
+              <div className="session-value">{formatDuration(userSessions.avgDuration)}</div>
+            </div>
+            <div className="session-stat">
+              <h3>Новые пользователи</h3>
+              <div className="session-value">{formatNumber(userSessions.newUsers)}</div>
+            </div>
+            <div className="session-stat">
+              <h3>Возвращающиеся</h3>
+              <div className="session-value">{formatNumber(userSessions.returningUsers)}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Тренды */}
+        {trends && (
+          <div className="analytics-section">
+            <h2>📈 Тренды ({getPeriodLabel()})</h2>
+            <div className="trends-grid">
+              {trends.map((trend, index) => (
+                <div key={index} className="trend-card">
+                  <div className="trend-header">
+                    <h3>{trend.metric}</h3>
+                    <div className={`trend-change ${trend.change >= 0 ? 'positive' : 'negative'}`}>
+                      {trend.change >= 0 ? '+' : ''}{trend.change}%
+                    </div>
+                  </div>
+                  <div className="trend-chart">
+                    {trend.data.map((point, i) => (
+                      <div key={i} className="trend-point" style={{ height: `${point}%` }}></div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
+        )}
 
-          {/* Популярные страницы */}
-          <div style={{background: 'var(--bg-secondary)', borderRadius: '16px', padding: '24px', border: '2px solid var(--accent-primary)'}}>
-            <h3 style={{color: 'var(--accent-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 700}}>🌐 Популярные страницы</h3>
-            <div style={{display: 'grid', gap: '12px'}}>
-              {Object.entries(analytics.popularPages)
-                .sort(([,a], [,b]) => b - a)
-                .slice(0, 5)
-                .map(([page, count]) => (
-                  <div key={page} style={{display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-color)'}}>
-                    <span style={{fontSize: '14px'}}>{page}</span>
-                    <span style={{fontWeight: 700, color: 'var(--accent-secondary)'}}>{formatNumber(count)}</span>
+        {/* Источники трафика */}
+        {topReferrers && (
+          <div className="analytics-section">
+            <h2>🔗 Источники трафика ({getPeriodLabel()})</h2>
+            <div className="referrers-list">
+              {topReferrers.map((referrer, index) => (
+                <div key={index} className="referrer-item">
+                  <div className="referrer-rank">#{index + 1}</div>
+                  <div className="referrer-info">
+                    <div className="referrer-name">{referrer.source}</div>
+                    <div className="referrer-url">{referrer.url}</div>
                   </div>
-                ))}
-            </div>
-          </div>
-
-          {/* Клики по кнопкам */}
-          <div style={{background: 'var(--bg-secondary)', borderRadius: '16px', padding: '24px', border: '2px solid var(--accent-primary)'}}>
-            <h3 style={{color: 'var(--accent-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 700}}>🖱️ Клики по кнопкам</h3>
-            <div style={{display: 'grid', gap: '12px'}}>
-              {Object.entries(analytics.buttonClicks)
-                .sort(([,a], [,b]) => b - a)
-                .slice(0, 5)
-                .map(([button, count]) => (
-                  <div key={button} style={{display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-color)'}}>
-                    <span style={{fontSize: '14px'}}>{button}</span>
-                    <span style={{fontWeight: 700, color: 'var(--accent-secondary)'}}>{formatNumber(count)}</span>
+                  <div className="referrer-stats">
+                    <div className="referrer-visits">{formatNumber(referrer.visits)} визитов</div>
+                    <div className="referrer-percentage">{referrer.percentage}%</div>
                   </div>
-                ))}
-            </div>
-          </div>
-
-          {/* Конверсии */}
-          <div style={{background: 'var(--bg-secondary)', borderRadius: '16px', padding: '24px', border: '2px solid var(--accent-primary)'}}>
-            <h3 style={{color: 'var(--accent-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 700}}>🎯 Конверсии</h3>
-            <div style={{display: 'grid', gap: '12px'}}>
-              {Object.entries(analytics.conversions).map(([action, count]) => (
-                <div key={action} style={{display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-color)'}}>
-                  <span style={{fontSize: '14px'}}>{action}</span>
-                  <span style={{fontWeight: 700, color: 'var(--accent-secondary)'}}>{formatNumber(count)}</span>
                 </div>
               ))}
             </div>
           </div>
+        )}
 
-          {/* Вовлеченность в чат */}
-          <div style={{background: 'var(--bg-secondary)', borderRadius: '16px', padding: '24px', border: '2px solid var(--accent-primary)'}}>
-            <h3 style={{color: 'var(--accent-primary)', marginBottom: '16px', fontSize: '18px', fontWeight: 700}}>💬 Вовлеченность в чат</h3>
-            <div style={{display: 'grid', gap: '12px'}}>
-              {Object.entries(analytics.chatEngagement).map(([metric, value]) => (
-                <div key={metric} style={{display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-color)'}}>
-                  <span style={{fontSize: '14px'}}>{metric}</span>
-                  <span style={{fontWeight: 700, color: 'var(--accent-secondary)'}}>{typeof value === 'number' ? formatNumber(value) : value}</span>
+        {/* Браузеры и ОС */}
+        <div className="analytics-section">
+          <h2>🌐 Браузеры и ОС ({getPeriodLabel()})</h2>
+          <div className="tech-stats-grid">
+            <div className="tech-section">
+              <h3>Браузеры</h3>
+              {browserStats.map((browser, index) => (
+                <div key={index} className="tech-item">
+                  <div className="tech-name">{browser.name}</div>
+                  <div className="tech-bar">
+                    <div className="tech-bar-fill" style={{ width: `${browser.percentage}%` }}></div>
+                  </div>
+                  <div className="tech-percentage">{browser.percentage}%</div>
+                </div>
+              ))}
+            </div>
+            <div className="tech-section">
+              <h3>Операционные системы</h3>
+              {osStats.map((os, index) => (
+                <div key={index} className="tech-item">
+                  <div className="tech-name">{os.name}</div>
+                  <div className="tech-bar">
+                    <div className="tech-bar-fill" style={{ width: `${os.percentage}%` }}></div>
+                  </div>
+                  <div className="tech-percentage">{os.percentage}%</div>
                 </div>
               ))}
             </div>
           </div>
         </div>
-      )}
+
+        {/* Почасовая активность */}
+        {hourlyActivity && (
+          <div className="analytics-section">
+            <h2>🕐 Почасовая активность ({getPeriodLabel()})</h2>
+            <div className="hourly-chart">
+              {hourlyActivity.map((hour, index) => (
+                <div key={index} className="hour-bar">
+                  <div className="hour-label">{hour.hour}:00</div>
+                  <div className="hour-value" style={{ height: `${hour.percentage}%` }}>
+                    <span className="hour-count">{formatNumber(hour.count)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Недельная активность */}
+        {weeklyActivity && (
+          <div className="analytics-section">
+            <h2>📅 Недельная активность ({getPeriodLabel()})</h2>
+            <div className="weekly-chart">
+              {weeklyActivity.map((day, index) => (
+                <div key={index} className="day-bar">
+                  <div className="day-label">{day.day}</div>
+                  <div className="day-value" style={{ height: `${day.percentage}%` }}>
+                    <span className="day-count">{formatNumber(day.count)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderChats = () => (
+    <div className="chats-container">
+      <div className="chats-header">
+        <h2>💬 Чаты ({chats.length})</h2>
+        <button onClick={fetchChats} className="refresh-btn">🔄 Обновить</button>
+      </div>
+      
+      <div className="chats-grid">
+        <div className="chats-list">
+          {chats.map((chat) => (
+            <div 
+              key={chat._id} 
+              className={`chat-item ${selectedChat === chat._id ? 'active' : ''}`}
+              onClick={() => fetchChatMessages(chat._id)}
+            >
+              <div className="chat-header">
+                <div className="chat-id">#{chat._id.slice(-6)}</div>
+                <div className="chat-date">{formatDate(chat.timestamp)}</div>
+              </div>
+              <div className="chat-preview">
+                {chat.messages && chat.messages.length > 0 
+                  ? chat.messages[chat.messages.length - 1].text?.substring(0, 50) + '...'
+                  : 'Нет сообщений'
+                }
+              </div>
+              <div className="chat-stats">
+                <span className="chat-messages">{chat.messages?.length || 0} сообщений</span>
+                {chat.messages && chat.messages.some(m => m.fileUrl) && (
+                  <span className="chat-files">📎</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {selectedChat && (
+          <div className="chat-messages">
+            <div className="messages-header">
+              <h3>Чат #{selectedChat.slice(-6)}</h3>
+              <button onClick={() => setSelectedChat(null)} className="close-btn">✕</button>
+            </div>
+            <div className="messages-list">
+              {chatMessages.map((message) => (
+                <div key={message._id} className={`message ${message.isUser ? 'user' : 'admin'}`}>
+                  <div className="message-header">
+                    <span className="message-sender">
+                      {message.isUser ? '👤 Пользователь' : '🤖 Админ'}
+                    </span>
+                    <span className="message-time">{formatDate(message.timestamp)}</span>
+                    <button 
+                      onClick={() => deleteMessage(message._id)}
+                      className="delete-btn"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                  <div className="message-content">
+                    {message.text && <div className="message-text">{message.text}</div>}
+                    {message.fileUrl && (
+                      <div className="message-file">
+                        <a href={message.fileUrl} target="_blank" rel="noopener noreferrer">
+                          📎 {message.fileName || 'Файл'}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 
-  if (!isAuth) {
+  if (!isAuthenticated) {
     return (
-      <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh',background:'var(--bg-primary)'}}>
-        <form onSubmit={handleLogin} style={{background:'var(--bg-secondary)',padding:32,borderRadius:24,boxShadow:'0 8px 48px 0 var(--shadow-color), 0 2px 8px 0 var(--shadow-color)',minWidth:320, border:'2px solid var(--accent-primary)'}}>
-          <h2 style={{marginBottom:24, color:'var(--accent-primary)', fontWeight:900, letterSpacing:1}}>Вход для администратора</h2>
-          <input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Пароль" style={{width:'100%',padding:16,borderRadius:16,border:'1.5px solid var(--accent-secondary)',marginBottom:18, color:'#fff', background:'var(--bg-primary)', fontWeight:500, fontSize:18, boxShadow:'0 2px 8px var(--shadow-color)', outline:'none'}} autoFocus />
-          <button type="submit" style={{width:'100%',padding:16,borderRadius:16,background:'linear-gradient(90deg, var(--accent-secondary) 0%, var(--accent-tertiary) 100%)',color:'#fff',fontWeight:800,border:'2px solid var(--accent-primary)',fontSize:18,boxShadow:'0 4px 24px var(--shadow-color)',cursor:'pointer',letterSpacing:1}}>Войти</button>
-          {error && <div style={{color:'#ff3b3b',marginTop:12}}>{error}</div>}
-        </form>
+      <div className="admin-login">
+        <div className="login-form">
+          <h1>🔐 Админ-панель</h1>
+          <form onSubmit={handleLogin}>
+            <input
+              type="password"
+              placeholder="Введите пароль"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button type="submit">Войти</button>
+          </form>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{display:'flex',height:'100vh',background:'var(--bg-primary)',color:'var(--text-primary)',fontFamily:'inherit'}}>
-      {/* Левая панель — навигация */}
-      <div style={{width:340,background:'var(--bg-secondary)',borderRight:'2px solid var(--accent-primary)',padding:0,overflowY:'auto',boxShadow:'2px 0 16px var(--shadow-color)'}}>
-        <div style={{padding:'28px 22px',borderBottom:'2px solid var(--accent-primary)',fontWeight:900,fontSize:22,letterSpacing:1,color:'var(--accent-primary)',background:'var(--bg-secondary)'}}>Панель управления</div>
-        
-        {/* Вкладки */}
-        <div style={{padding:'16px 0'}}>
-          <div 
+    <div className="admin-panel">
+      <div className="admin-header">
+        <h1>🎛️ Админ-панель Фейеро</h1>
+        <div className="admin-tabs">
+          <button 
+            className={activeTab === 'chats' ? 'active' : ''} 
             onClick={() => setActiveTab('chats')}
-            style={{
-              padding:'16px 22px',
-              cursor:'pointer',
-              background:activeTab==='chats'?'var(--accent-primary)':'var(--bg-secondary)',
-              color:activeTab==='chats'?'#fff':'var(--text-primary)',
-              fontWeight:activeTab==='chats'?800:600,
-              borderLeft:activeTab==='chats'?'4px solid var(--accent-tertiary)':'4px solid transparent',
-              transition:'all 0.2s'
-            }}
           >
-            💬 Чаты ({chats.length})
-          </div>
-          <div 
+            💬 Чаты
+          </button>
+          <button 
+            className={activeTab === 'analytics' ? 'active' : ''} 
             onClick={() => setActiveTab('analytics')}
-            style={{
-              padding:'16px 22px',
-              cursor:'pointer',
-              background:activeTab==='analytics'?'var(--accent-primary)':'var(--bg-secondary)',
-              color:activeTab==='analytics'?'#fff':'var(--text-primary)',
-              fontWeight:activeTab==='analytics'?800:600,
-              borderLeft:activeTab==='analytics'?'4px solid var(--accent-tertiary)':'4px solid transparent',
-              transition:'all 0.2s'
-            }}
           >
             📊 Аналитика
-          </div>
+          </button>
         </div>
-
-        {/* Список чатов (только для вкладки чатов) */}
-        {activeTab === 'chats' && (
-          <div style={{padding:0}}>
-            {chats.map(chat => (
-              <div key={chat._id}
-                   onClick={()=>setSelectedChat(chat._id)}
-                   style={{padding:'18px 22px',borderBottom:'1.5px solid var(--border-color)',cursor:'pointer',background:selectedChat===chat._id?'var(--accent-primary)':'var(--bg-secondary)',transition:'background 0.2s',color:selectedChat===chat._id?'#fff':'var(--text-primary)',fontWeight:selectedChat===chat._id?800:600,borderLeft:selectedChat===chat._id?'4px solid var(--accent-tertiary)':'4px solid transparent'}}>
-                <div style={{fontWeight:800,fontSize:16,letterSpacing:0.5}}>{chat._id}</div>
-                <div style={{fontSize:14,color:selectedChat===chat._id?'#fff':'var(--accent-secondary)',margin:'4px 0 2px 0'}}>{chat.lastMessage?.text?.slice(0, 40) || '—'}</div>
-                <div style={{fontSize:12,color:selectedChat===chat._id?'#fff':'var(--text-secondary)'}}>{chat.lastMessage?.createdAt ? new Date(chat.lastMessage.createdAt).toLocaleString() : '—'}</div>
-              </div>
-            ))}
-          </div>
-        )}
+        <button onClick={() => setIsAuthenticated(false)} className="logout-btn">
+          🚪 Выйти
+        </button>
       </div>
 
-      {/* Правая панель — контент */}
-      <div style={{flex:1,display:'flex',flexDirection:'column',height:'100vh',background:'var(--bg-primary)'}}>
-        {activeTab === 'chats' ? (
-          <>
-            <div style={{padding:'28px 38px',borderBottom:'2px solid var(--accent-primary)',fontWeight:900,fontSize:22,letterSpacing:1,background:'var(--bg-secondary)',color:'var(--accent-primary)'}}>Сообщения</div>
-            <div style={{flex:1,overflowY:'auto',padding:'38px 32px 0 32px',display:'flex',flexDirection:'column',gap:18}}>
-              {selectedChat ? (
-                messages.length > 0 ? (
-                  messages.map((m,i) => (
-                    <div key={i} style={{alignSelf:m.sender==='admin'?'flex-end':'flex-start',maxWidth:'70%'}}>
-                      {m.fileUrl ? (
-                        m.fileType && m.fileType.startsWith('image/') ? (
-                          <img src={API_URL + m.fileUrl} alt="file" style={{maxWidth:180,maxHeight:180,borderRadius:12,marginBottom:6}} />
-                        ) : (
-                          <a href={API_URL + m.fileUrl} target="_blank" rel="noopener noreferrer" style={{color:'#7CA7CE',wordBreak:'break-all',display:'block',marginBottom:6}}>
-                            📎 Скачать файл
-                          </a>
-                        )
-                      ) : null}
-                      <div style={{background:m.sender==='admin'?'linear-gradient(90deg,var(--accent-secondary) 0%,var(--accent-primary) 100%)':'var(--bg-secondary)',color:m.sender==='admin'?'#fff':'var(--text-primary)',borderRadius:m.sender==='admin'?'16px 16px 4px 16px':'16px 16px 16px 4px',padding:'12px 18px',fontSize:16,boxShadow:'0 2px 8px var(--shadow-color)',marginBottom:2,fontWeight:600,letterSpacing:0.2}}>
-                        <span>{m.text}</span>
-                      </div>
-                      <div style={{fontSize:12,color:'var(--text-secondary)',marginTop:2,textAlign:m.sender==='admin'?'right':'left'}}>
-                        {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {m.sender==='admin'?'Админ':'Пользователь'}
-                        {m.sender==='user' && m.viewed && <span style={{marginLeft:6,color:'var(--accent-tertiary)'}}>✓✓</span>}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div style={{color:'var(--text-secondary)',marginTop:40}}>Нет сообщений</div>
-                )
-              ) : (
-                <div style={{color:'var(--text-secondary)',marginTop:40}}>Выберите чат слева</div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-            {/* Форма отправки сообщения */}
-            {selectedChat && (
-              <form onSubmit={sendMsg} style={{display:'flex',borderTop:'2px solid var(--accent-primary)',padding:'22px 32px',background:'var(--bg-secondary)'}} autoComplete="off">
-                <input
-                  style={{flex:1,border:'1.5px solid var(--accent-secondary)',borderRadius:16,padding:'12px 18px',fontSize:16,marginRight:16,color:'#fff',background:'var(--bg-primary)',fontWeight:500,outline:'none',boxShadow:'0 2px 8px var(--shadow-color)'}}
-                  value={msg}
-                  onChange={e=>setMsg(e.target.value)}
-                  placeholder="Введите сообщение..."
-                  autoFocus
-                />
-                <button type="submit" style={{background:'linear-gradient(90deg,var(--accent-secondary) 0%,var(--accent-tertiary) 100%)',color:'#fff',border:'none',borderRadius:16,padding:'0 32px',fontWeight:800,fontSize:16,cursor:'pointer',boxShadow:'0 4px 24px var(--shadow-color)',letterSpacing:1}}>Отправить</button>
-              </form>
-            )}
-          </>
-        ) : (
-          renderAnalytics()
-        )}
+      <div className="admin-content">
+        {activeTab === 'chats' ? renderChats() : renderAnalytics()}
       </div>
     </div>
   );
-} 
+};
+
+export default AdminPanel; 

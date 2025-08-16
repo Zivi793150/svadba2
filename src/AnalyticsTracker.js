@@ -37,12 +37,25 @@ class AnalyticsTracker {
 
   async trackPageView() {
     try {
+      // Определяем тип устройства
+      const getDeviceType = () => {
+        const userAgent = navigator.userAgent.toLowerCase();
+        if (/mobile|android|iphone|ipad|phone/.test(userAgent)) {
+          return 'mobile';
+        } else if (/tablet|ipad/.test(userAgent)) {
+          return 'tablet';
+        } else {
+          return 'desktop';
+        }
+      };
+
       const data = {
         page: this.currentPage,
         userAgent: navigator.userAgent,
         referrer: document.referrer,
         screenResolution: `${window.screen.width}x${window.screen.height}`,
-        language: navigator.language
+        language: navigator.language,
+        deviceType: getDeviceType()
       };
 
       await fetch(`${this.API_URL}/api/analytics/pageview`, {
