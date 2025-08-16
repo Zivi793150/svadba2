@@ -84,7 +84,20 @@ const generateSessionId = () => {
 // API для аналитики
 app.post('/api/analytics/pageview', async (req, res) => {
   try {
+    // Проверяем, что req.body существует
+    if (!req.body) {
+      console.error('PageView error: req.body is undefined');
+      return res.status(400).json({ error: 'Request body is missing' });
+    }
+    
     const { page, userAgent, referrer } = req.body;
+    
+    // Проверяем обязательные поля
+    if (!page) {
+      console.error('PageView error: page is missing', req.body);
+      return res.status(400).json({ error: 'Page is required' });
+    }
+    
     const ip = req.ip || req.connection.remoteAddress;
     const sessionId = req.headers['x-session-id'] || generateSessionId();
     const deviceType = getDeviceType(userAgent);
@@ -129,7 +142,20 @@ app.post('/api/analytics/pageview', async (req, res) => {
 
 app.post('/api/analytics/button-click', async (req, res) => {
   try {
+    // Проверяем, что req.body существует
+    if (!req.body) {
+      console.error('ButtonClick error: req.body is undefined');
+      return res.status(400).json({ error: 'Request body is missing' });
+    }
+    
     const { buttonId, buttonText, page } = req.body;
+    
+    // Проверяем обязательные поля
+    if (!buttonId) {
+      console.error('ButtonClick error: buttonId is missing', req.body);
+      return res.status(400).json({ error: 'ButtonId is required' });
+    }
+    
     const ip = req.ip || req.connection.remoteAddress;
     const sessionId = req.headers['x-session-id'];
     
@@ -152,7 +178,20 @@ app.post('/api/analytics/button-click', async (req, res) => {
 
 app.post('/api/analytics/conversion', async (req, res) => {
   try {
+    // Проверяем, что req.body существует
+    if (!req.body) {
+      console.error('Conversion error: req.body is undefined');
+      return res.status(400).json({ error: 'Request body is missing' });
+    }
+    
     const { action, page, metadata } = req.body;
+    
+    // Проверяем обязательные поля
+    if (!action) {
+      console.error('Conversion error: action is missing', req.body);
+      return res.status(400).json({ error: 'Action is required' });
+    }
+    
     const ip = req.ip || req.connection.remoteAddress;
     const sessionId = req.headers['x-session-id'];
     
@@ -228,25 +267,25 @@ app.get('/api/analytics', async (req, res) => {
     }
 
     // Получаем данные за текущий период
-    const pageViews = await PageView.find({ timestamp: { $gte: startDate } });
-    const buttonClicks = await ButtonClick.find({ timestamp: { $gte: startDate } });
-    const conversions = await Conversion.find({ timestamp: { $gte: startDate } });
-    const chatEngagement = await ChatEngagement.find({ timestamp: { $gte: startDate } });
-    const userSessions = await UserSession.find({ startTime: { $gte: startDate } });
+    const pageViews = await PageView.find({ timestamp: { $gte: startDate } }) || [];
+    const buttonClicks = await ButtonClick.find({ timestamp: { $gte: startDate } }) || [];
+    const conversions = await Conversion.find({ timestamp: { $gte: startDate } }) || [];
+    const chatEngagement = await ChatEngagement.find({ timestamp: { $gte: startDate } }) || [];
+    const userSessions = await UserSession.find({ startTime: { $gte: startDate } }) || [];
 
     // Получаем данные за предыдущий период для сравнения
     const previousPageViews = await PageView.find({ 
       timestamp: { $gte: previousStartDate, $lt: startDate } 
-    });
+    }) || [];
     const previousButtonClicks = await ButtonClick.find({ 
       timestamp: { $gte: previousStartDate, $lt: startDate } 
-    });
+    }) || [];
     const previousConversions = await Conversion.find({ 
       timestamp: { $gte: previousStartDate, $lt: startDate } 
-    });
+    }) || [];
     const previousChatEngagement = await ChatEngagement.find({ 
       timestamp: { $gte: previousStartDate, $lt: startDate } 
-    });
+    }) || [];
 
     // Анализ устройств (по уникальным посетителям)
     const deviceStats = {};
@@ -267,7 +306,7 @@ app.get('/api/analytics', async (req, res) => {
       .map(([type, count]) => ({
         type,
         count,
-        percentage: Math.round((count / uniqueVisitors) * 100)
+        percentage: uniqueVisitors > 0 ? Math.round((count / uniqueVisitors) * 100) : 0
       }))
       .sort((a, b) => b.count - a.count);
 
@@ -295,7 +334,7 @@ app.get('/api/analytics', async (req, res) => {
         name: path === '/' ? 'Главная' : path.split('/').pop() || path,
         views,
         uniqueVisitors: pageVisitors[path].size,
-        percentage: Math.round((views / pageViews.length) * 100)
+        percentage: pageViews.length > 0 ? Math.round((views / pageViews.length) * 100) : 0
       }))
       .sort((a, b) => b.views - a.views)
       .slice(0, 10);
@@ -311,7 +350,7 @@ app.get('/api/analytics', async (req, res) => {
     const topButtons = Object.values(buttonStats)
       .map(button => ({
         ...button,
-        percentage: Math.round((button.clicks / buttonClicks.length) * 100)
+        percentage: buttonClicks.length > 0 ? Math.round((button.clicks / buttonClicks.length) * 100) : 0
       }))
       .sort((a, b) => b.clicks - a.clicks)
       .slice(0, 10);
@@ -340,14 +379,14 @@ app.get('/api/analytics', async (req, res) => {
         action: conv.action,
         count: conv.count,
         uniqueVisitors: conversionVisitors[conv.action].size,
-        rate: Math.round((conversionVisitors[conv.action].size / uniqueVisitors) * 100 * 100) / 100,
+        rate: uniqueVisitors > 0 ? Math.round((conversionVisitors[conv.action].size / uniqueVisitors) * 100 * 100) / 100 : 0,
         page: Array.from(conv.pages)[0] || '/'
       }))
       .sort((a, b) => b.count - a.count);
 
     // Вовлеченность в чат
-    const totalMessagesSent = chatEngagement.reduce((sum, engagement) => sum + engagement.messagesSent, 0);
-    const totalFilesSent = chatEngagement.reduce((sum, engagement) => sum + engagement.filesSent, 0);
+    const totalMessagesSent = chatEngagement.reduce((sum, engagement) => sum + (engagement.messagesSent || 0), 0);
+    const totalFilesSent = chatEngagement.reduce((sum, engagement) => sum + (engagement.filesSent || 0), 0);
     const avgTimeInChat = chatEngagement.length > 0 
       ? chatEngagement.reduce((sum, engagement) => sum + (engagement.timeInChat || 0), 0) / chatEngagement.length 
       : 0;
@@ -403,7 +442,7 @@ app.get('/api/analytics', async (req, res) => {
         url: source === 'direct' ? '-' : source,
         visits,
         uniqueVisitors: referrerVisitors[source].size,
-        percentage: Math.round((referrerVisitors[source].size / uniqueVisitors) * 100)
+        percentage: uniqueVisitors > 0 ? Math.round((referrerVisitors[source].size / uniqueVisitors) * 100) : 0
       }))
       .sort((a, b) => b.visits - a.visits)
       .slice(0, 5);
@@ -463,19 +502,19 @@ app.get('/api/analytics', async (req, res) => {
     // Подсчет уникальных посетителей
     const uniqueVisitors = new Set(pageViews.map(view => view.sessionId || view.ip)).size;
     const previousUniqueVisitors = new Set(previousPageViews.map(view => view.sessionId || view.ip)).size;
-    
+
     // Обзор
     const overview = {
-      totalVisitors: uniqueVisitors,
-      previousVisitors: previousUniqueVisitors,
-      totalPageViews: pageViews.length,
-      previousPageViews: previousPageViews.length,
-      totalChats: activeChats,
-      previousChats: previousChatEngagement.length,
-      totalConversions: conversions.length,
-      previousConversions: previousConversions.length,
-      avgSessionDuration,
-      mobilePercentage: devices.find(d => d.type === 'mobile')?.percentage || 0,
+      totalVisitors: uniqueVisitors || 0,
+      previousVisitors: previousUniqueVisitors || 0,
+      totalPageViews: pageViews.length || 0,
+      previousPageViews: previousPageViews.length || 0,
+      totalChats: activeChats || 0,
+      previousChats: previousChatEngagement.length || 0,
+      totalConversions: conversions.length || 0,
+      previousConversions: previousConversions.length || 0,
+      avgSessionDuration: avgSessionDuration || 0,
+      mobilePercentage: devices && devices.length > 0 ? devices.find(d => d.type === 'mobile')?.percentage || 0 : 0,
       bounceRate: 35, // Упрощенная версия
       pagesPerSession: pageViews.length > 0 && totalSessions > 0 
         ? Math.round((pageViews.length / totalSessions) * 10) / 10 
@@ -493,16 +532,16 @@ app.get('/api/analytics', async (req, res) => {
       buttonClicks: topButtons,
       conversions: topConversions,
       chatEngagement: {
-        messagesSent: totalMessagesSent,
-        filesSent: totalFilesSent,
-        avgTimeInChat,
-        activeChats
+        messagesSent: totalMessagesSent || 0,
+        filesSent: totalFilesSent || 0,
+        avgTimeInChat: avgTimeInChat || 0,
+        activeChats: activeChats || 0
       },
       userSessions: {
-        total: totalSessions,
-        avgDuration: avgSessionDuration,
-        newUsers,
-        returningUsers
+        total: totalSessions || 0,
+        avgDuration: avgSessionDuration || 0,
+        newUsers: newUsers || 0,
+        returningUsers: returningUsers || 0
       },
       trends,
       topReferrers,
