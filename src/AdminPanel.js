@@ -175,28 +175,21 @@ const AdminPanel = () => {
           <div className="metric-card primary">
             <div className="metric-icon">👥</div>
             <div className="metric-content">
-              <h3>Уникальные посетители</h3>
+              <h3>Посетители</h3>
               <div className="metric-value">{formatNumber(overview.totalVisitors)}</div>
               <div className="metric-change positive">
                 +{calculateGrowth(overview.totalVisitors, overview.previousVisitors)}% vs предыдущий период
               </div>
-              <div className="metric-subtitle">разные люди, а не сессии</div>
             </div>
           </div>
 
           <div className="metric-card primary">
             <div className="metric-icon">📄</div>
             <div className="metric-content">
-              <h3>Общие просмотры</h3>
+              <h3>Просмотры</h3>
               <div className="metric-value">{formatNumber(overview.totalPageViews)}</div>
               <div className="metric-change positive">
                 +{calculateGrowth(overview.totalPageViews, overview.previousPageViews)}% vs предыдущий период
-              </div>
-              <div className="metric-subtitle">
-                {overview.totalPageViews > overview.totalVisitors 
-                  ? `${overview.totalPageViews - overview.totalVisitors} повторных просмотров`
-                  : 'Все просмотры уникальные'
-                }
               </div>
             </div>
           </div>
@@ -265,16 +258,11 @@ const AdminPanel = () => {
           <div className="metric-card">
             <div className="metric-icon">🔄</div>
             <div className="metric-content">
-              <h3>Повторные посещения</h3>
+              <h3>Сессий/посетитель</h3>
               <div className="metric-value">
-                {overview.totalPageViews > 0 
-                  ? Math.round((overview.totalPageViews - overview.totalVisitors) / overview.totalPageViews * 100)
-                  : 0
-                }%
+                {userSessions.total > 0 ? (userSessions.totalSessions / userSessions.total).toFixed(1) : 0}
               </div>
-              <div className="metric-subtitle">
-                {overview.totalPageViews - overview.totalVisitors} из {overview.totalPageViews}
-              </div>
+              <div className="metric-subtitle">в среднем</div>
             </div>
           </div>
         </div>
@@ -282,9 +270,6 @@ const AdminPanel = () => {
         {/* Устройства */}
         <div className="analytics-section">
           <h2>📱 Устройства ({getPeriodLabel()})</h2>
-          <div className="section-description">
-            Распределение посетителей по типам устройств
-          </div>
           <div className="devices-grid">
             {devices.map((device, index) => (
               <div key={index} className="device-card">
@@ -307,9 +292,6 @@ const AdminPanel = () => {
         {/* Популярные страницы */}
         <div className="analytics-section">
           <h2>📄 Популярные страницы ({getPeriodLabel()})</h2>
-          <div className="section-description">
-            Страницы с наибольшим количеством просмотров
-          </div>
           <div className="pages-list">
             {popularPages.map((page, index) => (
               <div key={index} className="page-item">
@@ -333,9 +315,6 @@ const AdminPanel = () => {
         {/* Клики по кнопкам */}
         <div className="analytics-section">
           <h2>🖱️ Популярные кнопки ({getPeriodLabel()})</h2>
-          <div className="section-description">
-            Кнопки с наибольшим количеством кликов
-          </div>
           <div className="buttons-grid">
             {buttonClicks.map((button, index) => (
               <div key={index} className="button-card">
@@ -359,9 +338,6 @@ const AdminPanel = () => {
         {/* Конверсии */}
         <div className="analytics-section">
           <h2>🎯 Конверсии ({getPeriodLabel()})</h2>
-          <div className="section-description">
-            Действия пользователей, ведущие к целям
-          </div>
           <div className="conversions-grid">
             {conversions.map((conversion, index) => (
               <div key={index} className="conversion-card">
@@ -392,9 +368,6 @@ const AdminPanel = () => {
         {/* Вовлеченность в чат */}
         <div className="analytics-section">
           <h2>💬 Вовлеченность в чат ({getPeriodLabel()})</h2>
-          <div className="section-description">
-            Активность пользователей в чате
-          </div>
           <div className="chat-stats-grid">
             <div className="chat-stat-card">
               <div className="chat-stat-icon">💬</div>
@@ -427,28 +400,29 @@ const AdminPanel = () => {
           </div>
         </div>
 
-        {/* Сессии пользователей */}
+        {/* Посетители и сессии */}
         <div className="analytics-section">
-          <h2>🕐 Сессии пользователей ({getPeriodLabel()})</h2>
-          <div className="section-description">
-            Статистика по сессиям и времени на сайте
-          </div>
+          <h2>👥 Посетители и сессии ({getPeriodLabel()})</h2>
           <div className="sessions-stats">
             <div className="session-stat">
-              <h3>Всего сессий</h3>
+              <h3>Уникальные посетители</h3>
               <div className="session-value">{formatNumber(userSessions.total)}</div>
+            </div>
+            <div className="session-stat">
+              <h3>Всего сессий</h3>
+              <div className="session-value">{formatNumber(userSessions.totalSessions)}</div>
+            </div>
+            <div className="session-stat">
+              <h3>Новые посетители</h3>
+              <div className="session-value">{formatNumber(userSessions.newVisitors)}</div>
+            </div>
+            <div className="session-stat">
+              <h3>Возвращающиеся</h3>
+              <div className="session-value">{formatNumber(userSessions.returningVisitors)}</div>
             </div>
             <div className="session-stat">
               <h3>Средняя длительность</h3>
               <div className="session-value">{formatDuration(userSessions.avgDuration)}</div>
-            </div>
-            <div className="session-stat">
-              <h3>Новые пользователи</h3>
-              <div className="session-value">{formatNumber(userSessions.newUsers)}</div>
-            </div>
-            <div className="session-stat">
-              <h3>Возвращающиеся</h3>
-              <div className="session-value">{formatNumber(userSessions.returningUsers)}</div>
             </div>
           </div>
         </div>
@@ -457,9 +431,6 @@ const AdminPanel = () => {
         {trends && (
           <div className="analytics-section">
             <h2>📈 Тренды ({getPeriodLabel()})</h2>
-            <div className="trends-description">
-              Сравнение с предыдущим периодом: посетители, просмотры и конверсии
-            </div>
             <div className="trends-grid">
               {trends.map((trend, index) => (
                 <div key={index} className="trend-card">
@@ -484,9 +455,6 @@ const AdminPanel = () => {
         {topReferrers && (
           <div className="analytics-section">
             <h2>🔗 Источники трафика ({getPeriodLabel()})</h2>
-            <div className="section-description">
-              Откуда приходят посетители на сайт
-            </div>
             <div className="referrers-list">
               {topReferrers.map((referrer, index) => (
                 <div key={index} className="referrer-item">
@@ -508,9 +476,6 @@ const AdminPanel = () => {
         {/* Браузеры и ОС */}
         <div className="analytics-section">
           <h2>🌐 Браузеры и ОС ({getPeriodLabel()})</h2>
-          <div className="section-description">
-            Технические характеристики устройств посетителей
-          </div>
           <div className="tech-stats-grid">
             <div className="tech-section">
               <h3>Браузеры</h3>
@@ -542,10 +507,7 @@ const AdminPanel = () => {
         {/* Почасовая активность */}
         {hourlyActivity && (
           <div className="analytics-section">
-            <h2>⏰ Почасовая активность ({getPeriodLabel()})</h2>
-            <div className="section-description">
-              Распределение активности по часам дня
-            </div>
+            <h2>🕐 Почасовая активность ({getPeriodLabel()})</h2>
             <div className="hourly-chart">
               {hourlyActivity.map((hour, index) => (
                 <div key={index} className="hour-bar">
@@ -563,9 +525,6 @@ const AdminPanel = () => {
         {weeklyActivity && (
           <div className="analytics-section">
             <h2>📅 Недельная активность ({getPeriodLabel()})</h2>
-            <div className="section-description">
-              Распределение активности по дням недели
-            </div>
             <div className="weekly-chart">
               {weeklyActivity.map((day, index) => (
                 <div key={index} className="day-bar">

@@ -247,12 +247,10 @@ app.get('/api/analytics', async (req, res) => {
     const previousChatEngagement = await ChatEngagement.find({ 
       timestamp: { $gte: previousStartDate, $lt: startDate } 
     });
+    const previousSessions = await UserSession.find({ 
+      startTime: { $gte: previousStartDate, $lt: startDate } 
+    });
 
-    // Подсчет уникальных посетителей и сессий
-    const uniqueVisitors = new Set(pageViews.map(view => view.sessionId || view.ip)).size;
-    const totalPageViews = pageViews.length;
-    const uniqueSessions = new Set(pageViews.map(view => view.sessionId || view.ip)).size;
-    
     // Анализ устройств
     const deviceStats = {};
     pageViews.forEach(view => {
@@ -264,7 +262,7 @@ app.get('/api/analytics', async (req, res) => {
       .map(([type, count]) => ({
         type,
         count,
-        percentage: Math.round((count / totalPageViews) * 100)
+        percentage: Math.round((count / pageViews.length) * 100)
       }))
       .sort((a, b) => b.count - a.count);
 
@@ -280,7 +278,7 @@ app.get('/api/analytics', async (req, res) => {
         path,
         name: path === '/' ? 'Главная' : path.split('/').pop() || path,
         views,
-        percentage: Math.round((views / totalPageViews) * 100)
+        percentage: Math.round((views / pageViews.length) * 100)
       }))
       .sort((a, b) => b.views - a.views)
       .slice(0, 10);
@@ -314,7 +312,7 @@ app.get('/api/analytics', async (req, res) => {
       .map(conv => ({
         action: conv.action,
         count: conv.count,
-        rate: Math.round((conv.count / totalPageViews) * 100 * 100) / 100,
+        rate: Math.round((conv.count / pageViews.length) * 100 * 100) / 100,
         page: Array.from(conv.pages)[0] || '/'
       }))
       .sort((a, b) => b.count - a.count);
@@ -327,27 +325,24 @@ app.get('/api/analytics', async (req, res) => {
       : 0;
     const activeChats = chatEngagement.length;
 
-    // Сессии пользователей
+    // Уникальные посетители
+    const uniqueVisitors = [...new Set(userSessions.map(session => session.ip))].length;
     const totalSessions = userSessions.length;
     const avgSessionDuration = userSessions.length > 0
       ? userSessions.reduce((sum, session) => sum + (session.duration || 0), 0) / userSessions.length
       : 0;
-    const newUsers = userSessions.filter(session => !session.pages || session.pages.length <= 1).length;
-    const returningUsers = totalSessions - newUsers;
+    
+    // Новые посетители (с IP, которые не встречались ранее)
+    const previousIPs = new Set(previousSessions.map(s => s.ip));
+    const newVisitors = userSessions.filter(session => !previousIPs.has(session.ip)).length;
+    const returningVisitors = uniqueVisitors - newVisitors;
 
     // Тренды (упрощенная версия)
     const trends = [
       {
-        metric: 'Посетители',
-        change: uniqueVisitors > 0 && new Set(previousPageViews.map(view => view.sessionId || view.ip)).size > 0 
-          ? Math.round(((uniqueVisitors - new Set(previousPageViews.map(view => view.sessionId || view.ip)).size) / new Set(previousPageViews.map(view => view.sessionId || view.ip)).size) * 100)
-          : 0,
-        data: [60, 70, 80, 65, 90, 85, 95]
-      },
-      {
         metric: 'Просмотры',
-        change: totalPageViews > 0 && previousPageViews.length > 0 
-          ? Math.round(((totalPageViews - previousPageViews.length) / previousPageViews.length) * 100)
+        change: pageViews.length > 0 && previousPageViews.length > 0 
+          ? Math.round(((pageViews.length - previousPageViews.length) / previousPageViews.length) * 100)
           : 0,
         data: [60, 70, 80, 65, 90, 85, 95]
       },
@@ -372,7 +367,7 @@ app.get('/api/analytics', async (req, res) => {
         source: source === 'direct' ? 'Прямые переходы' : source,
         url: source === 'direct' ? '-' : source,
         visits,
-        percentage: Math.round((visits / totalPageViews) * 100)
+        percentage: Math.round((visits / pageViews.length) * 100)
       }))
       .sort((a, b) => b.visits - a.visits)
       .slice(0, 5);
@@ -403,7 +398,7 @@ app.get('/api/analytics', async (req, res) => {
       hourlyActivity.push({
         hour: i,
         count: hourViews,
-        percentage: totalPageViews > 0 ? Math.round((hourViews / totalPageViews) * 100) : 0
+        percentage: pageViews.length > 0 ? Math.round((hourViews / pageViews.length) * 100) : 0
       });
     }
 
@@ -419,15 +414,15 @@ app.get('/api/analytics', async (req, res) => {
       weeklyActivity.push({
         day: days[i],
         count: dayViews,
-        percentage: totalPageViews > 0 ? Math.round((dayViews / totalPageViews) * 100) : 0
+        percentage: pageViews.length > 0 ? Math.round((dayViews / pageViews.length) * 100) : 0
       });
     }
 
     // Обзор
     const overview = {
       totalVisitors: uniqueVisitors,
-      previousVisitors: new Set(previousPageViews.map(view => view.sessionId || view.ip)).size,
-      totalPageViews: totalPageViews,
+      previousVisitors: [...new Set(previousSessions.map(s => s.ip))].length,
+      totalPageViews: pageViews.length,
       previousPageViews: previousPageViews.length,
       totalChats: activeChats,
       previousChats: previousChatEngagement.length,
@@ -436,8 +431,8 @@ app.get('/api/analytics', async (req, res) => {
       avgSessionDuration,
       mobilePercentage: devices.find(d => d.type === 'mobile')?.percentage || 0,
       bounceRate: 35, // Упрощенная версия
-      pagesPerSession: totalPageViews > 0 && totalSessions > 0 
-        ? Math.round((totalPageViews / totalSessions) * 10) / 10 
+      pagesPerSession: pageViews.length > 0 && uniqueVisitors > 0 
+        ? Math.round((pageViews.length / uniqueVisitors) * 10) / 10 
         : 0
     };
 
@@ -455,10 +450,11 @@ app.get('/api/analytics', async (req, res) => {
         activeChats
       },
       userSessions: {
-        total: totalSessions,
+        total: uniqueVisitors,
+        totalSessions: totalSessions,
         avgDuration: avgSessionDuration,
-        newUsers,
-        returningUsers
+        newVisitors,
+        returningVisitors
       },
       trends,
       topReferrers,
