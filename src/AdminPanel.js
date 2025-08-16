@@ -180,16 +180,23 @@ const AdminPanel = () => {
               <div className="metric-change positive">
                 +{calculateGrowth(overview.totalVisitors, overview.previousVisitors)}% vs предыдущий период
               </div>
+              <div className="metric-subtitle">разные люди, а не сессии</div>
             </div>
           </div>
 
           <div className="metric-card primary">
             <div className="metric-icon">📄</div>
             <div className="metric-content">
-              <h3>Просмотры страниц</h3>
+              <h3>Общие просмотры</h3>
               <div className="metric-value">{formatNumber(overview.totalPageViews)}</div>
               <div className="metric-change positive">
                 +{calculateGrowth(overview.totalPageViews, overview.previousPageViews)}% vs предыдущий период
+              </div>
+              <div className="metric-subtitle">
+                {overview.totalPageViews > overview.totalVisitors 
+                  ? `${overview.totalPageViews - overview.totalVisitors} повторных просмотров`
+                  : 'Все просмотры уникальные'
+                }
               </div>
             </div>
           </div>
@@ -249,48 +256,25 @@ const AdminPanel = () => {
           <div className="metric-card">
             <div className="metric-icon">📈</div>
             <div className="metric-content">
-              <h3>Страниц/посетитель</h3>
-              <div className="metric-value">{overview.avgPagesPerVisitor}</div>
+              <h3>Страниц/сессия</h3>
+              <div className="metric-value">{overview.pagesPerSession}</div>
               <div className="metric-subtitle">в среднем</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Дополнительные метрики */}
-        <div className="metrics-grid secondary">
-          <div className="metric-card">
-            <div className="metric-icon">⏱️</div>
-            <div className="metric-content">
-              <h3>Время на сайте</h3>
-              <div className="metric-value">{formatDuration(overview.avgSessionDuration)}</div>
-              <div className="metric-subtitle">в среднем</div>
-            </div>
-          </div>
-
-          <div className="metric-card">
-            <div className="metric-icon">📱</div>
-            <div className="metric-content">
-              <h3>Мобильные</h3>
-              <div className="metric-value">{overview.mobilePercentage}%</div>
-              <div className="metric-subtitle">от всех посетителей</div>
             </div>
           </div>
 
           <div className="metric-card">
             <div className="metric-icon">🔄</div>
             <div className="metric-content">
-              <h3>Возвраты</h3>
-              <div className="metric-value">{overview.bounceRate}%</div>
-              <div className="metric-subtitle">процент отказов</div>
-            </div>
-          </div>
-
-          <div className="metric-card">
-            <div className="metric-icon">📊</div>
-            <div className="metric-content">
-              <h3>Страниц/сессия</h3>
-              <div className="metric-value">{overview.pagesPerSession}</div>
-              <div className="metric-subtitle">в среднем</div>
+              <h3>Повторные посещения</h3>
+              <div className="metric-value">
+                {overview.totalPageViews > 0 
+                  ? Math.round((overview.totalPageViews - overview.totalVisitors) / overview.totalPageViews * 100)
+                  : 0
+                }%
+              </div>
+              <div className="metric-subtitle">
+                {overview.totalPageViews - overview.totalVisitors} из {overview.totalPageViews}
+              </div>
             </div>
           </div>
         </div>
@@ -298,7 +282,9 @@ const AdminPanel = () => {
         {/* Устройства */}
         <div className="analytics-section">
           <h2>📱 Устройства ({getPeriodLabel()})</h2>
-          <div className="section-subtitle">Показывает уникальных посетителей по типам устройств</div>
+          <div className="section-description">
+            Распределение посетителей по типам устройств
+          </div>
           <div className="devices-grid">
             {devices.map((device, index) => (
               <div key={index} className="device-card">
@@ -321,7 +307,9 @@ const AdminPanel = () => {
         {/* Популярные страницы */}
         <div className="analytics-section">
           <h2>📄 Популярные страницы ({getPeriodLabel()})</h2>
-          <div className="section-subtitle">Показывает просмотры и уникальных посетителей</div>
+          <div className="section-description">
+            Страницы с наибольшим количеством просмотров
+          </div>
           <div className="pages-list">
             {popularPages.map((page, index) => (
               <div key={index} className="page-item">
@@ -332,7 +320,6 @@ const AdminPanel = () => {
                 </div>
                 <div className="page-stats">
                   <div className="page-views">{formatNumber(page.views)} просмотров</div>
-                  <div className="page-visitors">{formatNumber(page.uniqueVisitors)} посетителей</div>
                   <div className="page-percentage">{page.percentage}%</div>
                 </div>
                 <div className="page-bar">
@@ -346,7 +333,9 @@ const AdminPanel = () => {
         {/* Клики по кнопкам */}
         <div className="analytics-section">
           <h2>🖱️ Популярные кнопки ({getPeriodLabel()})</h2>
-          <div className="section-subtitle">Показывает общее количество кликов</div>
+          <div className="section-description">
+            Кнопки с наибольшим количеством кликов
+          </div>
           <div className="buttons-grid">
             {buttonClicks.map((button, index) => (
               <div key={index} className="button-card">
@@ -370,7 +359,9 @@ const AdminPanel = () => {
         {/* Конверсии */}
         <div className="analytics-section">
           <h2>🎯 Конверсии ({getPeriodLabel()})</h2>
-          <div className="section-subtitle">Показывает действия и уникальных посетителей</div>
+          <div className="section-description">
+            Действия пользователей, ведущие к целям
+          </div>
           <div className="conversions-grid">
             {conversions.map((conversion, index) => (
               <div key={index} className="conversion-card">
@@ -391,7 +382,6 @@ const AdminPanel = () => {
                 </div>
                 <div className="conversion-stats">
                   <div className="conversion-count">{formatNumber(conversion.count)}</div>
-                  <div className="conversion-visitors">{formatNumber(conversion.uniqueVisitors)} посетителей</div>
                   <div className="conversion-rate">{conversion.rate}%</div>
                 </div>
               </div>
@@ -402,6 +392,9 @@ const AdminPanel = () => {
         {/* Вовлеченность в чат */}
         <div className="analytics-section">
           <h2>💬 Вовлеченность в чат ({getPeriodLabel()})</h2>
+          <div className="section-description">
+            Активность пользователей в чате
+          </div>
           <div className="chat-stats-grid">
             <div className="chat-stat-card">
               <div className="chat-stat-icon">💬</div>
@@ -437,6 +430,9 @@ const AdminPanel = () => {
         {/* Сессии пользователей */}
         <div className="analytics-section">
           <h2>🕐 Сессии пользователей ({getPeriodLabel()})</h2>
+          <div className="section-description">
+            Статистика по сессиям и времени на сайте
+          </div>
           <div className="sessions-stats">
             <div className="session-stat">
               <h3>Всего сессий</h3>
@@ -461,6 +457,9 @@ const AdminPanel = () => {
         {trends && (
           <div className="analytics-section">
             <h2>📈 Тренды ({getPeriodLabel()})</h2>
+            <div className="trends-description">
+              Сравнение с предыдущим периодом: посетители, просмотры и конверсии
+            </div>
             <div className="trends-grid">
               {trends.map((trend, index) => (
                 <div key={index} className="trend-card">
@@ -485,7 +484,9 @@ const AdminPanel = () => {
         {topReferrers && (
           <div className="analytics-section">
             <h2>🔗 Источники трафика ({getPeriodLabel()})</h2>
-            <div className="section-subtitle">Показывает переходы и уникальных посетителей</div>
+            <div className="section-description">
+              Откуда приходят посетители на сайт
+            </div>
             <div className="referrers-list">
               {topReferrers.map((referrer, index) => (
                 <div key={index} className="referrer-item">
@@ -495,8 +496,7 @@ const AdminPanel = () => {
                     <div className="referrer-url">{referrer.url}</div>
                   </div>
                   <div className="referrer-stats">
-                    <div className="referrer-visits">{formatNumber(referrer.visits)} переходов</div>
-                    <div className="referrer-visitors">{formatNumber(referrer.uniqueVisitors)} посетителей</div>
+                    <div className="referrer-visits">{formatNumber(referrer.visits)} визитов</div>
                     <div className="referrer-percentage">{referrer.percentage}%</div>
                   </div>
                 </div>
@@ -508,6 +508,9 @@ const AdminPanel = () => {
         {/* Браузеры и ОС */}
         <div className="analytics-section">
           <h2>🌐 Браузеры и ОС ({getPeriodLabel()})</h2>
+          <div className="section-description">
+            Технические характеристики устройств посетителей
+          </div>
           <div className="tech-stats-grid">
             <div className="tech-section">
               <h3>Браузеры</h3>
@@ -539,8 +542,10 @@ const AdminPanel = () => {
         {/* Почасовая активность */}
         {hourlyActivity && (
           <div className="analytics-section">
-            <h2>🕐 Почасовая активность ({getPeriodLabel()})</h2>
-            <div className="section-subtitle">Показывает уникальных посетителей по часам</div>
+            <h2>⏰ Почасовая активность ({getPeriodLabel()})</h2>
+            <div className="section-description">
+              Распределение активности по часам дня
+            </div>
             <div className="hourly-chart">
               {hourlyActivity.map((hour, index) => (
                 <div key={index} className="hour-bar">
@@ -558,7 +563,9 @@ const AdminPanel = () => {
         {weeklyActivity && (
           <div className="analytics-section">
             <h2>📅 Недельная активность ({getPeriodLabel()})</h2>
-            <div className="section-subtitle">Показывает уникальных посетителей по дням недели</div>
+            <div className="section-description">
+              Распределение активности по дням недели
+            </div>
             <div className="weekly-chart">
               {weeklyActivity.map((day, index) => (
                 <div key={index} className="day-bar">

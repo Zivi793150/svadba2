@@ -84,20 +84,7 @@ const generateSessionId = () => {
 // API для аналитики
 app.post('/api/analytics/pageview', async (req, res) => {
   try {
-    // Проверяем, что req.body существует
-    if (!req.body) {
-      console.error('PageView error: req.body is undefined');
-      return res.status(400).json({ error: 'Request body is missing' });
-    }
-    
     const { page, userAgent, referrer } = req.body;
-    
-    // Проверяем обязательные поля
-    if (!page) {
-      console.error('PageView error: page is missing', req.body);
-      return res.status(400).json({ error: 'Page is required' });
-    }
-    
     const ip = req.ip || req.connection.remoteAddress;
     const sessionId = req.headers['x-session-id'] || generateSessionId();
     const deviceType = getDeviceType(userAgent);
@@ -142,20 +129,7 @@ app.post('/api/analytics/pageview', async (req, res) => {
 
 app.post('/api/analytics/button-click', async (req, res) => {
   try {
-    // Проверяем, что req.body существует
-    if (!req.body) {
-      console.error('ButtonClick error: req.body is undefined');
-      return res.status(400).json({ error: 'Request body is missing' });
-    }
-    
     const { buttonId, buttonText, page } = req.body;
-    
-    // Проверяем обязательные поля
-    if (!buttonId) {
-      console.error('ButtonClick error: buttonId is missing', req.body);
-      return res.status(400).json({ error: 'ButtonId is required' });
-    }
-    
     const ip = req.ip || req.connection.remoteAddress;
     const sessionId = req.headers['x-session-id'];
     
@@ -178,20 +152,7 @@ app.post('/api/analytics/button-click', async (req, res) => {
 
 app.post('/api/analytics/conversion', async (req, res) => {
   try {
-    // Проверяем, что req.body существует
-    if (!req.body) {
-      console.error('Conversion error: req.body is undefined');
-      return res.status(400).json({ error: 'Request body is missing' });
-    }
-    
     const { action, page, metadata } = req.body;
-    
-    // Проверяем обязательные поля
-    if (!action) {
-      console.error('Conversion error: action is missing', req.body);
-      return res.status(400).json({ error: 'Action is required' });
-    }
-    
     const ip = req.ip || req.connection.remoteAddress;
     const sessionId = req.headers['x-session-id'];
     
@@ -267,65 +228,51 @@ app.get('/api/analytics', async (req, res) => {
     }
 
     // Получаем данные за текущий период
-    const pageViews = await PageView.find({ timestamp: { $gte: startDate } }) || [];
-    const buttonClicks = await ButtonClick.find({ timestamp: { $gte: startDate } }) || [];
-    const conversions = await Conversion.find({ timestamp: { $gte: startDate } }) || [];
-    const chatEngagement = await ChatEngagement.find({ timestamp: { $gte: startDate } }) || [];
-    const userSessions = await UserSession.find({ startTime: { $gte: startDate } }) || [];
+    const pageViews = await PageView.find({ timestamp: { $gte: startDate } });
+    const buttonClicks = await ButtonClick.find({ timestamp: { $gte: startDate } });
+    const conversions = await Conversion.find({ timestamp: { $gte: startDate } });
+    const chatEngagement = await ChatEngagement.find({ timestamp: { $gte: startDate } });
+    const userSessions = await UserSession.find({ startTime: { $gte: startDate } });
 
     // Получаем данные за предыдущий период для сравнения
     const previousPageViews = await PageView.find({ 
       timestamp: { $gte: previousStartDate, $lt: startDate } 
-    }) || [];
+    });
     const previousButtonClicks = await ButtonClick.find({ 
       timestamp: { $gte: previousStartDate, $lt: startDate } 
-    }) || [];
+    });
     const previousConversions = await Conversion.find({ 
       timestamp: { $gte: previousStartDate, $lt: startDate } 
-    }) || [];
+    });
     const previousChatEngagement = await ChatEngagement.find({ 
       timestamp: { $gte: previousStartDate, $lt: startDate } 
-    }) || [];
+    });
 
-    // Анализ устройств (по уникальным посетителям)
-    const deviceStats = {};
-    const visitorDevices = {};
+    // Подсчет уникальных посетителей и сессий
+    const uniqueVisitors = new Set(pageViews.map(view => view.sessionId || view.ip)).size;
+    const totalPageViews = pageViews.length;
+    const uniqueSessions = new Set(pageViews.map(view => view.sessionId || view.ip)).size;
     
+    // Анализ устройств
+    const deviceStats = {};
     pageViews.forEach(view => {
-      const visitorId = view.sessionId || view.ip;
       const deviceType = view.deviceType || 'desktop';
-      
-      // Считаем только первое посещение для каждого посетителя
-      if (!visitorDevices[visitorId]) {
-        visitorDevices[visitorId] = deviceType;
-        deviceStats[deviceType] = (deviceStats[deviceType] || 0) + 1;
-      }
+      deviceStats[deviceType] = (deviceStats[deviceType] || 0) + 1;
     });
 
     const devices = Object.entries(deviceStats)
       .map(([type, count]) => ({
         type,
         count,
-        percentage: uniqueVisitors > 0 ? Math.round((count / uniqueVisitors) * 100) : 0
+        percentage: Math.round((count / totalPageViews) * 100)
       }))
       .sort((a, b) => b.count - a.count);
 
     // Популярные страницы
     const pageStats = {};
-    const pageVisitors = {};
-    
     pageViews.forEach(view => {
       const page = view.page || '/';
-      const visitorId = view.sessionId || view.ip;
-      
-      // Считаем просмотры
       pageStats[page] = (pageStats[page] || 0) + 1;
-      
-      // Считаем уникальных посетителей для каждой страницы
-      if (!pageVisitors[page]) {
-        pageVisitors[page] = new Set();
-      }
-      pageVisitors[page].add(visitorId);
     });
 
     const popularPages = Object.entries(pageStats)
@@ -333,8 +280,7 @@ app.get('/api/analytics', async (req, res) => {
         path,
         name: path === '/' ? 'Главная' : path.split('/').pop() || path,
         views,
-        uniqueVisitors: pageVisitors[path].size,
-        percentage: pageViews.length > 0 ? Math.round((views / pageViews.length) * 100) : 0
+        percentage: Math.round((views / totalPageViews) * 100)
       }))
       .sort((a, b) => b.views - a.views)
       .slice(0, 10);
@@ -350,43 +296,32 @@ app.get('/api/analytics', async (req, res) => {
     const topButtons = Object.values(buttonStats)
       .map(button => ({
         ...button,
-        percentage: buttonClicks.length > 0 ? Math.round((button.clicks / buttonClicks.length) * 100) : 0
+        percentage: Math.round((button.clicks / buttonClicks.length) * 100)
       }))
       .sort((a, b) => b.clicks - a.clicks)
       .slice(0, 10);
 
     // Конверсии
     const conversionStats = {};
-    const conversionVisitors = {};
-    
     conversions.forEach(conversion => {
       const key = conversion.action;
-      const visitorId = conversion.sessionId || conversion.ip;
-      
       conversionStats[key] = conversionStats[key] || { action: conversion.action, count: 0, pages: new Set() };
       conversionStats[key].count++;
       conversionStats[key].pages.add(conversion.page);
-      
-      // Считаем уникальных посетителей для каждой конверсии
-      if (!conversionVisitors[key]) {
-        conversionVisitors[key] = new Set();
-      }
-      conversionVisitors[key].add(visitorId);
     });
 
     const topConversions = Object.values(conversionStats)
       .map(conv => ({
         action: conv.action,
         count: conv.count,
-        uniqueVisitors: conversionVisitors[conv.action].size,
-        rate: uniqueVisitors > 0 ? Math.round((conversionVisitors[conv.action].size / uniqueVisitors) * 100 * 100) / 100 : 0,
+        rate: Math.round((conv.count / totalPageViews) * 100 * 100) / 100,
         page: Array.from(conv.pages)[0] || '/'
       }))
       .sort((a, b) => b.count - a.count);
 
     // Вовлеченность в чат
-    const totalMessagesSent = chatEngagement.reduce((sum, engagement) => sum + (engagement.messagesSent || 0), 0);
-    const totalFilesSent = chatEngagement.reduce((sum, engagement) => sum + (engagement.filesSent || 0), 0);
+    const totalMessagesSent = chatEngagement.reduce((sum, engagement) => sum + engagement.messagesSent, 0);
+    const totalFilesSent = chatEngagement.reduce((sum, engagement) => sum + engagement.filesSent, 0);
     const avgTimeInChat = chatEngagement.length > 0 
       ? chatEngagement.reduce((sum, engagement) => sum + (engagement.timeInChat || 0), 0) / chatEngagement.length 
       : 0;
@@ -400,12 +335,19 @@ app.get('/api/analytics', async (req, res) => {
     const newUsers = userSessions.filter(session => !session.pages || session.pages.length <= 1).length;
     const returningUsers = totalSessions - newUsers;
 
-    // Тренды (по уникальным посетителям)
+    // Тренды (упрощенная версия)
     const trends = [
       {
         metric: 'Посетители',
-        change: uniqueVisitors > 0 && previousUniqueVisitors > 0 
-          ? Math.round(((uniqueVisitors - previousUniqueVisitors) / previousUniqueVisitors) * 100)
+        change: uniqueVisitors > 0 && new Set(previousPageViews.map(view => view.sessionId || view.ip)).size > 0 
+          ? Math.round(((uniqueVisitors - new Set(previousPageViews.map(view => view.sessionId || view.ip)).size) / new Set(previousPageViews.map(view => view.sessionId || view.ip)).size) * 100)
+          : 0,
+        data: [60, 70, 80, 65, 90, 85, 95]
+      },
+      {
+        metric: 'Просмотры',
+        change: totalPageViews > 0 && previousPageViews.length > 0 
+          ? Math.round(((totalPageViews - previousPageViews.length) / previousPageViews.length) * 100)
           : 0,
         data: [60, 70, 80, 65, 90, 85, 95]
       },
@@ -418,22 +360,11 @@ app.get('/api/analytics', async (req, res) => {
       }
     ];
 
-    // Источники трафика (по уникальным посетителям)
+    // Источники трафика (упрощенная версия)
     const referrerStats = {};
-    const referrerVisitors = {};
-    
     pageViews.forEach(view => {
       const referrer = view.referrer || 'direct';
-      const visitorId = view.sessionId || view.ip;
-      
-      // Считаем переходы
       referrerStats[referrer] = (referrerStats[referrer] || 0) + 1;
-      
-      // Считаем уникальных посетителей для каждого источника
-      if (!referrerVisitors[referrer]) {
-        referrerVisitors[referrer] = new Set();
-      }
-      referrerVisitors[referrer].add(visitorId);
     });
 
     const topReferrers = Object.entries(referrerStats)
@@ -441,8 +372,7 @@ app.get('/api/analytics', async (req, res) => {
         source: source === 'direct' ? 'Прямые переходы' : source,
         url: source === 'direct' ? '-' : source,
         visits,
-        uniqueVisitors: referrerVisitors[source].size,
-        percentage: uniqueVisitors > 0 ? Math.round((referrerVisitors[source].size / uniqueVisitors) * 100) : 0
+        percentage: Math.round((visits / totalPageViews) * 100)
       }))
       .sort((a, b) => b.visits - a.visits)
       .slice(0, 5);
@@ -462,65 +392,52 @@ app.get('/api/analytics', async (req, res) => {
       { name: 'macOS', percentage: 5 }
     ];
 
-    // Почасовая активность (по уникальным посетителям)
+    // Почасовая активность
     const hourlyActivity = [];
     for (let i = 0; i < 24; i++) {
-      const hourVisitors = new Set();
-      pageViews.forEach(view => {
+      const hourViews = pageViews.filter(view => {
         const hour = new Date(view.timestamp).getHours();
-        if (hour === i) {
-          hourVisitors.add(view.sessionId || view.ip);
-        }
-      });
+        return hour === i;
+      }).length;
       
       hourlyActivity.push({
         hour: i,
-        count: hourVisitors.size,
-        percentage: uniqueVisitors > 0 ? Math.round((hourVisitors.size / uniqueVisitors) * 100) : 0
+        count: hourViews,
+        percentage: totalPageViews > 0 ? Math.round((hourViews / totalPageViews) * 100) : 0
       });
     }
 
-    // Недельная активность (по уникальным посетителям)
+    // Недельная активность
     const weeklyActivity = [];
     const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
     for (let i = 0; i < 7; i++) {
-      const dayVisitors = new Set();
-      pageViews.forEach(view => {
+      const dayViews = pageViews.filter(view => {
         const day = new Date(view.timestamp).getDay();
-        if (day === (i + 1) % 7) { // Понедельник = 1, воскресенье = 0
-          dayVisitors.add(view.sessionId || view.ip);
-        }
-      });
+        return day === (i + 1) % 7; // Понедельник = 1, воскресенье = 0
+      }).length;
       
       weeklyActivity.push({
         day: days[i],
-        count: dayVisitors.size,
-        percentage: uniqueVisitors > 0 ? Math.round((dayVisitors.size / uniqueVisitors) * 100) : 0
+        count: dayViews,
+        percentage: totalPageViews > 0 ? Math.round((dayViews / totalPageViews) * 100) : 0
       });
     }
 
-    // Подсчет уникальных посетителей
-    const uniqueVisitors = new Set(pageViews.map(view => view.sessionId || view.ip)).size;
-    const previousUniqueVisitors = new Set(previousPageViews.map(view => view.sessionId || view.ip)).size;
-
     // Обзор
     const overview = {
-      totalVisitors: uniqueVisitors || 0,
-      previousVisitors: previousUniqueVisitors || 0,
-      totalPageViews: pageViews.length || 0,
-      previousPageViews: previousPageViews.length || 0,
-      totalChats: activeChats || 0,
-      previousChats: previousChatEngagement.length || 0,
-      totalConversions: conversions.length || 0,
-      previousConversions: previousConversions.length || 0,
-      avgSessionDuration: avgSessionDuration || 0,
-      mobilePercentage: devices && devices.length > 0 ? devices.find(d => d.type === 'mobile')?.percentage || 0 : 0,
+      totalVisitors: uniqueVisitors,
+      previousVisitors: new Set(previousPageViews.map(view => view.sessionId || view.ip)).size,
+      totalPageViews: totalPageViews,
+      previousPageViews: previousPageViews.length,
+      totalChats: activeChats,
+      previousChats: previousChatEngagement.length,
+      totalConversions: conversions.length,
+      previousConversions: previousConversions.length,
+      avgSessionDuration,
+      mobilePercentage: devices.find(d => d.type === 'mobile')?.percentage || 0,
       bounceRate: 35, // Упрощенная версия
-      pagesPerSession: pageViews.length > 0 && totalSessions > 0 
-        ? Math.round((pageViews.length / totalSessions) * 10) / 10 
-        : 0,
-      avgPagesPerVisitor: uniqueVisitors > 0 
-        ? Math.round((pageViews.length / uniqueVisitors) * 10) / 10 
+      pagesPerSession: totalPageViews > 0 && totalSessions > 0 
+        ? Math.round((totalPageViews / totalSessions) * 10) / 10 
         : 0
     };
 
@@ -532,16 +449,16 @@ app.get('/api/analytics', async (req, res) => {
       buttonClicks: topButtons,
       conversions: topConversions,
       chatEngagement: {
-        messagesSent: totalMessagesSent || 0,
-        filesSent: totalFilesSent || 0,
-        avgTimeInChat: avgTimeInChat || 0,
-        activeChats: activeChats || 0
+        messagesSent: totalMessagesSent,
+        filesSent: totalFilesSent,
+        avgTimeInChat,
+        activeChats
       },
       userSessions: {
-        total: totalSessions || 0,
-        avgDuration: avgSessionDuration || 0,
-        newUsers: newUsers || 0,
-        returningUsers: returningUsers || 0
+        total: totalSessions,
+        avgDuration: avgSessionDuration,
+        newUsers,
+        returningUsers
       },
       trends,
       topReferrers,
