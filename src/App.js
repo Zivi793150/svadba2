@@ -13,6 +13,7 @@ import ChatFabButton from "./ChatFabButton";
 import ChatWidget from './ChatWidget';
 import SlideshowDetails from './SlideshowDetails';
 import OrderPage from './OrderPage';
+import PaymentSuccess from './PaymentSuccess';
 import io from 'socket.io-client';
 import analyticsTracker from './AnalyticsTracker';
 
@@ -115,6 +116,8 @@ export default function App() {
   const [showSlideshowDetails, setShowSlideshowDetails] = useState(false);
   const [showOrder, setShowOrder] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState(null);
   const chatIdRef = useRef(localStorage.getItem('chatSessionId'));
   const socketRef = useRef(null);
 
@@ -173,6 +176,12 @@ export default function App() {
     // страница с подробностями сохраняла свои данные
   };
 
+  const handlePaymentSuccess = (orderId) => {
+    setCurrentOrderId(orderId);
+    setShowPaymentSuccess(true);
+    setShowOrder(false);
+  };
+
   const handleOpenAbout = () => setShowAbout(true);
   const handleCloseAbout = () => setShowAbout(false);
 
@@ -207,7 +216,10 @@ export default function App() {
         />
       )}
       {showOrder && (
-        <OrderPage onClose={handleCloseOrder} product={selectedVideoData} />
+        <OrderPage onClose={handleCloseOrder} product={selectedVideoData} onPaymentSuccess={handlePaymentSuccess} />
+      )}
+      {showPaymentSuccess && (
+        <PaymentSuccess orderId={currentOrderId} onClose={() => setShowPaymentSuccess(false)} />
       )}
       <Footer onAboutClick={handleOpenAbout} />
       {showAbout && (

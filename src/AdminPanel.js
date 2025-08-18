@@ -9,10 +9,12 @@ const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('chats');
   const [chats, setChats] = useState([]);
   const [analytics, setAnalytics] = useState(null);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('week'); // week, month, year, all
   const [selectedChat, setSelectedChat] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
+  const [chatCounts, setChatCounts] = useState({});
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -20,6 +22,7 @@ const AdminPanel = () => {
       setIsAuthenticated(true);
       fetchChats();
       fetchAnalytics();
+      fetchOrders();
     } else {
       alert('Неверный пароль!');
     }
@@ -27,11 +30,35 @@ const AdminPanel = () => {
 
   const fetchChats = async () => {
     try {
-      const response = await fetch('https://svadba2.onrender.com/api/messages');
+      const response = await fetch('https://svadba2.onrender.com/api/chats');
       const data = await response.json();
       setChats(data);
+      
+      // Получаем количество сообщений для каждого чата
+      const counts = {};
+      for (const chat of data) {
+        try {
+          const countResponse = await fetch(`https://svadba2.onrender.com/api/messages/${chat._id}/count`);
+          const countData = await countResponse.json();
+          counts[chat._id] = countData.total;
+        } catch (error) {
+          console.error('Error fetching chat count:', error);
+          counts[chat._id] = 0;
+        }
+      }
+      setChatCounts(counts);
     } catch (error) {
       console.error('Error fetching chats:', error);
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch('https://svadba2.onrender.com/api/orders');
+      const data = await response.json();
+      setOrders(data);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
     }
   };
 
@@ -541,6 +568,56 @@ const AdminPanel = () => {
     );
   };
 
+  const renderOrders = () => (
+    <div className="orders-container">
+      <div className="orders-header">
+        <h2>🛒 Заказы ({orders.length})</h2>
+        <button onClick={fetchOrders} className="refresh-btn">🔄 Обновить</button>
+      </div>
+      
+      <div className="orders-grid">
+        {orders.map((order) => (
+          <div key={order._id} className="order-item">
+            <div className="order-header">
+              <div className="order-id">#{order.orderId}</div>
+              <div className="order-status">
+                <span className={`status-badge ${order.paymentStatus}`}>
+                  {order.paymentStatus === 'paid' ? '✅ Оплачен' :
+                   order.paymentStatus === 'pending' ? '⏳ Ожидает оплаты' :
+                   order.paymentStatus === 'cancelled' ? '❌ Отменен' :
+                   order.paymentStatus === 'failed' ? '💥 Ошибка' : '❓ Неизвестно'}
+                </span>
+              </div>
+            </div>
+            <div className="order-details">
+              <div className="order-product">{order.productTitle}</div>
+              <div className="order-variant">
+                {order.variant === 'anim' ? 'С оживлением' : 'Без оживления'}
+                {order.selection && ` - ${order.selection}`}
+              </div>
+              <div className="order-prices">
+                <div className="total-price">Общая стоимость: {order.totalPrice.toLocaleString('ru-RU')} ₽</div>
+                <div className="prepay-price">Предоплата: {order.prepayAmount.toLocaleString('ru-RU')} ₽</div>
+                <div className="remaining-price">Осталось: {(order.totalPrice - order.prepayAmount).toLocaleString('ru-RU')} ₽</div>
+              </div>
+            </div>
+            <div className="order-customer">
+              <div className="customer-name">{order.customerInfo?.name || 'Имя не указано'}</div>
+              <div className="customer-email">{order.customerInfo?.email || 'Email не указан'}</div>
+              <div className="customer-phone">{order.customerInfo?.phone || 'Телефон не указан'}</div>
+            </div>
+            <div className="order-footer">
+              <div className="order-date">{formatDate(order.createdAt)}</div>
+              {order.yookassaPaymentId && (
+                <div className="payment-id">ID: {order.yookassaPaymentId}</div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   const renderChats = () => (
     <div className="chats-container">
       <div className="chats-header">
@@ -558,17 +635,23 @@ const AdminPanel = () => {
             >
               <div className="chat-header">
                 <div className="chat-id">#{chat._id.slice(-6)}</div>
-                <div className="chat-date">{formatDate(chat.timestamp)}</div>
+                <div className="chat-date">{formatDate(chat.lastMessage?.createdAt || chat.lastMessage?.timestamp)}</div>
               </div>
               <div className="chat-preview">
-                {chat.messages && chat.messages.length > 0 
-                  ? chat.messages[chat.messages.length - 1].text?.substring(0, 50) + '...'
+                {chat.lastMessage?.text 
+                  ? chat.lastMessage.text.substring(0, 50) + (chat.lastMessage.text.length > 50 ? '...' : '')
                   : 'Нет сообщений'
                 }
               </div>
               <div className="chat-stats">
-                <span className="chat-messages">{chat.messages?.length || 0} сообщений</span>
-                {chat.messages && chat.messages.some(m => m.fileUrl) && (
+                <span className="chat-messages">
+                  {chat.lastMessage?.sender === 'user' ? '👤' : '🤖'} 
+                  {chat.lastMessage?.sender === 'user' ? 'Пользователь' : 'Админ'}
+                </span>
+                <span className="chat-count">
+                  {chatCounts[chat._id] || 0} сообщений
+                </span>
+                {chat.lastMessage?.fileUrl && (
                   <span className="chat-files">📎</span>
                 )}
               </div>
@@ -577,19 +660,19 @@ const AdminPanel = () => {
         </div>
 
         {selectedChat && (
-          <div className="chat-messages">
+          <div className="chat-messages-container">
             <div className="messages-header">
               <h3>Чат #{selectedChat.slice(-6)}</h3>
               <button onClick={() => setSelectedChat(null)} className="close-btn">✕</button>
             </div>
             <div className="messages-list">
               {chatMessages.map((message) => (
-                <div key={message._id} className={`message ${message.isUser ? 'user' : 'admin'}`}>
+                <div key={message._id} className={`message ${message.sender === 'user' ? 'user' : 'admin'}`}>
                   <div className="message-header">
                     <span className="message-sender">
-                      {message.isUser ? '👤 Пользователь' : '🤖 Админ'}
+                      {message.sender === 'user' ? '👤 Пользователь' : '🤖 Админ'}
                     </span>
-                    <span className="message-time">{formatDate(message.timestamp)}</span>
+                    <span className="message-time">{formatDate(message.createdAt || message.timestamp)}</span>
                     <button 
                       onClick={() => deleteMessage(message._id)}
                       className="delete-btn"
@@ -648,6 +731,12 @@ const AdminPanel = () => {
             💬 Чаты
           </button>
           <button 
+            className={activeTab === 'orders' ? 'active' : ''} 
+            onClick={() => setActiveTab('orders')}
+          >
+            🛒 Заказы
+          </button>
+          <button 
             className={activeTab === 'analytics' ? 'active' : ''} 
             onClick={() => setActiveTab('analytics')}
           >
@@ -660,7 +749,9 @@ const AdminPanel = () => {
       </div>
 
       <div className="admin-content">
-        {activeTab === 'chats' ? renderChats() : renderAnalytics()}
+        {activeTab === 'chats' ? renderChats() : 
+         activeTab === 'orders' ? renderOrders() : 
+         renderAnalytics()}
       </div>
     </div>
   );

@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@appigram/yookassa-node": "^1.1.11",
     "axios": "^1.11.0",
     "cloudinary": "^1.41.0",
     "cors": "^2.8.5",

@@ -158,6 +158,67 @@
   color: #0a0a13;
 }
 
+/* Customer Form Styles */
+.customer-form {
+  background: linear-gradient(135deg, rgba(191, 215, 237, 0.05) 0%, rgba(161, 143, 255, 0.08) 100%);
+  border: 1px solid rgba(191, 215, 237, 0.15);
+  border-radius: 20px;
+  padding: 40px;
+  margin: 32px 0 40px 0;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.customer-form h3 {
+  color: #BFD7ED;
+  font-weight: 700;
+  font-size: 1.4rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin: 0 0 32px 0;
+  text-align: center;
+}
+
+.form-row {
+  margin-bottom: 24px;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-row input {
+  width: 100%;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(191, 215, 237, 0.2);
+  border-radius: 16px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.form-row input::placeholder {
+  color: rgba(191, 215, 237, 0.6);
+}
+
+.form-row input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+  transform: translateY(-2px);
+}
+
+.form-row input:invalid {
+  border-color: #ff6b6b;
+}
+
+.form-row input:valid {
+  border-color: #51cf66;
+}
+
 .order-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

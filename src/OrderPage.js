@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import './OrderPage.css';
 
-export default function OrderPage({ onClose, product }) {
+export default function OrderPage({ onClose, product, onPaymentSuccess }) {
   const [variant, setVariant] = useState('noAnim');
   const [selection, setSelection] = useState(() => {
     if (product?.title?.includes('Видео-приглашения')) {
@@ -9,6 +9,13 @@ export default function OrderPage({ onClose, product }) {
     }
     return '16';
   });
+  const [customerInfo, setCustomerInfo] = useState({
+    name: '',
+    email: '',
+    phone: ''
+  });
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [orderId, setOrderId] = useState(null);
 
   const prices = useMemo(() => {
     if (product?.title?.includes('Видео-приглашения')) {
@@ -47,6 +54,51 @@ export default function OrderPage({ onClose, product }) {
 
   const current = prices[variant][selection];
   const prepay = Math.round(current.price * 0.3);
+
+  const handleCreateOrder = async () => {
+    if (!customerInfo.name || !customerInfo.email || !customerInfo.phone) {
+      alert('Пожалуйста, заполните все поля');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const response = await fetch('https://svadba2.onrender.com/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productTitle: product?.title || 'Свадебная презентация',
+          variant,
+          selection,
+          totalPrice: current.price,
+          prepayAmount: prepay,
+          customerInfo
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка создания заказа');
+      }
+
+      const data = await response.json();
+      setOrderId(data.orderId);
+      
+      // Вызываем callback для перехода на страницу успешной оплаты
+      if (onPaymentSuccess) {
+        onPaymentSuccess(data.orderId);
+      }
+      
+      // Перенаправляем на страницу оплаты ЮKassa
+      window.location.href = data.confirmationUrl;
+    } catch (error) {
+      console.error('Ошибка:', error);
+      alert('Произошла ошибка при создании заказа. Попробуйте еще раз.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className="slideshow-details-overlay">
@@ -98,6 +150,38 @@ export default function OrderPage({ onClose, product }) {
               <div><strong>Стоимость:</strong> {current.price.toLocaleString('ru-RU')} ₽</div>
             </div>
             
+            {/* Форма данных клиента */}
+            <div className="customer-form">
+              <h3>📝 Ваши данные</h3>
+              <div className="form-row">
+                <input
+                  type="text"
+                  placeholder="Ваше имя"
+                  value={customerInfo.name}
+                  onChange={(e) => setCustomerInfo(prev => ({ ...prev, name: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="form-row">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={customerInfo.email}
+                  onChange={(e) => setCustomerInfo(prev => ({ ...prev, email: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="form-row">
+                <input
+                  type="tel"
+                  placeholder="Телефон"
+                  value={customerInfo.phone}
+                  onChange={(e) => setCustomerInfo(prev => ({ ...prev, phone: e.target.value }))}
+                  required
+                />
+              </div>
+            </div>
+            
             {/* Блок "Итого" - крупно и заметно */}
             <div className="order-total">
               <h3>Итого к оплате сейчас</h3>
@@ -112,8 +196,14 @@ export default function OrderPage({ onClose, product }) {
             </div>
             
             <div className="action-buttons">
-              <a className="pay-btn" href={`https://xn--e1aalvju.xn--p1ai?product=${encodeURIComponent(product?.title||'Свадебная презентация')}&variant=${variant}&photos=${selection}&price=${current.price}`} target="_blank" rel="noopener noreferrer">
-                <span className="btn-text">Перейти к оплате</span>
+              <button 
+                className="pay-btn" 
+                onClick={handleCreateOrder}
+                disabled={isProcessing}
+              >
+                <span className="btn-text">
+                  {isProcessing ? 'Создаем заказ...' : 'Оплатить'}
+                </span>
                 <div className="icon-container">
                   <svg viewBox="0 0 24 24" className="icon card-icon">
                     <path d="M20,8H4V6H20M20,18H4V12H20M20,4H4C2.89,4 2,4.89 2,6V18C2,19.11 2.89,20 4,20H20C21.11,20 22,19.11 22,18V6C22,4.89 21.11,4 20,4Z" fill="currentColor" />
@@ -131,7 +221,7 @@ export default function OrderPage({ onClose, product }) {
                     <path d="M9,16.17L4.83,12L3.41,13.41L9,19L21,7L19.59,5.59L9,16.17Z" fill="currentColor" />
                   </svg>
                 </div>
-              </a>
+              </button>
             </div>
           </div>
         </main>

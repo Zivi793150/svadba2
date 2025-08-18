@@ -61,6 +61,8 @@ db.once('open', () => {
 
 const Message = require('./message.model');
 const { PageView, ButtonClick, UserSession, Conversion, ChatEngagement } = require('./analytics.model');
+const Order = require('./order.model');
+const yookassaService = require('./yookassa.service');
 
 // Подключение ботов
 const telegramBot = require('./telegram-bot');
@@ -84,11 +86,24 @@ const generateSessionId = () => {
 // API для аналитики
 app.post('/api/analytics/pageview', async (req, res) => {
   try {
-    const { page, userAgent, referrer } = req.body;
+    // Поддерживаем как JSON-тело, так и строку (например, из sendBeacon без заголовков)
+    const rawBody = req.body;
+    let body = {};
+    if (typeof rawBody === 'string') {
+      try { body = JSON.parse(rawBody); } catch (e) { body = {}; }
+    } else if (Buffer.isBuffer(rawBody)) {
+      try { body = JSON.parse(rawBody.toString('utf8')); } catch (e) { body = {}; }
+    } else if (rawBody && typeof rawBody === 'object') {
+      body = rawBody;
+    }
+
+    const page = body.page || req.query.page || '/';
+    const userAgent = body.userAgent || req.headers['user-agent'] || '';
+    const referrer = body.referrer || req.get('referer') || '';
     const ip = req.ip || req.connection.remoteAddress;
-    const sessionId = req.headers['x-session-id'] || generateSessionId();
-    const deviceType = getDeviceType(userAgent);
-    
+    const sessionId = req.headers['x-session-id'] || body.sessionId || generateSessionId();
+    const deviceType = body.deviceType || getDeviceType(userAgent);
+
     const pageView = new PageView({
       page,
       userAgent,
@@ -96,12 +111,12 @@ app.post('/api/analytics/pageview', async (req, res) => {
       referrer,
       sessionId,
       deviceType,
-      screenResolution: req.body.screenResolution,
-      language: req.body.language
+      screenResolution: body.screenResolution,
+      language: body.language
     });
-    
+
     await pageView.save();
-    
+
     // Обновляем или создаем сессию
     let session = await UserSession.findOne({ sessionId });
     if (!session) {
@@ -119,7 +134,7 @@ app.post('/api/analytics/pageview', async (req, res) => {
       session.isActive = true;
     }
     await session.save();
-    
+
     res.json({ success: true, sessionId });
   } catch (err) {
     console.error('PageView error:', err);
@@ -626,6 +641,81 @@ app.get('/webhook/telegram/delete', async (req, res) => {
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: String(e.message || e) });
+  }
+});
+
+// API для заказов и оплаты
+app.post('/api/orders', async (req, res) => {
+  try {
+    const { productTitle, variant, selection, totalPrice, prepayAmount, customerInfo } = req.body;
+    
+    const paymentData = await yookassaService.createPayment({
+      productTitle,
+      variant,
+      selection,
+      totalPrice,
+      prepayAmount,
+      customerInfo
+    });
+    
+    res.json(paymentData);
+  } catch (error) {
+    console.error('Ошибка создания заказа:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/orders/:orderId', async (req, res) => {
+  try {
+    const order = await Order.findOne({ orderId: req.params.orderId });
+    if (!order) {
+      return res.status(404).json({ error: 'Заказ не найден' });
+    }
+    res.json(order);
+  } catch (error) {
+    console.error('Ошибка получения заказа:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/orders/:orderId/customer-info', async (req, res) => {
+  try {
+    const { name, email, phone } = req.body;
+    const order = await Order.findOne({ orderId: req.params.orderId });
+    
+    if (!order) {
+      return res.status(404).json({ error: 'Заказ не найден' });
+    }
+    
+    order.customerInfo = { name, email, phone };
+    await order.save();
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Ошибка обновления информации о клиенте:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Получить все заказы
+app.get('/api/orders', async (req, res) => {
+  try {
+    const orders = await Order.find().sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    console.error('Ошибка получения заказов:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Webhook для ЮKassa
+app.post('/webhook/yookassa', async (req, res) => {
+  try {
+    await yookassaService.processWebhook(req.body);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Ошибка обработки webhook ЮKassa:', error);
+    res.sendStatus(500);
   }
 });
 

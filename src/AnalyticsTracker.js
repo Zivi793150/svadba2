@@ -179,14 +179,20 @@ class AnalyticsTracker {
   trackPageLeave() {
     window.addEventListener('beforeunload', () => {
       const timeOnPage = Date.now() - this.pageStartTime;
-      
-      // Отправляем данные о времени на странице
-      navigator.sendBeacon(`${this.API_URL}/api/analytics/pageview`, JSON.stringify({
+
+      // Отправляем данные о времени на странице (как JSON Blob, т.к. sendBeacon не позволяет задать заголовки)
+      const payload = {
         page: this.currentPage,
         userAgent: navigator.userAgent,
+        referrer: document.referrer,
+        screenResolution: `${window.screen.width}x${window.screen.height}`,
+        language: navigator.language,
         timeOnPage,
-        action: 'page_leave'
-      }));
+        action: 'page_leave',
+        sessionId: this.sessionId
+      };
+      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+      navigator.sendBeacon(`${this.API_URL}/api/analytics/pageview`, blob);
     });
   }
 
