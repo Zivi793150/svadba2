@@ -104,6 +104,25 @@ app.post('/api/analytics/pageview', async (req, res) => {
     const sessionId = req.headers['x-session-id'] || body.sessionId || generateSessionId();
     const deviceType = body.deviceType || getDeviceType(userAgent);
 
+    // Если это сигнал об уходе со страницы — не создаём PageView, а обновляем длительность сессии
+    if (body.action === 'page_leave') {
+      let session = await UserSession.findOne({ sessionId });
+      if (!session) {
+        session = new UserSession({ sessionId, userAgent, ip, deviceType, pages: [page] });
+      }
+      const additional = Number(body.timeOnPage) || 0;
+      session.duration = (session.duration || 0) + additional;
+      session.endTime = new Date();
+      session.isActive = false;
+      // фиксируем последнюю страницу, если её нет в списке
+      if (page && !session.pages.includes(page)) {
+        session.pages.push(page);
+      }
+      await session.save();
+      return res.json({ success: true, sessionId });
+    }
+
+    // Обычный просмотр страницы — сохраняем PageView и актуализируем сессию
     const pageView = new PageView({
       page,
       userAgent,
@@ -117,7 +136,6 @@ app.post('/api/analytics/pageview', async (req, res) => {
 
     await pageView.save();
 
-    // Обновляем или создаем сессию
     let session = await UserSession.findOne({ sessionId });
     if (!session) {
       session = new UserSession({
@@ -610,7 +628,8 @@ app.get('/api/messages/:chatId/count', async (req, res) => {
 app.get('/api/chats', async (req, res) => {
   try {
     const chats = await Message.aggregate([
-      { $group: { _id: '$chatId', lastMessage: { $last: '$$ROOT' } } },
+      { $sort: { createdAt: 1 } },
+      { $group: { _id: '$chatId', lastMessage: { $last: '$$ROOT' }, count: { $sum: 1 } } },
       { $sort: { 'lastMessage.createdAt': -1 } }
     ]);
     res.json(chats);

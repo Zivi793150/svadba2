@@ -15,6 +15,7 @@ const AdminPanel = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatCounts, setChatCounts] = useState({});
+  const [visitorMetric, setVisitorMetric] = useState('ip'); // ip | session | hybrid
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -192,6 +193,14 @@ const AdminPanel = () => {
               <option value="all">Все время</option>
             </select>
           </div>
+          <div className="period-selector">
+            <label>Метрика посетителей:</label>
+            <select value={visitorMetric} onChange={(e) => setVisitorMetric(e.target.value)}>
+              <option value="ip">По IP</option>
+              <option value="session">По sessionId</option>
+              <option value="hybrid">Гибрид</option>
+            </select>
+          </div>
           <button onClick={fetchAnalytics} className="refresh-btn" disabled={loading}>
             {loading ? '🔄' : '🔄'} Обновить
           </button>
@@ -203,7 +212,13 @@ const AdminPanel = () => {
             <div className="metric-icon">👥</div>
             <div className="metric-content">
               <h3>Посетители</h3>
-              <div className="metric-value">{formatNumber(overview.totalVisitors)}</div>
+              <div className="metric-value">
+                {formatNumber(
+                  visitorMetric === 'ip' ? (overview.visitorsBreakdown?.byIp || overview.totalVisitors) :
+                  visitorMetric === 'session' ? (overview.visitorsBreakdown?.bySession || overview.totalVisitors) :
+                  (overview.visitorsBreakdown?.hybrid || overview.totalVisitors)
+                )}
+              </div>
               <div className="metric-change positive">
                 +{calculateGrowth(overview.totalVisitors, overview.previousVisitors)}% vs предыдущий период
               </div>
@@ -433,7 +448,13 @@ const AdminPanel = () => {
           <div className="sessions-stats">
             <div className="session-stat">
               <h3>Уникальные посетители</h3>
-              <div className="session-value">{formatNumber(userSessions.total)}</div>
+              <div className="session-value">
+                {formatNumber(
+                  visitorMetric === 'ip' ? (analytics.visitors?.byIp?.total || userSessions.total) :
+                  visitorMetric === 'session' ? (analytics.visitors?.bySession?.total || userSessions.total) :
+                  (analytics.visitors?.hybrid?.total || userSessions.total)
+                )}
+              </div>
             </div>
             <div className="session-stat">
               <h3>Всего сессий</h3>
@@ -441,11 +462,23 @@ const AdminPanel = () => {
             </div>
             <div className="session-stat">
               <h3>Новые посетители</h3>
-              <div className="session-value">{formatNumber(userSessions.newVisitors)}</div>
+              <div className="session-value">
+                {formatNumber(
+                  visitorMetric === 'ip' ? (analytics.visitors?.byIp?.new ?? userSessions.newVisitors) :
+                  visitorMetric === 'session' ? (analytics.visitors?.bySession?.new ?? userSessions.newVisitors) :
+                  (analytics.visitors?.hybrid?.new ?? userSessions.newVisitors)
+                )}
+              </div>
             </div>
             <div className="session-stat">
               <h3>Возвращающиеся</h3>
-              <div className="session-value">{formatNumber(userSessions.returningVisitors)}</div>
+              <div className="session-value">
+                {formatNumber(
+                  visitorMetric === 'ip' ? (analytics.visitors?.byIp?.returning ?? userSessions.returningVisitors) :
+                  visitorMetric === 'session' ? (analytics.visitors?.bySession?.returning ?? userSessions.returningVisitors) :
+                  (analytics.visitors?.hybrid?.returning ?? userSessions.returningVisitors)
+                )}
+              </div>
             </div>
             <div className="session-stat">
               <h3>Средняя длительность</h3>

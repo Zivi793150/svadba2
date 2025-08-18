@@ -202,6 +202,22 @@ class AnalyticsTracker {
     
     const checkPathChange = () => {
       if (window.location.pathname !== currentPath) {
+        // Закрываем прошлую страницу — фиксируем время
+        const timeOnPage = Date.now() - this.pageStartTime;
+        const leavePayload = {
+          page: this.currentPage,
+          userAgent: navigator.userAgent,
+          referrer: document.referrer,
+          screenResolution: `${window.screen.width}x${window.screen.height}`,
+          language: navigator.language,
+          timeOnPage,
+          action: 'page_leave',
+          sessionId: this.sessionId
+        };
+        const blob = new Blob([JSON.stringify(leavePayload)], { type: 'application/json' });
+        navigator.sendBeacon(`${this.API_URL}/api/analytics/pageview`, blob);
+
+        // Открываем новую страницу
         currentPath = window.location.pathname;
         this.currentPage = currentPath;
         this.pageStartTime = Date.now();
