@@ -340,17 +340,33 @@ app.get('/api/analytics', async (req, res) => {
       : 0;
     const activeChats = chatEngagement.length;
 
-    // Уникальные посетители
-    const uniqueVisitors = [...new Set(userSessions.map(session => session.ip))].length;
+    // Уникальные посетители — универсальные метрики
+    const uniqueIps = new Set(userSessions.map(session => session.ip)).size;
+    const uniqueSessionIds = new Set(userSessions.map(session => session.sessionId)).size;
+    // Гибрид: если есть sessionId — используем его; если нет — fallback к ip+userAgent
+    const hybridKey = (ip, ua, sid) => sid || `${ip}||${ua || ''}`;
+    const currentHybridKeys = new Set(pageViews.map(v => hybridKey(v.ip, v.userAgent, v.sessionId)));
+    const previousHybridKeys = new Set(previousPageViews.map(v => hybridKey(v.ip, v.userAgent, v.sessionId)));
+    const uniqueHybrid = currentHybridKeys.size;
+
+    const uniqueVisitors = uniqueIps; // для обратной совместимости старых полей (by IP)
     const totalSessions = userSessions.length;
     const avgSessionDuration = userSessions.length > 0
       ? userSessions.reduce((sum, session) => sum + (session.duration || 0), 0) / userSessions.length
       : 0;
-    
-    // Новые посетители (с IP, которые не встречались ранее)
+
+    // Новые/возвратные по разным методам
     const previousIPs = new Set(previousSessions.map(s => s.ip));
-    const newVisitors = userSessions.filter(session => !previousIPs.has(session.ip)).length;
-    const returningVisitors = uniqueVisitors - newVisitors;
+    const newVisitorsByIp = [...new Set(userSessions.map(s => s.ip))].filter(ip => !previousIPs.has(ip)).length;
+    const returningVisitorsByIp = uniqueIps - newVisitorsByIp;
+
+    const previousSessionIds = new Set(previousSessions.map(s => s.sessionId));
+    const currentSessionIds = new Set(userSessions.map(s => s.sessionId));
+    const newVisitorsBySession = [...currentSessionIds].filter(id => !previousSessionIds.has(id)).length;
+    const returningVisitorsBySession = uniqueSessionIds - newVisitorsBySession;
+
+    const newVisitorsHybrid = [...currentHybridKeys].filter(k => !previousHybridKeys.has(k)).length;
+    const returningVisitorsHybrid = uniqueHybrid - newVisitorsHybrid;
 
     // Тренды (упрощенная версия)
     const trends = [
@@ -435,7 +451,7 @@ app.get('/api/analytics', async (req, res) => {
 
     // Обзор
     const overview = {
-      totalVisitors: uniqueVisitors,
+      totalVisitors: uniqueVisitors, // by IP (legacy)
       previousVisitors: [...new Set(previousSessions.map(s => s.ip))].length,
       totalPageViews: pageViews.length,
       previousPageViews: previousPageViews.length,
@@ -448,7 +464,12 @@ app.get('/api/analytics', async (req, res) => {
       bounceRate: 35, // Упрощенная версия
       pagesPerSession: pageViews.length > 0 && uniqueVisitors > 0 
         ? Math.round((pageViews.length / uniqueVisitors) * 10) / 10 
-        : 0
+        : 0,
+      visitorsBreakdown: {
+        byIp: uniqueIps,
+        bySession: uniqueSessionIds,
+        hybrid: uniqueHybrid
+      }
     };
 
     res.json({
@@ -465,11 +486,28 @@ app.get('/api/analytics', async (req, res) => {
         activeChats
       },
       userSessions: {
-        total: uniqueVisitors,
+        total: uniqueVisitors, // by IP (legacy)
         totalSessions: totalSessions,
         avgDuration: avgSessionDuration,
-        newVisitors,
-        returningVisitors
+        newVisitors: newVisitorsByIp,
+        returningVisitors: returningVisitorsByIp
+      },
+      visitors: {
+        byIp: {
+          total: uniqueIps,
+          new: newVisitorsByIp,
+          returning: returningVisitorsByIp
+        },
+        bySession: {
+          total: uniqueSessionIds,
+          new: newVisitorsBySession,
+          returning: returningVisitorsBySession
+        },
+        hybrid: {
+          total: uniqueHybrid,
+          new: newVisitorsHybrid,
+          returning: returningVisitorsHybrid
+        }
       },
       trends,
       topReferrers,
