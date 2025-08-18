@@ -368,6 +368,9 @@ app.get('/api/analytics', async (req, res) => {
         .sort((a, b) => b.count - a.count)
     })).sort((a, b) => b.total - a.total);
 
+    console.log('Product views stats:', productViewStats);
+    console.log('Product views processed:', productViews);
+
     // Вовлеченность в чат
     const totalMessagesSent = chatEngagement.reduce((sum, engagement) => sum + engagement.messagesSent, 0);
     const totalFilesSent = chatEngagement.reduce((sum, engagement) => sum + engagement.filesSent, 0);
