@@ -1,9 +1,17 @@
-const { YooKassa } = require('@appigram/yookassa-node');
+// Совместимость с разными стилями экспорта пакета
+let YooKassaCtor;
+try {
+  // Named export
+  ({ YooKassa: YooKassaCtor } = require('@appigram/yookassa-node'));
+} catch (e) {
+  const mod = require('@appigram/yookassa-node');
+  YooKassaCtor = mod && (mod.YooKassa || mod.default || mod);
+}
 const Order = require('./order.model');
 
 class YooKassaService {
   constructor() {
-    this.client = new YooKassa({
+    this.client = new YooKassaCtor({
       shopId: process.env.YOOKASSA_SHOP_ID,
       secretKey: process.env.YOOKASSA_SECRET_KEY
     });

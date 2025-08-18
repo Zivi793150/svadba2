@@ -176,7 +176,7 @@ const AdminPanel = () => {
       weeklyActivity
     } = analytics;
 
-  return (
+    return (
       <div className="analytics-container">
         {/* Период и обновление */}
         <div className="analytics-header">
@@ -612,10 +612,10 @@ const AdminPanel = () => {
                 <div className="payment-id">ID: {order.yookassaPaymentId}</div>
               )}
             </div>
-          </div>
-        ))}
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
   );
 
   const renderChats = () => (
@@ -687,13 +687,13 @@ const AdminPanel = () => {
                         <a href={message.fileUrl} target="_blank" rel="noopener noreferrer">
                           📎 {message.fileName || 'Файл'}
                         </a>
-                      </div>
+                  </div>
                     )}
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+        </div>
         )}
       </div>
     </div>
