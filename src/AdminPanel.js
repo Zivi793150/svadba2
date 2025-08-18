@@ -411,12 +411,6 @@ const AdminPanel = () => {
                 {/* Просмотры товаров/карточек */}
         <div className="analytics-section">
           <h2>🧩 Просмотры карточек ({getPeriodLabel()})</h2>
-          <div className="debug-info" style={{background: '#2a2a2a', padding: '10px', margin: '10px 0', borderRadius: '8px', fontSize: '12px'}}>
-            <strong>Debug:</strong> productViews = {JSON.stringify(productViews)}
-          </div>
-          <div className="debug-info" style={{background: '#2a2a2a', padding: '10px', margin: '10px 0', borderRadius: '8px', fontSize: '12px'}}>
-            <strong>Все analytics:</strong> {JSON.stringify(analytics, null, 2)}
-          </div>
           {productViews && productViews.length > 0 ? (
             <div className="products-grid">
               {productViews.map((group, idx) => (
@@ -438,15 +432,7 @@ const AdminPanel = () => {
             </div>
           ) : (
             <div className="no-data">
-              Нет данных о просмотрах карточек. 
-              <br />
-              Возможные причины:
-              <br />
-              1. Бэкенд не перезапущен после изменений
-              <br />
-              2. Нет просмотров карточек за выбранный период
-              <br />
-              3. Нужно открыть карточку на сайте для генерации данных
+              Нет данных о просмотрах карточек за выбранный период
             </div>
           )}
         </div>
