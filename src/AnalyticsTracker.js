@@ -75,8 +75,9 @@ class AnalyticsTracker {
     document.addEventListener('click', (e) => {
       const button = e.target.closest('button, a, [role="button"]');
       if (button) {
-        const buttonText = button.textContent?.trim() || button.getAttribute('aria-label') || 'Unknown Button';
-        const buttonId = button.id || button.className || 'no-id';
+        const ds = button.dataset || {};
+        const buttonText = ds.analyticsText || button.textContent?.trim() || button.getAttribute('aria-label') || 'Unknown Button';
+        const buttonId = ds.analyticsId || button.id || button.className || 'no-id';
         
         this.trackButtonClick(buttonId, buttonText);
       }
@@ -146,12 +147,31 @@ class AnalyticsTracker {
       });
     };
 
+    // Просмотр карточки/товара (переход в детали)
+    const trackProductView = (productType, productTitle) => {
+      this.trackConversion('product_view', {
+        type: productType || 'unknown',
+        title: productTitle || 'Unknown',
+        page: this.currentPage
+      });
+    };
+
+    // Специальный трекинг для "Подробнее" (по просьбе — различаем карточки)
+    const trackDetailsClick = (kind) => {
+      this.trackConversion('details_click', {
+        kind: kind || 'unknown',
+        page: this.currentPage
+      });
+    };
+
     // Добавляем глобальные обработчики
     window.trackChatOpen = trackChatOpen;
     window.trackMessageSent = trackMessageSent;
     window.trackTelegramClick = trackTelegramClick;
     window.trackWhatsAppClick = trackWhatsAppClick;
     window.trackOrderPage = trackOrderPage;
+    window.trackProductView = trackProductView;
+    window.trackDetailsClick = trackDetailsClick;
   }
 
   async trackConversion(action, metadata = {}) {

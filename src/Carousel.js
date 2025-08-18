@@ -87,7 +87,7 @@ const Carousel = ({ items = [], onShowDetails }) => {
                     <div className="placeholder-text">Подготовка контента</div>
                   </div>
                 </div>
-                <button className="carousel-order-btn" onClick={() => {
+                <button className="carousel-order-btn" data-analytics-id="details_development" data-analytics-text={`Подробнее — ${item.title || item?.videoData?.title || 'В разработке'}`} onClick={() => {
                   console.log('Кнопка "Подробнее" нажата для карточки в разработке!');
                   if (onShowDetails) {
                     onShowDetails(item.videoData);
@@ -130,10 +130,18 @@ const Carousel = ({ items = [], onShowDetails }) => {
                   />
                 ) : null}
               </div>
-              <button className="carousel-order-btn" onClick={() => {
+              <button className="carousel-order-btn" data-analytics-id={item?.videoData?.isVertical ? 'details_invitation' : 'details_presentation'} data-analytics-text={`Подробнее — ${item?.videoData?.title || item.title || 'Карточка'}`} onClick={() => {
                 console.log('Кнопка "Подробнее" нажата в карусели!');
                 if (onShowDetails) {
                   onShowDetails(item.videoData);
+                  // аналитика: просмотр карточки и клик "Подробнее"
+                  if (window.trackProductView) {
+                    const type = item?.videoData?.isVertical ? 'invitation' : 'presentation';
+                    window.trackProductView(type, item?.videoData?.title || item.title || 'Карточка');
+                  }
+                  if (window.trackDetailsClick) {
+                    window.trackDetailsClick(item?.videoData?.isVertical ? 'details_invitation' : 'details_presentation');
+                  }
                 }
               }}>
                 <span className="order-text">Подробнее</span>

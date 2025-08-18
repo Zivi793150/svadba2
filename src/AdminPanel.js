@@ -167,6 +167,7 @@ const AdminPanel = () => {
       popularPages,
       buttonClicks,
       conversions,
+      productViews,
       chatEngagement,
       userSessions,
       trends,
@@ -406,6 +407,31 @@ const AdminPanel = () => {
             ))}
           </div>
         </div>
+
+        {/* Просмотры товаров/карточек */}
+        {productViews && productViews.length > 0 && (
+          <div className="analytics-section">
+            <h2>🧩 Просмотры карточек ({getPeriodLabel()})</h2>
+            <div className="products-grid">
+              {productViews.map((group, idx) => (
+                <div key={idx} className="product-group-card">
+                  <div className="product-group-header">
+                    <h3>{group.type === 'presentation' ? 'Свадебные презентации' : group.type === 'invitation' ? 'Видео‑приглашения' : 'Другое'}</h3>
+                    <div className="product-group-total">{formatNumber(group.total)} просмотров</div>
+                  </div>
+                  <div className="product-titles-list">
+                    {group.titles.map((t, i) => (
+                      <div key={i} className="product-title-item">
+                        <div className="product-title-name">{t.title}</div>
+                        <div className="product-title-count">{formatNumber(t.count)}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Вовлеченность в чат */}
         <div className="analytics-section">

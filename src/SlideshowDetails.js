@@ -34,6 +34,15 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
     };
   }, []);
 
+  // Фиксируем просмотр карточки при открытии деталей
+  useEffect(() => {
+    if (videoData && window.trackProductView) {
+      const type = videoData.isVertical ? 'invitation' : 'presentation';
+      const title = videoData.title || (videoData.isVertical ? 'Видео-приглашения' : 'Свадебная презентация');
+      window.trackProductView(type, title);
+    }
+  }, [videoData]);
+
   const handleWhatsAppClick = () => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const botPhone = '79004511777'; // Номер WhatsApp бота

@@ -122,10 +122,17 @@ function Catalog({ title, badge, description, icon, info, video, poster, isInDev
           )
         ) : null}
       </div>
-      <button className="carousel-order-btn" onClick={() => {
+      <button className="carousel-order-btn" data-analytics-id="details_presentation" data-analytics-text="Подробнее — Свадебная презентация" onClick={() => {
         console.log('Кнопка "Подробнее" нажата!');
         if (onShowDetails) {
           onShowDetails(videoData);
+          // аналитика: просмотр карточки и клик "Подробнее"
+          if (window.trackProductView) {
+            window.trackProductView('presentation', videoData?.title || 'Свадебная презентация');
+          }
+          if (window.trackDetailsClick) {
+            window.trackDetailsClick('details_presentation');
+          }
         }
       }}><span className="order-text">Подробнее</span></button>
     </div>

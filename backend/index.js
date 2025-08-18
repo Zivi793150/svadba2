@@ -334,11 +334,20 @@ app.get('/api/analytics', async (req, res) => {
 
     // Конверсии
     const conversionStats = {};
+    const productViewStats = {}; // product_view по типу и названию
     conversions.forEach(conversion => {
       const key = conversion.action;
       conversionStats[key] = conversionStats[key] || { action: conversion.action, count: 0, pages: new Set() };
       conversionStats[key].count++;
       conversionStats[key].pages.add(conversion.page);
+
+      if (conversion.action === 'product_view') {
+        const type = conversion.metadata?.type || 'unknown';
+        const title = conversion.metadata?.title || 'Unknown';
+        productViewStats[type] = productViewStats[type] || { type, total: 0, titles: {} };
+        productViewStats[type].total += 1;
+        productViewStats[type].titles[title] = (productViewStats[type].titles[title] || 0) + 1;
+      }
     });
 
     const topConversions = Object.values(conversionStats)
@@ -349,6 +358,15 @@ app.get('/api/analytics', async (req, res) => {
         page: Array.from(conv.pages)[0] || '/'
       }))
       .sort((a, b) => b.count - a.count);
+
+    // Подготавливаем продуктовые просмотры в удобном виде
+    const productViews = Object.values(productViewStats).map(group => ({
+      type: group.type,
+      total: group.total,
+      titles: Object.entries(group.titles)
+        .map(([title, count]) => ({ title, count }))
+        .sort((a, b) => b.count - a.count)
+    })).sort((a, b) => b.total - a.total);
 
     // Вовлеченность в чат
     const totalMessagesSent = chatEngagement.reduce((sum, engagement) => sum + engagement.messagesSent, 0);
@@ -497,6 +515,7 @@ app.get('/api/analytics', async (req, res) => {
       popularPages,
       buttonClicks: topButtons,
       conversions: topConversions,
+      productViews,
       chatEngagement: {
         messagesSent: totalMessagesSent,
         filesSent: totalFilesSent,
