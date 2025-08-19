@@ -178,7 +178,7 @@ const AdminPanel = () => {
       weeklyActivity
     } = analytics;
 
-    return (
+  return (
       <div className="analytics-container">
         {/* Период и обновление */}
         <div className="analytics-header">
@@ -350,10 +350,10 @@ const AdminPanel = () => {
                 <div className="page-bar">
                   <div className="page-bar-fill" style={{ width: `${page.percentage}%` }}></div>
                 </div>
-              </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
+      </div>
 
         {/* Маркетинг и реклама */}
         <div className="analytics-section">
@@ -427,14 +427,14 @@ const AdminPanel = () => {
                               ? `${platform.campaigns.length} кампаний` 
                               : 'Рекламные переходы'}
                           </span>
-                        </div>
+                  </div>
                         <div className="platform-data">
                           <span className="platform-value">{platform.count}</span>
                           <span className="platform-label">кликов</span>
-                        </div>
-                      </div>
-                    ))
-                ) : (
+                  </div>
+                </div>
+              ))
+            ) : (
                   <div className="no-data">
                     Нет данных о рекламных кампаниях
                     <br />
@@ -482,6 +482,17 @@ const AdminPanel = () => {
                     <small>Данные появятся после настройки отслеживания</small>
                   </div>
                 )}
+                
+                {/* Инструкция по улучшению SEO */}
+                <div className="setup-instructions">
+                  <h4>🔧 Как улучшить SEO:</h4>
+                  <div className="instruction-item">
+                    <strong>Поисковые запросы:</strong> Добавьте мета-теги и оптимизируйте контент
+                  </div>
+                  <div className="instruction-item">
+                    <strong>Технические метрики:</strong> Используйте PageSpeed Insights и Lighthouse
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -503,6 +514,17 @@ const AdminPanel = () => {
                     <small>Данные появятся после настройки отслеживания</small>
                   </div>
                 )}
+                
+                {/* Инструкция по внешним ссылкам */}
+                <div className="setup-instructions">
+                  <h4>🔧 Как получить внешние ссылки:</h4>
+                  <div className="instruction-item">
+                    <strong>Гостевые посты:</strong> Публикуйтесь на свадебных блогах
+                  </div>
+                  <div className="instruction-item">
+                    <strong>Партнерства:</strong> Сотрудничайте с фотографами и организаторами
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -515,19 +537,25 @@ const AdminPanel = () => {
                     {analytics.pageSpeed && (
                       <div className="metric-row">
                         <span className="metric-label">Скорость загрузки</span>
-                        <span className="metric-value">{analytics.pageSpeed} сек</span>
+                        <span className="metric-value">
+                          Быстро: {analytics.pageSpeed.fast || 0} | 
+                          Средне: {analytics.pageSpeed.medium || 0} | 
+                          Медленно: {analytics.pageSpeed.slow || 0}
+                        </span>
                       </div>
                     )}
                     {analytics.coreWebVitals && (
                       <div className="metric-row">
                         <span className="metric-label">Core Web Vitals</span>
-                        <span className="metric-value">{analytics.coreWebVitals}</span>
+                        <span className="metric-value">
+                          {Object.values(analytics.coreWebVitals).some(v => v.good > 0) ? '✅ Данные доступны' : '❌ Нет данных'}
+                        </span>
                       </div>
                     )}
                     {analytics.performanceIndex && (
                       <div className="metric-row">
                         <span className="metric-label">Индекс производительности</span>
-                        <span className="metric-value">{analytics.performanceIndex}</span>
+                        <span className="metric-value">{analytics.performanceIndex}/100</span>
                       </div>
                     )}
                   </>
@@ -538,6 +566,17 @@ const AdminPanel = () => {
                     <small>Данные появятся после настройки отслеживания</small>
                   </div>
                 )}
+                
+                {/* Инструкция по техническим метрикам */}
+                <div className="setup-instructions">
+                  <h4>🔧 Как улучшить технические метрики:</h4>
+                  <div className="instruction-item">
+                    <strong>Page Speed:</strong> Оптимизируйте изображения и используйте CDN
+                  </div>
+                  <div className="instruction-item">
+                    <strong>Core Web Vitals:</strong> Минимизируйте JavaScript и CSS
+                  </div>
+                </div>
               </div>
             </div>
           </div>

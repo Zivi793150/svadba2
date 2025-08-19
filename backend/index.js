@@ -260,28 +260,44 @@ app.get('/api/analytics', async (req, res) => {
         previousStartDate = new Date(startDate.getTime() - 7 * 24 * 60 * 60 * 1000);
     }
 
-    // Получаем данные за текущий период
-    const pageViews = await PageView.find({ timestamp: { $gte: startDate } });
-    const buttonClicks = await ButtonClick.find({ timestamp: { $gte: startDate } });
-    const conversions = await Conversion.find({ timestamp: { $gte: startDate } });
+    // Получаем данные за текущий период (исключаем админку)
+    const pageViews = await PageView.find({ 
+      timestamp: { $gte: startDate },
+      page: { $ne: '/admin' }
+    });
+    const buttonClicks = await ButtonClick.find({ 
+      timestamp: { $gte: startDate },
+      page: { $ne: '/admin' }
+    });
+    const conversions = await Conversion.find({ 
+      timestamp: { $gte: startDate },
+      page: { $ne: '/admin' }
+    });
     const chatEngagement = await ChatEngagement.find({ timestamp: { $gte: startDate } });
-    const userSessions = await UserSession.find({ startTime: { $gte: startDate } });
+    const userSessions = await UserSession.find({ 
+      startTime: { $gte: startDate },
+      pages: { $not: /^\/admin/ }
+    });
 
-    // Получаем данные за предыдущий период для сравнения
+    // Получаем данные за предыдущий период для сравнения (исключаем админку)
     const previousPageViews = await PageView.find({ 
-      timestamp: { $gte: previousStartDate, $lt: startDate } 
+      timestamp: { $gte: previousStartDate, $lt: startDate },
+      page: { $ne: '/admin' }
     });
     const previousButtonClicks = await ButtonClick.find({ 
-      timestamp: { $gte: previousStartDate, $lt: startDate } 
+      timestamp: { $gte: previousStartDate, $lt: startDate },
+      page: { $ne: '/admin' }
     });
     const previousConversions = await Conversion.find({ 
-      timestamp: { $gte: previousStartDate, $lt: startDate } 
+      timestamp: { $gte: previousStartDate, $lt: startDate },
+      page: { $ne: '/admin' }
     });
     const previousChatEngagement = await ChatEngagement.find({ 
       timestamp: { $gte: previousStartDate, $lt: startDate } 
     });
     const previousSessions = await UserSession.find({ 
-      startTime: { $gte: previousStartDate, $lt: startDate } 
+      startTime: { $gte: previousStartDate, $lt: startDate },
+      pages: { $not: /^\/admin/ }
     });
 
     // Анализ устройств
@@ -631,6 +647,38 @@ app.get('/api/analytics', async (req, res) => {
       }
     });
 
+    // Анализируем технические метрики
+    const technicalMetrics = {
+      pageSpeed: {
+        fast: 0,    // < 2 сек
+        medium: 0,  // 2-4 сек
+        slow: 0     // > 4 сек
+      },
+      coreWebVitals: {
+        lcp: { good: 0, needsImprovement: 0, poor: 0 },
+        fid: { good: 0, needsImprovement: 0, poor: 0 },
+        cls: { good: 0, needsImprovement: 0, poor: 0 }
+      },
+      performanceIndex: 0
+    };
+
+    // Анализируем время загрузки страниц (если есть данные)
+    pageViews.forEach(view => {
+      if (view.loadTime) {
+        if (view.loadTime < 2000) technicalMetrics.pageSpeed.fast++;
+        else if (view.loadTime < 4000) technicalMetrics.pageSpeed.medium++;
+        else technicalMetrics.pageSpeed.slow++;
+      }
+    });
+
+    // Вычисляем общий индекс производительности
+    const totalPageViews = pageViews.length;
+    if (totalPageViews > 0) {
+      const fastPercentage = (technicalMetrics.pageSpeed.fast / totalPageViews) * 100;
+      const mediumPercentage = (technicalMetrics.pageSpeed.medium / totalPageViews) * 50;
+      technicalMetrics.performanceIndex = Math.round(fastPercentage + mediumPercentage);
+    }
+
     const marketingData = {
       searchQueries: searchQueries.length,
       adPlatforms,
@@ -638,9 +686,9 @@ app.get('/api/analytics', async (req, res) => {
       searchQueriesList: searchQueries,
       backlinks,
       utmStats,
-      pageSpeed: null, // TODO: Реализовать измерение скорости
-      coreWebVitals: null, // TODO: Реализовать Core Web Vitals
-      performanceIndex: null // TODO: Реализовать индекс производительности
+      pageSpeed: technicalMetrics.pageSpeed,
+      coreWebVitals: technicalMetrics.coreWebVitals,
+      performanceIndex: technicalMetrics.performanceIndex
     };
 
     // Почасовая активность
