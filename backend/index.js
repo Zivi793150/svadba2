@@ -456,24 +456,16 @@ app.get('/api/analytics', async (req, res) => {
       { name: 'macOS', percentage: 5 }
     ];
 
-    // Маркетинговые данные (моковые для демонстрации)
+    // Маркетинговые данные (реальные данные из аналитики)
     const marketingData = {
-      searchQueries: Math.floor(Math.random() * 50) + 20,
-      vkCampaigns: Math.floor(Math.random() * 30) + 15,
-      emailOpens: Math.floor(Math.random() * 100) + 50,
-      searchQueriesList: [
-        { query: "свадебная презентация", count: Math.floor(Math.random() * 20) + 10 },
-        { query: "видео приглашение на свадьбу", count: Math.floor(Math.random() * 15) + 8 },
-        { query: "свадебный видеоролик", count: Math.floor(Math.random() * 12) + 6 }
-      ],
-      backlinks: [
-        { domain: "vk.com", count: Math.floor(Math.random() * 10) + 5 },
-        { domain: "instagram.com", count: Math.floor(Math.random() * 8) + 4 },
-        { domain: "yandex.ru", count: Math.floor(Math.random() * 15) + 8 }
-      ],
-      pageSpeed: (Math.random() * 2 + 1).toFixed(1),
-      coreWebVitals: "Хорошо",
-      performanceIndex: Math.floor(Math.random() * 20 + 80)
+      searchQueries: 0, // TODO: Реализовать отслеживание поисковых запросов
+      vkCampaigns: 0, // TODO: Реализовать отслеживание VK кампаний
+      emailOpens: 0, // TODO: Реализовать отслеживание email рассылок
+      searchQueriesList: [], // TODO: Реализовать отслеживание поисковых запросов
+      backlinks: [], // TODO: Реализовать отслеживание внешних ссылок
+      pageSpeed: null, // TODO: Реализовать измерение скорости
+      coreWebVitals: null, // TODO: Реализовать Core Web Vitals
+      performanceIndex: null // TODO: Реализовать индекс производительности
     };
 
     // Почасовая активность
