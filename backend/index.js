@@ -456,6 +456,26 @@ app.get('/api/analytics', async (req, res) => {
       { name: 'macOS', percentage: 5 }
     ];
 
+    // Маркетинговые данные (моковые для демонстрации)
+    const marketingData = {
+      searchQueries: Math.floor(Math.random() * 50) + 20,
+      vkCampaigns: Math.floor(Math.random() * 30) + 15,
+      emailOpens: Math.floor(Math.random() * 100) + 50,
+      searchQueriesList: [
+        { query: "свадебная презентация", count: Math.floor(Math.random() * 20) + 10 },
+        { query: "видео приглашение на свадьбу", count: Math.floor(Math.random() * 15) + 8 },
+        { query: "свадебный видеоролик", count: Math.floor(Math.random() * 12) + 6 }
+      ],
+      backlinks: [
+        { domain: "vk.com", count: Math.floor(Math.random() * 10) + 5 },
+        { domain: "instagram.com", count: Math.floor(Math.random() * 8) + 4 },
+        { domain: "yandex.ru", count: Math.floor(Math.random() * 15) + 8 }
+      ],
+      pageSpeed: (Math.random() * 2 + 1).toFixed(1),
+      coreWebVitals: "Хорошо",
+      performanceIndex: Math.floor(Math.random() * 20 + 80)
+    };
+
     // Почасовая активность
     const hourlyActivity = [];
     for (let i = 0; i < 24; i++) {
@@ -553,7 +573,16 @@ app.get('/api/analytics', async (req, res) => {
       browserStats,
       osStats,
       hourlyActivity,
-      weeklyActivity
+      weeklyActivity,
+      // Маркетинговые данные
+      searchQueries: marketingData.searchQueries,
+      vkCampaigns: marketingData.vkCampaigns,
+      emailOpens: marketingData.emailOpens,
+      searchQueriesList: marketingData.searchQueriesList,
+      backlinks: marketingData.backlinks,
+      pageSpeed: marketingData.pageSpeed,
+      coreWebVitals: marketingData.coreWebVitals,
+      performanceIndex: marketingData.performanceIndex
     });
   } catch (error) {
     console.error('Analytics error:', error);

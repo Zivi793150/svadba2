@@ -355,6 +355,129 @@ const AdminPanel = () => {
           </div>
         </div>
 
+        {/* Маркетинг и реклама */}
+        <div className="analytics-section">
+          <h2>📢 Маркетинг и реклама ({getPeriodLabel()})</h2>
+          <div className="marketing-grid">
+            {/* Источники трафика */}
+            <div className="marketing-card">
+              <h3>🌐 Источники трафика</h3>
+              <div className="traffic-sources">
+                {topReferrers.map((ref, idx) => (
+                  <div key={idx} className="traffic-source-item">
+                    <div className="source-info">
+                      <span className="source-name">{ref.source}</span>
+                      <span className="source-url">{ref.url !== '-' ? ref.url : 'Прямые переходы'}</span>
+                    </div>
+                    <div className="source-stats">
+                      <span className="source-visits">{formatNumber(ref.visits)}</span>
+                      <span className="source-percentage">{ref.percentage}%</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div className="progress-fill" style={{width: `${ref.percentage}%`}}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Рекламные платформы */}
+            <div className="marketing-card">
+              <h3>📱 Рекламные платформы</h3>
+              <div className="platform-stats">
+                <div className="platform-item">
+                  <div className="platform-icon">🔍</div>
+                  <div className="platform-info">
+                    <span className="platform-name">Яндекс.Директ</span>
+                    <span className="platform-metric">Поисковые запросы</span>
+                  </div>
+                  <div className="platform-data">
+                    <span className="platform-value">{analytics.searchQueries || 0}</span>
+                    <span className="platform-label">запросов</span>
+                  </div>
+                </div>
+                <div className="platform-item">
+                  <div className="platform-icon">📘</div>
+                  <div className="platform-info">
+                    <span className="platform-name">ВКонтакте</span>
+                    <span className="platform-metric">Рекламные кампании</span>
+                  </div>
+                  <div className="platform-data">
+                    <span className="platform-value">{analytics.vkCampaigns || 0}</span>
+                    <span className="platform-label">кликов</span>
+                  </div>
+                </div>
+                <div className="platform-item">
+                  <div className="platform-icon">📧</div>
+                  <div className="platform-info">
+                    <span className="platform-name">Email рассылки</span>
+                    <span className="platform-metric">Открытия</span>
+                  </div>
+                  <div className="platform-data">
+                    <span className="platform-value">{analytics.emailOpens || 0}</span>
+                    <span className="platform-label">открытий</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* SEO аналитика */}
+        <div className="analytics-section">
+          <h2>🔍 SEO аналитика ({getPeriodLabel()})</h2>
+          <div className="seo-grid">
+            {/* Поисковые запросы */}
+            <div className="seo-card">
+              <h3>🔎 Поисковые запросы</h3>
+              <div className="search-queries">
+                {analytics.searchQueriesList ? analytics.searchQueriesList.map((query, idx) => (
+                  <div key={idx} className="query-item">
+                    <span className="query-text">{query.query}</span>
+                    <span className="query-count">{query.count}</span>
+                  </div>
+                )) : (
+                  <div className="no-data">Нет данных о поисковых запросах</div>
+                )}
+              </div>
+            </div>
+
+            {/* Внешние ссылки */}
+            <div className="seo-card">
+              <h3>🔗 Внешние ссылки</h3>
+              <div className="backlinks">
+                {analytics.backlinks ? analytics.backlinks.map((link, idx) => (
+                  <div key={idx} className="backlink-item">
+                    <span className="backlink-domain">{link.domain}</span>
+                    <span className="backlink-count">{link.count}</span>
+                  </div>
+                )) : (
+                  <div className="no-data">Нет данных о внешних ссылках</div>
+                )}
+              </div>
+            </div>
+
+            {/* Технические метрики */}
+            <div className="seo-card">
+              <h3>⚙️ Технические метрики</h3>
+              <div className="tech-metrics">
+                <div className="metric-row">
+                  <span className="metric-label">Скорость загрузки</span>
+                  <span className="metric-value">{analytics.pageSpeed || 'N/A'} сек</span>
+                </div>
+                <div className="metric-row">
+                  <span className="metric-label">Core Web Vitals</span>
+                  <span className="metric-value">{analytics.coreWebVitals || 'N/A'}</span>
+                </div>
+                <div className="metric-row">
+                  <span className="metric-label">Индекс производительности</span>
+                  <span className="metric-value">{analytics.performanceIndex || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Клики по кнопкам */}
         <div className="analytics-section">
           <h2>🖱️ Популярные кнопки ({getPeriodLabel()})</h2>
