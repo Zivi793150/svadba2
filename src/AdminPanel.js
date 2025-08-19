@@ -378,6 +378,29 @@ const AdminPanel = () => {
                     </div>
                   </div>
                 ))}
+                
+                {/* UTM-метки */}
+                {analytics.utmStats && Object.keys(analytics.utmStats).length > 0 && (
+                  <div className="utm-section">
+                    <h4>📊 UTM-метки</h4>
+                    {Object.entries(analytics.utmStats)
+                      .sort(([,a], [,b]) => b - a)
+                      .slice(0, 5)
+                      .map(([key, count], idx) => {
+                        const [source, medium, campaign] = key.split(':');
+                        return (
+                          <div key={idx} className="utm-item">
+                            <div className="utm-info">
+                              <span className="utm-source">{source}</span>
+                              <span className="utm-medium">{medium}</span>
+                              <span className="utm-campaign">{campaign}</span>
+                            </div>
+                            <span className="utm-count">{count}</span>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
               </div>
             </div>
 

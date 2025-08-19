@@ -1701,6 +1701,64 @@
   font-weight: 600;
 }
 
+/* UTM Section */
+.utm-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.utm-section h4 {
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.utm-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 8px;
+}
+
+.utm-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.utm-source {
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.utm-medium {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+}
+
+.utm-campaign {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+}
+
+.utm-count {
+  color: #667eea;
+  font-weight: 600;
+  font-size: 16px;
+  margin-left: 16px;
+}
+
 .platform-stats {
   display: flex;
   flex-direction: column;

@@ -49,13 +49,22 @@ class AnalyticsTracker {
         }
       };
 
+      // Извлекаем UTM-метки из URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const utmData = {};
+      ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'].forEach(param => {
+        const value = urlParams.get(param);
+        if (value) utmData[param] = value;
+      });
+
       const data = {
         page: this.currentPage,
         userAgent: navigator.userAgent,
         referrer: document.referrer,
         screenResolution: `${window.screen.width}x${window.screen.height}`,
         language: navigator.language,
-        deviceType: getDeviceType()
+        deviceType: getDeviceType(),
+        utmData: Object.keys(utmData).length > 0 ? utmData : undefined
       };
 
       await fetch(`${this.API_URL}/api/analytics/pageview`, {

@@ -457,12 +457,103 @@ app.get('/api/analytics', async (req, res) => {
     ];
 
     // Маркетинговые данные (реальные данные из аналитики)
+    
+    // Анализируем поисковые запросы из referrer
+    const searchEngines = ['google', 'yandex', 'bing', 'mail.ru'];
+    const searchQueries = [];
+    const searchQueriesCount = {};
+    
+    pageViews.forEach(view => {
+      if (view.referrer) {
+        const referrer = view.referrer.toLowerCase();
+        
+        // Ищем поисковые системы
+        const isSearchEngine = searchEngines.some(engine => referrer.includes(engine));
+        if (isSearchEngine) {
+          // Извлекаем поисковый запрос из URL
+          try {
+            const url = new URL(view.referrer);
+            const query = url.searchParams.get('q') || url.searchParams.get('text') || url.searchParams.get('query');
+            if (query) {
+              searchQueriesCount[query] = (searchQueriesCount[query] || 0) + 1;
+            }
+          } catch (e) {
+            // Если не удалось распарсить URL, считаем как поисковый переход
+            searchQueriesCount['неизвестный запрос'] = (searchQueriesCount['неизвестный запрос'] || 0) + 1;
+          }
+        }
+      }
+    });
+    
+    // Формируем список поисковых запросов
+    Object.entries(searchQueriesCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 10)
+      .forEach(([query, count]) => {
+        searchQueries.push({ query, count });
+      });
+    
+    // Анализируем VK кампании по UTM-меткам и referrer
+    let vkCampaigns = 0;
+    pageViews.forEach(view => {
+      if (view.referrer && view.referrer.includes('vk.com')) {
+        vkCampaigns++;
+      }
+      // Также проверяем UTM-метки
+      if (view.utmData && view.utmData.utm_source === 'vk') {
+        vkCampaigns++;
+      }
+    });
+    
+    // Анализируем внешние ссылки (кроме поисковых систем)
+    const backlinks = [];
+    const backlinkCounts = {};
+    
+    pageViews.forEach(view => {
+      if (view.referrer) {
+        try {
+          const url = new URL(view.referrer);
+          const domain = url.hostname;
+          
+          // Исключаем поисковые системы и внутренние ссылки
+          if (!searchEngines.some(engine => domain.includes(engine)) && 
+              !domain.includes('xn--e1aalvju.xn--p1ai')) {
+            backlinkCounts[domain] = (backlinkCounts[domain] || 0) + 1;
+          }
+        } catch (e) {
+          // Пропускаем невалидные URL
+        }
+      }
+    });
+    
+    // Формируем список внешних ссылок
+    Object.entries(backlinkCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 10)
+      .forEach(([domain, count]) => {
+        backlinks.push({ domain, count });
+      });
+    
+    // Анализируем UTM-метки для понимания источников трафика
+    const utmStats = {};
+    pageViews.forEach(view => {
+      if (view.utmData) {
+        const source = view.utmData.utm_source || 'unknown';
+        const medium = view.utmData.utm_medium || 'unknown';
+        const campaign = view.utmData.utm_campaign || 'unknown';
+        
+        const key = `${source}:${medium}:${campaign}`;
+        utmStats[key] = (utmStats[key] || 0) + 1;
+      }
+    });
+
     const marketingData = {
-      searchQueries: 0, // TODO: Реализовать отслеживание поисковых запросов
-      vkCampaigns: 0, // TODO: Реализовать отслеживание VK кампаний
+      searchQueries: searchQueries.length,
+      vkCampaigns,
       emailOpens: 0, // TODO: Реализовать отслеживание email рассылок
-      searchQueriesList: [], // TODO: Реализовать отслеживание поисковых запросов
-      backlinks: [], // TODO: Реализовать отслеживание внешних ссылок
+      searchQueriesList: searchQueries,
+      backlinks,
+      utmStats,
       pageSpeed: null, // TODO: Реализовать измерение скорости
       coreWebVitals: null, // TODO: Реализовать Core Web Vitals
       performanceIndex: null // TODO: Реализовать индекс производительности
@@ -572,6 +663,7 @@ app.get('/api/analytics', async (req, res) => {
       emailOpens: marketingData.emailOpens,
       searchQueriesList: marketingData.searchQueriesList,
       backlinks: marketingData.backlinks,
+      utmStats: marketingData.utmStats,
       pageSpeed: marketingData.pageSpeed,
       coreWebVitals: marketingData.coreWebVitals,
       performanceIndex: marketingData.performanceIndex
