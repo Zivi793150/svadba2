@@ -408,55 +408,53 @@ const AdminPanel = () => {
             <div className="marketing-card">
               <h3>📱 Рекламные платформы</h3>
               <div className="platform-stats">
-                {analytics.searchQueries > 0 || analytics.vkCampaigns > 0 || analytics.emailOpens > 0 ? (
-                  <>
-                    {analytics.searchQueries > 0 && (
-                      <div className="platform-item">
-                        <div className="platform-icon">🔍</div>
+                {analytics.adPlatforms && Object.values(analytics.adPlatforms).some(platform => platform.count > 0) ? (
+                  Object.entries(analytics.adPlatforms)
+                    .filter(([, platform]) => platform.count > 0)
+                    .map(([key, platform]) => (
+                      <div key={key} className="platform-item">
+                        <div className="platform-icon">
+                          {key === 'vk' ? '📘' : 
+                           key === 'yandex' ? '🔍' : 
+                           key === 'google' ? '🔎' : 
+                           key === 'instagram' ? '📷' : 
+                           key === 'facebook' ? '📘' : '📱'}
+                        </div>
                         <div className="platform-info">
-                          <span className="platform-name">Яндекс.Директ</span>
-                          <span className="platform-metric">Поисковые запросы</span>
+                          <span className="platform-name">{platform.name}</span>
+                          <span className="platform-metric">
+                            {platform.campaigns.length > 0 
+                              ? `${platform.campaigns.length} кампаний` 
+                              : 'Рекламные переходы'}
+                          </span>
                         </div>
                         <div className="platform-data">
-                          <span className="platform-value">{analytics.searchQueries}</span>
-                          <span className="platform-label">запросов</span>
-                        </div>
-                      </div>
-                    )}
-                    {analytics.vkCampaigns > 0 && (
-                      <div className="platform-item">
-                        <div className="platform-icon">📘</div>
-                        <div className="platform-info">
-                          <span className="platform-name">ВКонтакте</span>
-                          <span className="platform-metric">Рекламные кампании</span>
-                        </div>
-                        <div className="platform-data">
-                          <span className="platform-value">{analytics.vkCampaigns}</span>
+                          <span className="platform-value">{platform.count}</span>
                           <span className="platform-label">кликов</span>
                         </div>
                       </div>
-                    )}
-                    {analytics.emailOpens > 0 && (
-                      <div className="platform-item">
-                        <div className="platform-icon">📧</div>
-                        <div className="platform-info">
-                          <span className="platform-name">Email рассылки</span>
-                          <span className="platform-metric">Открытия</span>
-                        </div>
-                        <div className="platform-data">
-                          <span className="platform-value">{analytics.emailOpens}</span>
-                          <span className="platform-label">открытий</span>
-                        </div>
-                      </div>
-                    )}
-                  </>
+                    ))
                 ) : (
                   <div className="no-data">
                     Нет данных о рекламных кампаниях
                     <br />
-                    <small>Данные появятся после настройки отслеживания</small>
+                    <small>Данные появятся после настройки UTM-меток</small>
                   </div>
                 )}
+                
+                {/* Инструкция по настройке */}
+                <div className="setup-instructions">
+                  <h4>🔧 Как настроить отслеживание:</h4>
+                  <div className="instruction-item">
+                    <strong>VK:</strong> Добавьте в ссылки: <code>?utm_source=vk&utm_medium=banner&utm_campaign=название</code>
+                  </div>
+                  <div className="instruction-item">
+                    <strong>Яндекс.Директ:</strong> <code>?utm_source=yandex&utm_medium=cpc&utm_campaign=название</code>
+                  </div>
+                  <div className="instruction-item">
+                    <strong>Google Ads:</strong> <code>?utm_source=google&utm_medium=cpc&utm_campaign=название</code>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

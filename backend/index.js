@@ -493,16 +493,100 @@ app.get('/api/analytics', async (req, res) => {
         searchQueries.push({ query, count });
       });
     
-    // Анализируем VK кампании по UTM-меткам и referrer
-    let vkCampaigns = 0;
+    // Анализируем рекламные платформы
+    const adPlatforms = {
+      vk: { name: 'ВКонтакте', count: 0, campaigns: [] },
+      yandex: { name: 'Яндекс.Директ', count: 0, campaigns: [] },
+      google: { name: 'Google Ads', count: 0, campaigns: [] },
+      instagram: { name: 'Instagram', count: 0, campaigns: [] },
+      facebook: { name: 'Facebook', count: 0, campaigns: [] }
+    };
+
+    // Анализируем по referrer и UTM-меткам
     pageViews.forEach(view => {
-      if (view.referrer && view.referrer.includes('vk.com')) {
-        vkCampaigns++;
+      if (view.referrer) {
+        const referrer = view.referrer.toLowerCase();
+        
+        // VK
+        if (referrer.includes('vk.com')) {
+          adPlatforms.vk.count++;
+          if (view.utmData?.utm_campaign) {
+            adPlatforms.vk.campaigns.push(view.utmData.utm_campaign);
+          }
+        }
+        
+        // Yandex
+        if (referrer.includes('yandex.ru') && referrer.includes('clck')) {
+          adPlatforms.yandex.count++;
+          if (view.utmData?.utm_campaign) {
+            adPlatforms.yandex.campaigns.push(view.utmData.utm_campaign);
+          }
+        }
+        
+        // Google
+        if (referrer.includes('google.com') && referrer.includes('clck')) {
+          adPlatforms.google.count++;
+          if (view.utmData?.utm_campaign) {
+            adPlatforms.google.campaigns.push(view.utmData.utm_campaign);
+          }
+        }
+        
+        // Instagram
+        if (referrer.includes('instagram.com')) {
+          adPlatforms.instagram.count++;
+          if (view.utmData?.utm_campaign) {
+            adPlatforms.instagram.campaigns.push(view.utmData.utm_campaign);
+          }
+        }
+        
+        // Facebook
+        if (referrer.includes('facebook.com')) {
+          adPlatforms.facebook.count++;
+          if (view.utmData?.utm_campaign) {
+            adPlatforms.facebook.campaigns.push(view.utmData.utm_campaign);
+          }
+        }
       }
-      // Также проверяем UTM-метки
-      if (view.utmData && view.utmData.utm_source === 'vk') {
-        vkCampaigns++;
+      
+      // UTM-метки для рекламных источников
+      if (view.utmData) {
+        const source = view.utmData.utm_source?.toLowerCase();
+        const medium = view.utmData.utm_medium?.toLowerCase();
+        
+        if (source && medium && (medium.includes('cpc') || medium.includes('banner') || medium.includes('social'))) {
+          if (source === 'vk' || source === 'vkontakte') {
+            adPlatforms.vk.count++;
+            if (view.utmData.utm_campaign) {
+              adPlatforms.vk.campaigns.push(view.utmData.utm_campaign);
+            }
+          } else if (source === 'yandex' || source === 'yandex_direct') {
+            adPlatforms.yandex.count++;
+            if (view.utmData.utm_campaign) {
+              adPlatforms.yandex.campaigns.push(view.utmData.utm_campaign);
+            }
+          } else if (source === 'google' || source === 'google_ads') {
+            adPlatforms.google.count++;
+            if (view.utmData.utm_campaign) {
+              adPlatforms.google.campaigns.push(view.utmData.utm_campaign);
+            }
+          } else if (source === 'instagram' || source === 'ig') {
+            adPlatforms.instagram.count++;
+            if (view.utmData.utm_campaign) {
+              adPlatforms.instagram.campaigns.push(view.utmData.utm_campaign);
+            }
+          } else if (source === 'facebook' || source === 'fb') {
+            adPlatforms.facebook.count++;
+            if (view.utmData.utm_campaign) {
+              adPlatforms.facebook.campaigns.push(view.utmData.utm_campaign);
+            }
+          }
+        }
       }
+    });
+
+    // Убираем дубликаты кампаний
+    Object.values(adPlatforms).forEach(platform => {
+      platform.campaigns = [...new Set(platform.campaigns)];
     });
     
     // Анализируем внешние ссылки (кроме поисковых систем)
@@ -549,7 +633,7 @@ app.get('/api/analytics', async (req, res) => {
 
     const marketingData = {
       searchQueries: searchQueries.length,
-      vkCampaigns,
+      adPlatforms,
       emailOpens: 0, // TODO: Реализовать отслеживание email рассылок
       searchQueriesList: searchQueries,
       backlinks,
@@ -659,7 +743,7 @@ app.get('/api/analytics', async (req, res) => {
       weeklyActivity,
       // Маркетинговые данные
       searchQueries: marketingData.searchQueries,
-      vkCampaigns: marketingData.vkCampaigns,
+      adPlatforms: marketingData.adPlatforms,
       emailOpens: marketingData.emailOpens,
       searchQueriesList: marketingData.searchQueriesList,
       backlinks: marketingData.backlinks,

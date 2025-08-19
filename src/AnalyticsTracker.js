@@ -148,6 +148,17 @@ class AnalyticsTracker {
       });
     };
 
+    // Отслеживаем рекламные клики
+    const trackAdClick = (source, campaign, adType) => {
+      this.trackConversion('ad_clicked', {
+        trigger: 'ad_click',
+        page: this.currentPage,
+        ad_source: source,
+        ad_campaign: campaign,
+        ad_type: adType
+      });
+    };
+
     // Отслеживаем переходы на страницу заказа
     const trackOrderPage = () => {
       this.trackConversion('order_page_visited', {
@@ -181,6 +192,7 @@ class AnalyticsTracker {
     window.trackOrderPage = trackOrderPage;
     window.trackProductView = trackProductView;
     window.trackDetailsClick = trackDetailsClick;
+    window.trackAdClick = trackAdClick;
   }
 
   async trackConversion(action, metadata = {}) {
