@@ -5,7 +5,11 @@ const Lead = require('./lead.model');
 
 // Токен бота из переменных окружения
 const token = process.env.TELEGRAM_BOT_TOKEN;
-const ADMIN_ID = Number(process.env.ADMIN_TELEGRAM_ID || '0');
+const ADMIN_IDS = String(process.env.ADMIN_TELEGRAM_IDS || process.env.ADMIN_TELEGRAM_ID || '')
+  .split(/[\s,]+/)
+  .filter(Boolean)
+  .map(s => Number(s))
+  .filter(n => !Number.isNaN(n));
 
 // Проверяем наличие токена
 if (!token) {
@@ -15,7 +19,7 @@ if (!token) {
 }
 
 console.log('✅ TELEGRAM_BOT_TOKEN найден');
-console.log('ℹ️ ADMIN_TELEGRAM_ID:', ADMIN_ID);
+console.log('ℹ️ ADMIN_TELEGRAM_IDS:', ADMIN_IDS);
 const bot = new TelegramBot(token, { polling: false }); // В проде работаем через webhook
 
 // Состояния пользователей
@@ -262,8 +266,7 @@ bot.onText(/\/start(?:\s+(.*))?/, async (msg, match) => {
 
 // Команда для администратора: показать все заявки
 bot.onText(/\/leads(?:\s+(.*))?/, async (msg, match) => {
-  const adminId = Number(process.env.ADMIN_TELEGRAM_ID || '0');
-  if (msg.chat.id !== adminId) {
+  if (!ADMIN_IDS.includes(msg.chat.id)) {
     return bot.sendMessage(msg.chat.id, 'Команда доступна только администратору.');
   }
   const filter = {};

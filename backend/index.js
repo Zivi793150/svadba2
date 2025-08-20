@@ -66,6 +66,17 @@ const yookassaService = require('./yookassa.service');
 const { setLead, getLead, deleteLead } = require('./leadStore');
 const Lead = require('./lead.model');
 
+// Утилита: получить массив ID админов из переменных окружения
+function parseAdminIds() {
+  const raw = String(process.env.ADMIN_TELEGRAM_IDS || process.env.ADMIN_TELEGRAM_ID || '').trim();
+  if (!raw) return [];
+  return raw
+    .split(/[\s,]+/)
+    .filter(Boolean)
+    .map((s) => Number(s))
+    .filter((n) => !Number.isNaN(n));
+}
+
 // Подключение ботов
 const telegramBot = require('./telegram-bot');
 const whatsappBot = require('./whatsapp-bot');
@@ -871,9 +882,9 @@ app.get('/api/analytics', async (req, res) => {
 // Ежедневный дайджест в Telegram администратору
 app.post('/internal/daily-digest', async (req, res) => {
   try {
-    const adminId = Number(process.env.ADMIN_TELEGRAM_ID);
-    if (!adminId) {
-      return res.status(400).json({ error: 'ADMIN_TELEGRAM_ID not set' });
+    const adminIds = parseAdminIds();
+    if (!adminIds.length) {
+      return res.status(400).json({ error: 'ADMIN_TELEGRAM_ID(S) not set' });
     }
     // Используем текущую аналитическую выборку за сутки
     const now = new Date();
@@ -1145,10 +1156,12 @@ app.post('/api/lead', async (req, res) => {
       deepLink
     ];
 
-    try {
-      await telegramBot.sendMessage(adminId, lines.join('\n'));
-    } catch (e) {
-      console.error('Telegram send lead to admin failed:', e?.response?.body || e?.message || e);
+    for (const adminId of adminIds) {
+      try {
+        await telegramBot.sendMessage(adminId, lines.join('\n'));
+      } catch (e) {
+        console.error('Telegram send lead to admin failed:', adminId, e?.response?.body || e?.message || e);
+      }
     }
     res.json({ ok: true, leadId, deepLink });
   } catch (e) {
