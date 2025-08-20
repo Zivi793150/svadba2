@@ -19,7 +19,7 @@ export default function AboutPage({ onClose }) {
         </header>
 
         <main className="about-content">
-          <div className="about-dev-note">Сайт в разработке: связь через мессенджеры и SMS. Звонки временно не принимаются.</div>
+          
           <section className="about-section">
             <h2>Компания</h2>
             <div className="about-grid">

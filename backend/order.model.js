@@ -36,6 +36,10 @@ const orderSchema = new mongoose.Schema({
     email: String,
     phone: String
   },
+  screen: {
+    label: String, // например, "1920×1080"
+    aspect: String // например, "16:9"
+  },
   paymentStatus: {
     type: String,
     enum: ['pending', 'paid', 'cancelled', 'failed'],

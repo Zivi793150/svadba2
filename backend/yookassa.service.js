@@ -27,7 +27,8 @@ class YooKassaService {
         selection: orderData.selection,
         totalPrice: orderData.totalPrice,
         prepayAmount: orderData.prepayAmount,
-        customerInfo: orderData.customerInfo
+        customerInfo: orderData.customerInfo,
+        screen: orderData.screen
       });
 
       await order.save();
@@ -48,7 +49,8 @@ class YooKassaService {
           orderId: order.orderId,
           productTitle: orderData.productTitle,
           variant: orderData.variant,
-          selection: orderData.selection
+          selection: orderData.selection,
+          screen: orderData.screen
         },
         idempotenceKey: order.orderId
       });

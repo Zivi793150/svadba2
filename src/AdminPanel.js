@@ -11,6 +11,7 @@ const AdminPanel = () => {
   const [analytics, setAnalytics] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [digestLoading, setDigestLoading] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('week'); // week, month, year, all
   const [selectedChat, setSelectedChat] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
@@ -73,6 +74,20 @@ const AdminPanel = () => {
       console.error('Error fetching analytics:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const sendTelegramDigest = async () => {
+    try {
+      setDigestLoading(true);
+      const resp = await fetch('https://svadba2.onrender.com/internal/daily-digest', { method: 'POST' });
+      if (!resp.ok) throw new Error('Request failed');
+      alert('Отчёт отправлен в Telegram администратору.');
+    } catch (e) {
+      console.error('Digest send error:', e);
+      alert('Не удалось отправить отчёт. Проверьте настройки ADMIN_TELEGRAM_ID на бэкенде.');
+    } finally {
+      setDigestLoading(false);
     }
   };
 
@@ -204,6 +219,9 @@ const AdminPanel = () => {
           </div>
           <button onClick={fetchAnalytics} className="refresh-btn" disabled={loading}>
             {loading ? '🔄' : '🔄'} Обновить
+          </button>
+          <button onClick={sendTelegramDigest} className="refresh-btn" disabled={digestLoading} title="Отправить суточный отчёт администратору в Telegram">
+            {digestLoading ? '📨' : '📨'} Отправить отчёт в TG
           </button>
         </div>
 

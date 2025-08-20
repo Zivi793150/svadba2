@@ -16,6 +16,12 @@ export default function OrderPage({ onClose, product, onPaymentSuccess }) {
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderId, setOrderId] = useState(null);
+  const [screen, setScreen] = useState(() => {
+    try {
+      const s = localStorage.getItem('screenSelection');
+      return s ? JSON.parse(s) : null;
+    } catch (_) { return null; }
+  });
 
   const prices = useMemo(() => {
     if (product?.title?.includes('Видео-приглашения')) {
@@ -55,6 +61,13 @@ export default function OrderPage({ onClose, product, onPaymentSuccess }) {
   const current = prices[variant][selection];
   const prepay = Math.round(current.price * 0.3);
 
+  // Аналитика: открытие страницы заказа
+  React.useEffect(() => {
+    if (window.trackConversion) {
+      window.trackConversion('order_page_open', { product: product?.title || 'unknown', screen });
+    }
+  }, []);
+
   const handleCreateOrder = async () => {
     if (!customerInfo.name || !customerInfo.email || !customerInfo.phone) {
       alert('Пожалуйста, заполните все поля');
@@ -74,7 +87,8 @@ export default function OrderPage({ onClose, product, onPaymentSuccess }) {
           selection,
           totalPrice: current.price,
           prepayAmount: prepay,
-          customerInfo
+          customerInfo,
+          screen
         }),
       });
 
@@ -115,17 +129,22 @@ export default function OrderPage({ onClose, product, onPaymentSuccess }) {
           </div>
           <div className="text-content">
             <h2>Выберите параметры</h2>
+            {screen && (
+              <div className="order-screen-note" title={`Пропорции ${screen.aspect}`}>
+                Экран: <strong>{screen.label}</strong> ({screen.aspect})
+              </div>
+            )}
             <div className="order-controls">
               <div className="order-row">
                 <label>Оживление фото:</label>
                 <div className="order-switch">
-                  <button className={variant==='noAnim'?'active':''} onClick={()=>setVariant('noAnim')}>Без оживления</button>
-                  <button className={variant==='anim'?'active':''} onClick={()=>setVariant('anim')}>С оживлением</button>
+                  <button className={variant==='noAnim'?'active':''} onClick={()=>{ setVariant('noAnim'); window.trackConversion && window.trackConversion('order_variant_toggle', { variant: 'noAnim' }); }}>Без оживления</button>
+                  <button className={variant==='anim'?'active':''} onClick={()=>{ setVariant('anim'); window.trackConversion && window.trackConversion('order_variant_toggle', { variant: 'anim' }); }}>С оживлением</button>
                 </div>
               </div>
               <div className="order-row">
                 <label>{product?.title?.includes('Видео-приглашения') ? 'Тип приглашения:' : 'Количество фото/разворотов:'}</label>
-                <select value={selection} onChange={e=>setSelection(e.target.value)}>
+                <select value={selection} onChange={e=>{ setSelection(e.target.value); window.trackConversion && window.trackConversion('order_selection_change', { selection: e.target.value }); }}>
                   {product?.title?.includes('Видео-приглашения') ? (
                     <>
                       <option value="unnamed">Неименное приглашение</option>
@@ -198,7 +217,7 @@ export default function OrderPage({ onClose, product, onPaymentSuccess }) {
             <div className="action-buttons">
               <button 
                 className="pay-btn" 
-                onClick={handleCreateOrder}
+                onClick={() => { window.trackConversion && window.trackConversion('order_create_click', { product: product?.title || 'unknown', screen, variant, selection }); handleCreateOrder(); }}
                 disabled={isProcessing}
               >
                 <span className="btn-text">

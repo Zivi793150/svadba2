@@ -1,3 +1,8 @@
+.	order-screen-note {
+	  margin: 6px 0 12px 0;
+	  color: #cfe2f7;
+	  font-size: 0.98rem;
+	}
 /* Order page specific styles */
 .order-controls {
   background: linear-gradient(135deg, rgba(191, 215, 237, 0.05) 0%, rgba(161, 143, 255, 0.08) 100%);

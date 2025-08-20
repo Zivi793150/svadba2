@@ -69,7 +69,6 @@ export default function Header({ onContactClick, onAboutClick }) {
     <header className="header">
       <div className="logo-wrap">
         <div className="logo">Фейеро</div>
-        <div className="dev-subtitle" aria-hidden="true">Сайт в разработке</div>
       </div>
       <div className="wow-slogan" aria-hidden="true">Мы подарим вашему празднику WOW эффект!</div>
       <nav className="nav">

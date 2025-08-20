@@ -806,6 +806,50 @@ app.get('/api/analytics', async (req, res) => {
   }
 });
 
+// Ежедневный дайджест в Telegram администратору
+app.post('/internal/daily-digest', async (req, res) => {
+  try {
+    const adminId = process.env.ADMIN_TELEGRAM_ID;
+    if (!adminId) {
+      return res.status(400).json({ error: 'ADMIN_TELEGRAM_ID not set' });
+    }
+    // Используем текущую аналитическую выборку за сутки
+    const now = new Date();
+    const since = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const views = await PageView.find({ timestamp: { $gte: since } });
+    const convs = await Conversion.find({ timestamp: { $gte: since } });
+    const chats = await ChatEngagement.find({ timestamp: { $gte: since } });
+    const sessions = await UserSession.find({ startTime: { $gte: since } });
+
+    const totalViews = views.length;
+    const totalConversions = convs.length;
+    const totalChats = chats.length;
+    const uniqueVisitors = new Set(sessions.map(s => s.ip)).size;
+    const productViews = convs.filter(c => c.action === 'product_view').length;
+    const orderVisits = convs.filter(c => c.action === 'order_page_visited' || c.action === 'order_page_open').length;
+    const teleClicks = convs.filter(c => c.action === 'telegram_clicked').length;
+    const waClicks = convs.filter(c => c.action === 'whatsapp_clicked').length;
+    const screenSelects = convs.filter(c => c.action === 'screen_select').length;
+
+    const lines = [
+      `📊 Ежедневная сводка за 24ч:`,
+      `Посетители: ${uniqueVisitors}`,
+      `Просмотры: ${totalViews}`,
+      `Конверсии всего: ${totalConversions}`,
+      `Просмотры карточек: ${productViews}`,
+      `Переходов к оформлению: ${orderVisits}`,
+      `Выбор экрана: ${screenSelects}`,
+      `Клики: TG ${teleClicks} | WA ${waClicks}`
+    ];
+
+    await telegramBot.sendMessage(adminId, lines.join('\n'));
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Daily digest error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Получить все сообщения по chatId с поддержкой пагинации
 app.get('/api/messages/:chatId', async (req, res) => {
   try {
@@ -970,7 +1014,7 @@ app.get('/webhook/telegram/delete', async (req, res) => {
 // API для заказов и оплаты
 app.post('/api/orders', async (req, res) => {
   try {
-    const { productTitle, variant, selection, totalPrice, prepayAmount, customerInfo } = req.body;
+    const { productTitle, variant, selection, totalPrice, prepayAmount, customerInfo, screen } = req.body;
     
     const paymentData = await yookassaService.createPayment({
       productTitle,
@@ -978,7 +1022,8 @@ app.post('/api/orders', async (req, res) => {
       selection,
       totalPrice,
       prepayAmount,
-      customerInfo
+      customerInfo,
+      screen
     });
     
     res.json(paymentData);
