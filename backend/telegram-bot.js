@@ -273,7 +273,7 @@ bot.onText(/\/leads(?:\s+(.*))?/, async (msg, match) => {
   const textQuery = (match && match[1]) ? String(match[1]).trim() : '';
   try {
     const leads = await Lead.find(filter).sort({ createdAt: -1 }).limit(50).lean().exec();
-    if (!leads.length) return bot.sendMessage(adminId, 'Заявок пока нет.');
+    if (!leads.length) return bot.sendMessage(msg.chat.id, 'Заявок пока нет.');
     const chunks = [];
     let current = [];
     for (const l of leads) {
@@ -296,11 +296,11 @@ bot.onText(/\/leads(?:\s+(.*))?/, async (msg, match) => {
     }
     if (current.length) chunks.push(current.join('\n\n'));
     for (const chunk of chunks) {
-      await bot.sendMessage(adminId, chunk);
+      await bot.sendMessage(msg.chat.id, chunk);
     }
   } catch (e) {
     console.error('Leads list error:', e);
-    bot.sendMessage(adminId, 'Ошибка при получении заявок.');
+    bot.sendMessage(msg.chat.id, 'Ошибка при получении заявок.');
   }
 });
 

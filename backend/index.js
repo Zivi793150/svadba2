@@ -1138,9 +1138,9 @@ app.post('/api/lead', async (req, res) => {
       channel = 'telegram'
     } = req.body || {};
 
-    const adminId = process.env.ADMIN_TELEGRAM_ID;
-    if (!adminId) {
-      return res.status(400).json({ error: 'ADMIN_TELEGRAM_ID not set' });
+    const adminIds = parseAdminIds();
+    if (!adminIds.length) {
+      return res.status(400).json({ error: 'ADMIN_TELEGRAM_ID(S) not set' });
     }
 
     const leadId = generateLeadId();
