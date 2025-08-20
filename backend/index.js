@@ -946,8 +946,18 @@ app.post('/internal/daily-digest', async (req, res) => {
       `💭 Обратная связь: ${Object.entries(dFeedback).map(([k,v])=>`${k}:${v}`).join(' ') || 'нет данных'}`
     ];
 
-    await telegramBot.sendMessage(adminId, lines.join('\n'), { parse_mode: 'Markdown' });
-    res.json({ ok: true });
+    const text = lines.join('\n');
+    const results = [];
+    for (const id of adminIds) {
+      try {
+        await telegramBot.sendMessage(id, text, { parse_mode: 'Markdown' });
+        results.push({ id, ok: true });
+      } catch (e) {
+        console.error('Daily digest send failed for', id, e?.response?.body || e?.message || e);
+        results.push({ id, ok: false, error: e?.message || 'send failed' });
+      }
+    }
+    res.json({ ok: results.some(r => r.ok), results });
   } catch (error) {
     console.error('Daily digest error:', error);
     res.status(500).json({ error: 'Internal server error' });
