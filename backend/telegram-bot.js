@@ -1,6 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config();
 const { getLead, deleteLead } = require('./leadStore');
+const Lead = require('./lead.model');
 
 // Токен бота из переменных окружения
 const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -220,7 +221,7 @@ bot.onText(/\/start(?:\s+(.*))?/, async (msg, match) => {
   try {
     if (startPayload && startPayload.startsWith('lead_')) {
       const leadId = startPayload.replace('lead_', '');
-      const lead = getLead(leadId);
+      const lead = getLead(leadId) || await Lead.findOne({ leadId }).lean().exec();
       if (lead) {
         const adminId = process.env.ADMIN_TELEGRAM_ID;
         if (adminId) {
@@ -236,6 +237,7 @@ bot.onText(/\/start(?:\s+(.*))?/, async (msg, match) => {
           ];
           await bot.sendMessage(adminId, lines.join('\n'));
         }
+        try { await Lead.updateOne({ leadId }, { tgUserId: String(msg.from.id), tgUsername: msg.from.username || null, tgLinkedAt: new Date() }); } catch (e) {}
         deleteLead(leadId);
       }
     }
@@ -254,6 +256,47 @@ bot.onText(/\/start(?:\s+(.*))?/, async (msg, match) => {
   bot.sendMessage(chatId, welcomeMessage, mainMenu)
     .then(() => console.log('✅ Приветственное сообщение отправлено'))
     .catch(err => console.error('❌ Ошибка отправки приветственного сообщения:', err));
+});
+
+// Команда для администратора: показать все заявки
+bot.onText(/\/leads(?:\s+(.*))?/, async (msg, match) => {
+  const adminId = Number(process.env.ADMIN_TELEGRAM_ID || '0');
+  if (msg.chat.id !== adminId) {
+    return bot.sendMessage(msg.chat.id, 'Команда доступна только администратору.');
+  }
+  const filter = {};
+  const textQuery = (match && match[1]) ? String(match[1]).trim() : '';
+  try {
+    const leads = await Lead.find(filter).sort({ createdAt: -1 }).limit(50).lean().exec();
+    if (!leads.length) return bot.sendMessage(adminId, 'Заявок пока нет.');
+    const chunks = [];
+    let current = [];
+    for (const l of leads) {
+      const line = [
+        `#${l.leadId} • ${new Date(l.createdAt).toLocaleString('ru-RU')}`,
+        `Имя: ${l.name || '-'}`,
+        `Срок: ${l.term || '-'}`,
+        `Бюджет: ${l.budget || '-'}`,
+        `Экран: ${l.screen || '-'}`,
+        `Продукт: ${l.product || '-'}`,
+        `Источник: ${l.source || '-'}`,
+        `Канал: ${l.channel || '-'}`,
+        `Клиент: ${l.tgUsername ? '@' + l.tgUsername : '(не в боте)'}${l.tgUserId ? ' • id ' + l.tgUserId : ''}`
+      ].join('\n');
+      current.push(line);
+      if (current.join('\n\n').length > 3500) {
+        chunks.push(current.join('\n\n'));
+        current = [];
+      }
+    }
+    if (current.length) chunks.push(current.join('\n\n'));
+    for (const chunk of chunks) {
+      await bot.sendMessage(adminId, chunk);
+    }
+  } catch (e) {
+    console.error('Leads list error:', e);
+    bot.sendMessage(adminId, 'Ошибка при получении заявок.');
+  }
 });
 
 // Обработка callback запросов

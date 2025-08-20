@@ -277,6 +277,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
         });
       } catch (_) {}
       trackConversion('lead_submit_telegram', { product: videoData?.title || 'unknown' });
+      try { alert('Заявка отправлена боту в Telegram. Откройте диалог с @feyero_bot, чтобы продолжить.'); } catch (_) {}
     }
     setShowLeadModal(false);
   };

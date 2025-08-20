@@ -64,6 +64,7 @@ const { PageView, ButtonClick, UserSession, Conversion, ChatEngagement } = requi
 const Order = require('./order.model');
 const yookassaService = require('./yookassa.service');
 const { setLead, getLead, deleteLead } = require('./leadStore');
+const Lead = require('./lead.model');
 
 // Подключение ботов
 const telegramBot = require('./telegram-bot');
@@ -1124,6 +1125,9 @@ app.post('/api/lead', async (req, res) => {
     const leadId = generateLeadId();
     // Сохраняем лид во временное хранилище, чтобы бот мог сопоставить с Telegram-профилем
     setLead(leadId, { name, term, budget, screen, product, source, channel });
+    try {
+      await Lead.create({ leadId, name, term, budget, screen, product, source, channel });
+    } catch (e) { console.warn('Lead create warn:', e.message); }
 
     const botUsername = process.env.TELEGRAM_BOT_NAME || 'feyero_bot';
     const deepLink = `https://t.me/${botUsername}?start=lead_${leadId}`;
