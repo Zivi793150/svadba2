@@ -5,6 +5,7 @@ const Lead = require('./lead.model');
 
 // Токен бота из переменных окружения
 const token = process.env.TELEGRAM_BOT_TOKEN;
+const ADMIN_ID = Number(process.env.ADMIN_TELEGRAM_ID || '0');
 
 // Проверяем наличие токена
 if (!token) {
@@ -14,6 +15,7 @@ if (!token) {
 }
 
 console.log('✅ TELEGRAM_BOT_TOKEN найден');
+console.log('ℹ️ ADMIN_TELEGRAM_ID:', ADMIN_ID);
 const bot = new TelegramBot(token, { polling: false }); // В проде работаем через webhook
 
 // Состояния пользователей

@@ -871,7 +871,7 @@ app.get('/api/analytics', async (req, res) => {
 // Ежедневный дайджест в Telegram администратору
 app.post('/internal/daily-digest', async (req, res) => {
   try {
-    const adminId = process.env.ADMIN_TELEGRAM_ID;
+    const adminId = Number(process.env.ADMIN_TELEGRAM_ID);
     if (!adminId) {
       return res.status(400).json({ error: 'ADMIN_TELEGRAM_ID not set' });
     }
@@ -1064,7 +1064,7 @@ app.post('/webhook/whatsapp', whatsappBot.handleWebhook);
 app.get('/webhook/whatsapp', whatsappBot.verifyWebhook);
 
 // Webhook для Telegram бота
-app.post('/webhook/telegram', (req, res) => {
+app.post('/webhook/telegram', express.json({ limit: '2mb' }), (req, res) => {
   try {
     telegramBot.processUpdate(req.body);
     res.sendStatus(200);
@@ -1145,7 +1145,11 @@ app.post('/api/lead', async (req, res) => {
       deepLink
     ];
 
-    await telegramBot.sendMessage(adminId, lines.join('\n'));
+    try {
+      await telegramBot.sendMessage(adminId, lines.join('\n'));
+    } catch (e) {
+      console.error('Telegram send lead to admin failed:', e?.response?.body || e?.message || e);
+    }
     res.json({ ok: true, leadId, deepLink });
   } catch (e) {
     console.error('Lead forward error:', e);
