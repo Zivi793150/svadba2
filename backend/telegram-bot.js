@@ -2,24 +2,18 @@ const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config();
 const { getLead, deleteLead } = require('./leadStore');
 const Lead = require('./lead.model');
-
-// Импортируем fetch для Node.js
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const axios = require('axios');
 
 // Функция для отправки аналитики
 const trackAnalytics = async (action, metadata = {}) => {
   try {
     const API_URL = process.env.API_URL || 'https://svadba2.onrender.com';
-    await fetch(`${API_URL}/api/analytics/conversion`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        action, 
-        page: '/telegram_bot', 
-        metadata,
-        userAgent: 'TelegramBot',
-        source: 'telegram_bot'
-      })
+    await axios.post(`${API_URL}/api/analytics/conversion`, {
+      action, 
+      page: '/telegram_bot', 
+      metadata,
+      userAgent: 'TelegramBot',
+      source: 'telegram_bot'
     });
   } catch (e) {
     console.error('Analytics send failed:', e);

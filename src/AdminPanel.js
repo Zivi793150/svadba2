@@ -720,16 +720,47 @@ const AdminPanel = () => {
                   {conversion.action === 'chat_opened' ? '💬' :
                    conversion.action === 'telegram_clicked' ? '📱' :
                    conversion.action === 'whatsapp_clicked' ? '📞' :
-                   conversion.action === 'order_page_visited' ? '🛒' : '🎯'}
+                   conversion.action === 'order_page_visited' ? '🛒' :
+                   conversion.action === 'lead_submit_whatsapp' ? '📝' :
+                   conversion.action === 'lead_submit_telegram' ? '📝' :
+                   conversion.action === 'lead_modal_open' ? '📋' :
+                   conversion.action === 'lead_backend_success' ? '✅' :
+                   conversion.action === 'lead_backend_error' ? '❌' :
+                   conversion.action === 'bot_start' ? '🤖' :
+                   conversion.action === 'lead_processed' ? '🔗' :
+                   conversion.action === 'admin_leads_request' ? '👨‍💼' :
+                   conversion.action === 'bot_interaction' ? '🔄' :
+                   conversion.action === 'bot_text_message' ? '💬' :
+                   '🎯'}
                 </div>
                 <div className="conversion-info">
                   <h3>
                     {conversion.action === 'chat_opened' ? 'Открытие чата' :
                      conversion.action === 'telegram_clicked' ? 'Клик Telegram' :
                      conversion.action === 'whatsapp_clicked' ? 'Клик WhatsApp' :
-                     conversion.action === 'order_page_visited' ? 'Страница заказа' : conversion.action}
+                     conversion.action === 'order_page_visited' ? 'Страница заказа' :
+                     conversion.action === 'lead_submit_whatsapp' ? 'Заявка WhatsApp' :
+                     conversion.action === 'lead_submit_telegram' ? 'Заявка Telegram' :
+                     conversion.action === 'lead_modal_open' ? 'Открытие формы заявки' :
+                     conversion.action === 'lead_backend_success' ? 'Заявка отправлена успешно' :
+                     conversion.action === 'lead_backend_error' ? 'Ошибка отправки заявки' :
+                     conversion.action === 'bot_start' ? 'Начало работы с ботом' :
+                     conversion.action === 'lead_processed' ? 'Заявка обработана в боте' :
+                     conversion.action === 'admin_leads_request' ? 'Запрос списка заявок' :
+                     conversion.action === 'bot_interaction' ? 'Взаимодействие с ботом' :
+                     conversion.action === 'bot_text_message' ? 'Текстовое сообщение в боте' :
+                     conversion.action}
                   </h3>
                   <div className="conversion-page">{conversion.page}</div>
+                  {conversion.metadata && Object.keys(conversion.metadata).length > 0 && (
+                    <div className="conversion-metadata">
+                      {Object.entries(conversion.metadata).map(([key, value]) => (
+                        <span key={key} className="metadata-item">
+                          {key}: {String(value)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="conversion-stats">
                   <div className="conversion-count">{formatNumber(conversion.count)}</div>
@@ -740,7 +771,64 @@ const AdminPanel = () => {
           </div>
         </div>
 
-                {/* Просмотры товаров/карточек */}
+        {/* Заявки */}
+        <div className="analytics-section">
+          <h2>📝 Заявки ({getPeriodLabel()})</h2>
+          <div className="leads-grid">
+            {conversions.filter(c => 
+              c.action.includes('lead') || 
+              c.action.includes('bot') || 
+              c.action === 'admin_leads_request'
+            ).map((conversion, index) => (
+              <div key={`lead-${index}`} className="lead-card">
+                <div className="lead-icon">
+                  {conversion.action === 'lead_submit_whatsapp' ? '📱' :
+                   conversion.action === 'lead_submit_telegram' ? '📱' :
+                   conversion.action === 'lead_modal_open' ? '📋' :
+                   conversion.action === 'lead_backend_success' ? '✅' :
+                   conversion.action === 'lead_backend_error' ? '❌' :
+                   conversion.action === 'lead_processed' ? '🔗' :
+                   conversion.action === 'bot_start' ? '🤖' :
+                   conversion.action === 'admin_leads_request' ? '👨‍💼' :
+                   conversion.action === 'bot_interaction' ? '🔄' :
+                   conversion.action === 'bot_text_message' ? '💬' :
+                   '📝'}
+                </div>
+                <div className="lead-info">
+                  <h3>
+                    {conversion.action === 'lead_submit_whatsapp' ? 'Заявка WhatsApp' :
+                     conversion.action === 'lead_submit_telegram' ? 'Заявка Telegram' :
+                     conversion.action === 'lead_modal_open' ? 'Открытие формы заявки' :
+                     conversion.action === 'lead_backend_success' ? 'Заявка отправлена успешно' :
+                     conversion.action === 'lead_backend_error' ? 'Ошибка отправки заявки' :
+                     conversion.action === 'lead_processed' ? 'Заявка обработана в боте' :
+                     conversion.action === 'bot_start' ? 'Начало работы с ботом' :
+                     conversion.action === 'admin_leads_request' ? 'Запрос списка заявок' :
+                     conversion.action === 'bot_interaction' ? 'Взаимодействие с ботом' :
+                     conversion.action === 'bot_text_message' ? 'Текстовое сообщение в боте' :
+                     conversion.action}
+                  </h3>
+                  <div className="lead-page">{conversion.page}</div>
+                  {conversion.metadata && Object.keys(conversion.metadata).length > 0 && (
+                    <div className="lead-metadata">
+                      {Object.entries(conversion.metadata).map(([key, value]) => (
+                        <span key={key} className="metadata-item">
+                          {key}: {String(value)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="lead-stats">
+                  <div className="lead-count">{formatNumber(conversion.count)}</div>
+                  <div className="lead-rate">{conversion.rate}%</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Просмотры товаров/карточек */}
         <div className="analytics-section">
           <h2>🧩 Просмотры карточек ({getPeriodLabel()})</h2>
           {productViews && productViews.length > 0 ? (
