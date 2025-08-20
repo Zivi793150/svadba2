@@ -3,6 +3,29 @@ require('dotenv').config();
 const { getLead, deleteLead } = require('./leadStore');
 const Lead = require('./lead.model');
 
+// Импортируем fetch для Node.js
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
+// Функция для отправки аналитики
+const trackAnalytics = async (action, metadata = {}) => {
+  try {
+    const API_URL = process.env.API_URL || 'https://svadba2.onrender.com';
+    await fetch(`${API_URL}/api/analytics/conversion`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        action, 
+        page: '/telegram_bot', 
+        metadata,
+        userAgent: 'TelegramBot',
+        source: 'telegram_bot'
+      })
+    });
+  } catch (e) {
+    console.error('Analytics send failed:', e);
+  }
+};
+
 // Токен бота из переменных окружения
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const ADMIN_IDS = String(process.env.ADMIN_TELEGRAM_IDS || process.env.ADMIN_TELEGRAM_ID || '')
@@ -229,23 +252,42 @@ bot.onText(/\/start(?:\s+(.*))?/, async (msg, match) => {
       const leadId = startPayload.replace('lead_', '');
       const lead = getLead(leadId) || await Lead.findOne({ leadId }).lean().exec();
       if (lead) {
-        const adminId = process.env.ADMIN_TELEGRAM_ID;
-        if (adminId) {
-          const lines = [
-            `📩 Клиент открыл бота по заявке #${leadId}`,
-            `Профиль: ${usernameHandle} (id ${msg.from.id})`,
-            `Имя: ${lead.name}`,
-            `Срок/дата: ${lead.term}`,
-            `Бюджет: ${lead.budget}`,
-            `Экран: ${lead.screen}`,
-            `Контакт: ${lead.contact || '-'}`,
-            `Продукт: ${lead.product}`,
-            `Источник: ${lead.source}`
-          ];
-          await bot.sendMessage(adminId, lines.join('\n'));
+        // Уведомляем пользователя, что заявка получена
+        const userNotification = `✅ Ваша заявка #${leadId} успешно получена!\n\nМы свяжемся с вами в ближайшее время для уточнения деталей.\n\nА пока можете изучить наши услуги или задать вопросы через меню ниже.`;
+        
+        // Уведомляем всех администраторов
+        for (const adminId of ADMIN_IDS) {
+          try {
+            const lines = [
+              `�� Клиент открыл бота по заявке #${leadId}`,
+              `Профиль: ${usernameHandle} (id ${msg.from.id})`,
+              `Имя: ${lead.name}`,
+              `Срок/дата: ${lead.term}`,
+              `Бюджет: ${lead.budget}`,
+              `Экран: ${lead.screen}`,
+              `Контакт: ${lead.contact || '-'}`,
+              `Продукт: ${lead.product}`,
+              `Источник: ${lead.source}`
+            ];
+            await bot.sendMessage(adminId, lines.join('\n'));
+          } catch (e) {
+            console.error('Telegram send lead notification to admin failed:', adminId, e?.response?.body || e?.message || e);
+          }
         }
+        
         try { await Lead.updateOne({ leadId }, { tgUserId: String(msg.from.id), tgUsername: msg.from.username || null, tgLinkedAt: new Date() }); } catch (e) {}
         deleteLead(leadId);
+        
+        // Отправляем уведомление пользователю
+        await bot.sendMessage(chatId, userNotification);
+        
+        // Отслеживаем успешную обработку заявки
+        trackAnalytics('lead_processed', { 
+          leadId,
+          product: lead.product,
+          source: lead.source,
+          channel: lead.channel
+        });
       }
     }
   } catch (e) {
@@ -261,7 +303,14 @@ bot.onText(/\/start(?:\s+(.*))?/, async (msg, match) => {
 Выберите интересующий вас вопрос:`;
   
   bot.sendMessage(chatId, welcomeMessage, mainMenu)
-    .then(() => console.log('✅ Приветственное сообщение отправлено'))
+    .then(() => {
+      console.log('✅ Приветственное сообщение отправлено');
+      // Отслеживаем начало работы с ботом
+      trackAnalytics('bot_start', { 
+        hasLeadPayload: !!startPayload,
+        leadId: startPayload ? startPayload.replace('lead_', '') : null 
+      });
+    })
     .catch(err => console.error('❌ Ошибка отправки приветственного сообщения:', err));
 });
 
@@ -270,6 +319,13 @@ bot.onText(/\/leads(?:\s+(.*))?/, async (msg, match) => {
   if (!ADMIN_IDS.includes(msg.chat.id)) {
     return bot.sendMessage(msg.chat.id, 'Команда доступна только администратору.');
   }
+  
+  // Отслеживаем запрос списка заявок
+  trackAnalytics('admin_leads_request', { 
+    adminId: msg.chat.id,
+    adminUsername: msg.from.username || null
+  });
+  
   const filter = {};
   const textQuery = (match && match[1]) ? String(match[1]).trim() : '';
   try {
@@ -315,6 +371,14 @@ bot.on('callback_query', async (query) => {
   const messageId = query.message.message_id;
   const state = userStates.get(chatId) || {};
   const currentCategory = state.category;
+  
+  // Отслеживаем взаимодействие пользователя с ботом
+  trackAnalytics('bot_interaction', { 
+    action: data,
+    category: currentCategory,
+    userId: query.from.id,
+    username: query.from.username
+  });
   
   // Отвечаем на callback
   await bot.answerCallbackQuery(query.id);
@@ -374,6 +438,15 @@ bot.on('message', (msg) => {
   console.log('📨 Получено сообщение от:', msg.from.first_name, 'Текст:', msg.text);
   
   const chatId = msg.chat.id;
+  
+  // Отслеживаем текстовые сообщения пользователей
+  if (!msg.text.startsWith('/')) {
+    trackAnalytics('bot_text_message', { 
+      userId: msg.from.id,
+      username: msg.from.username,
+      messageLength: msg.text.length
+    });
+  }
   
   // Если это не команда /start, предлагаем вернуться к меню
   if (!msg.text.startsWith('/')) {

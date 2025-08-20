@@ -230,7 +230,12 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
     const message = `Здравствуйте! Хочу оформить заявку.\n\nИмя: ${leadName || '-'}\nСрок/дата: ${leadTerm || '-'}\nБюджет: ${leadBudget || '-'}\nЭкран: ${leadScreen === 'need' ? 'Подобрать' : 'Есть свой'}\nКонтакт: ${leadContact || '-'}\nПродукт: ${videoData?.title || '-'}`;
     const encoded = encodeURIComponent(message);
     if (leadChannel === 'whatsapp') {
-      trackConversion('lead_submit_whatsapp', { product: videoData?.title || 'unknown' });
+      trackConversion('lead_submit_whatsapp', { 
+        product: videoData?.title || 'unknown',
+        hasContact: !!leadContact,
+        hasName: !!leadName,
+        hasBudget: !!leadBudget
+      });
       window.open(`https://wa.me/79004511777?text=${encoded}`,'_blank');
     } else {
       // Сообщаем бэкенду о лиде — бот перешлёт администратору
@@ -254,6 +259,14 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
           const id = data && data.leadId ? String(data.leadId) : '';
           const payload = id ? `lead_${id}` : 'lead';
           const botUsername = 'feyero_bot';
+          
+          // Отслеживаем успешную отправку заявки на бэкенд
+          trackConversion('lead_backend_success', { 
+            product: videoData?.title || 'unknown',
+            leadId: id,
+            hasContact: !!leadContact
+          });
+          
           const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
           if (isMobile) {
             window.open(`tg://resolve?domain=${botUsername}&start=${encodeURIComponent(payload)}`, '_blank');
@@ -264,7 +277,13 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
             window.open(`https://t.me/${botUsername}?start=${encodeURIComponent(payload)}`, '_blank');
           }
         })
-        .catch(() => {
+        .catch((error) => {
+          // Отслеживаем ошибку отправки на бэкенд
+          trackConversion('lead_backend_error', { 
+            product: videoData?.title || 'unknown',
+            error: error.message || 'unknown'
+          });
+          
           const botUsername = 'feyero_bot';
           const payload = 'lead';
           const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -278,7 +297,12 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
           }
         });
       } catch (_) {}
-      trackConversion('lead_submit_telegram', { product: videoData?.title || 'unknown' });
+      trackConversion('lead_submit_telegram', { 
+        product: videoData?.title || 'unknown',
+        hasContact: !!leadContact,
+        hasName: !!leadName,
+        hasBudget: !!leadBudget
+      });
       try { alert('Заявка отправлена боту в Telegram. Откройте диалог с @feyero_bot, чтобы продолжить.'); } catch (_) {}
     }
     setShowLeadModal(false);
@@ -353,7 +377,14 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
                   ))}
                   <div className="cta-highlight">
                     <div className="cta-text">Хотите свадебный вау-эффект, но бюджет ограничен? Заходите в чат — подберём идеальное решение</div>
-                    <button className="btn question-btn" onClick={() => { setShowLeadModal(true); trackConversion('lead_modal_open', { from: 'pricing' }); }}>
+                    <button className="btn question-btn" onClick={() => { 
+                      setShowLeadModal(true); 
+                      trackConversion('lead_modal_open', { 
+                        from: 'pricing',
+                        product: videoData?.title || 'unknown',
+                        hasVideoData: !!videoData
+                      }); 
+                    }}>
                       <FaTelegramPlane size={18} />
                       <span>Мы поможем все организовать</span>
                     </button>
@@ -368,7 +399,14 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
                 <h3>Не переживайте о деталях</h3>
                 <p>Мы подскажем, как лучше. Напишите удобный срок, примерный бюджет и ваше имя — это уже первый шаг к идеальной презентации.</p>
                 <div className="action-buttons" style={{marginTop: 0}}>
-                  <button className="btn order-btn" onClick={() => { setShowLeadModal(true); trackConversion('lead_modal_open', { from: 'first_step_block' }); }}>
+                  <button className="btn order-btn" onClick={() => { 
+                    setShowLeadModal(true); 
+                    trackConversion('lead_modal_open', { 
+                      from: 'first_step_block',
+                      product: videoData?.title || 'unknown',
+                      hasVideoData: !!videoData
+                    }); 
+                  }}>
                     <span>Сделать первый шаг</span>
                   </button>
                 </div>
