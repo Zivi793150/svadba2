@@ -1,5 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config();
+const { getLead, deleteLead } = require('./leadStore');
 
 // Токен бота из переменных окружения
 const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -205,14 +206,43 @@ async function showQuestion(chatId, messageId, category, questionKey) {
 }
 
 // Обработка команды /start
-bot.onText(/\/start/, (msg) => {
+bot.onText(/\/start(?:\s+(.*))?/, async (msg, match) => {
   console.log('🎯 Получена команда /start от:', msg.from.first_name, 'ID:', msg.chat.id);
   
   const chatId = msg.chat.id;
   const userName = msg.from.first_name;
+  const usernameHandle = msg.from.username ? '@' + msg.from.username : '(без username)';
+  const startPayload = (match && match[1]) ? String(match[1]) : '';
   
   userStates.set(chatId, { state: 'main' });
   
+  // Если пришли по ссылке lead_<id> — уведомляем администратора с username
+  try {
+    if (startPayload && startPayload.startsWith('lead_')) {
+      const leadId = startPayload.replace('lead_', '');
+      const lead = getLead(leadId);
+      if (lead) {
+        const adminId = process.env.ADMIN_TELEGRAM_ID;
+        if (adminId) {
+          const lines = [
+            `📩 Клиент открыл бота по заявке #${leadId}`,
+            `Профиль: ${usernameHandle} (id ${msg.from.id})`,
+            `Имя: ${lead.name}`,
+            `Срок/дата: ${lead.term}`,
+            `Бюджет: ${lead.budget}`,
+            `Экран: ${lead.screen}`,
+            `Продукт: ${lead.product}`,
+            `Источник: ${lead.source}`
+          ];
+          await bot.sendMessage(adminId, lines.join('\n'));
+        }
+        deleteLead(leadId);
+      }
+    }
+  } catch (e) {
+    console.error('Ошибка уведомления админа о lead старт:', e);
+  }
+
   const welcomeMessage = `👋 Привет, ${userName}!
 
 Добро пожаловать в бот свадебных презентаций! 🎉

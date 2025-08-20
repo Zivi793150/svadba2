@@ -195,18 +195,18 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
 
   const handleTelegramClick = () => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const botUsername = 'feyero_bot'; // Username Telegram бота
+    const managerUsername = 'feiero'; // Username менеджера
 
     if (isMobile) {
       // Пробуем открыть приложение Telegram напрямую
-      window.open(`tg://resolve?domain=${botUsername}&start=`, '_blank');
+      window.open(`tg://resolve?domain=${managerUsername}`, '_blank');
       // Если не сработало, через 100ms открываем веб-версию
       setTimeout(() => {
-        window.open(`https://t.me/${botUsername}?start=`, '_blank');
+        window.open(`https://t.me/${managerUsername}`, '_blank');
       }, 100);
     } else {
       // На ПК открываем веб-версию бота
-      window.open(`https://t.me/${botUsername}?start=`, '_blank');
+      window.open(`https://t.me/${managerUsername}`, '_blank');
     }
     
     // Отслеживаем клик по Telegram
@@ -226,25 +226,57 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
   const closeLeadModal = () => setShowLeadModal(false);
   const handleLeadSubmit = (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    const message = `Заявка с сайта Фейеро\nИмя: ${leadName || '-'}\nСрок/дата: ${leadTerm || '-'}\nБюджет: ${leadBudget || '-'}\nЭкран: ${leadScreen === 'need' ? 'Подобрать' : 'Есть свой'}\nПродукт: ${videoData?.title || '-'}\nЭто первый шаг — поможем все организовать.`;
+    const message = `Здравствуйте! Хочу оформить заявку.\n\nИмя: ${leadName || '-'}\nСрок/дата: ${leadTerm || '-'}\nБюджет: ${leadBudget || '-'}\nЭкран: ${leadScreen === 'need' ? 'Подобрать' : 'Есть свой'}\nПродукт: ${videoData?.title || '-'}`;
     const encoded = encodeURIComponent(message);
     if (leadChannel === 'whatsapp') {
       trackConversion('lead_submit_whatsapp', { product: videoData?.title || 'unknown' });
       window.open(`https://wa.me/79004511777?text=${encoded}`,'_blank');
     } else {
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      // Сообщаем бэкенду о лиде — бот перешлёт администратору
+      try {
+        fetch('https://svadba2.onrender.com/api/lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: leadName,
+            term: leadTerm,
+            budget: leadBudget,
+            screen: leadScreen === 'need' ? 'Подобрать' : 'Есть свой',
+            product: videoData?.title || '-',
+            source: '/details',
+            channel: 'telegram'
+          })
+        })
+        .then(r => r.json())
+        .then(data => {
+          const id = data && data.leadId ? String(data.leadId) : '';
+          const payload = id ? `lead_${id}` : 'lead';
+          const botUsername = 'feyero_bot';
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          if (isMobile) {
+            window.open(`tg://resolve?domain=${botUsername}&start=${encodeURIComponent(payload)}`, '_blank');
+            setTimeout(() => {
+              window.open(`https://t.me/${botUsername}?start=${encodeURIComponent(payload)}`, '_blank');
+            }, 120);
+          } else {
+            window.open(`https://t.me/${botUsername}?start=${encodeURIComponent(payload)}`, '_blank');
+          }
+        })
+        .catch(() => {
+          const botUsername = 'feyero_bot';
+          const payload = 'lead';
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          if (isMobile) {
+            window.open(`tg://resolve?domain=${botUsername}&start=${payload}`, '_blank');
+            setTimeout(() => {
+              window.open(`https://t.me/${botUsername}?start=${payload}`, '_blank');
+            }, 120);
+          } else {
+            window.open(`https://t.me/${botUsername}?start=${payload}`, '_blank');
+          }
+        });
+      } catch (_) {}
       trackConversion('lead_submit_telegram', { product: videoData?.title || 'unknown' });
-      if (isMobile) {
-        // Пытаемся открыть приложение Telegram с заранее заполненным текстом
-        window.location.href = `tg://share?text=${encoded}`;
-        // Фолбэк на веб-версию, если схема tg:// не сработала
-        setTimeout(() => {
-          window.open(`https://t.me/share/url?url=&text=${encoded}`,'_blank');
-        }, 150);
-      } else {
-        // На десктопе открываем веб-версию Telegram с предзаполненным текстом
-        window.open(`https://t.me/share/url?url=&text=${encoded}`,'_blank');
-      }
     }
     setShowLeadModal(false);
   };

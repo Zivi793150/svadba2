@@ -63,6 +63,7 @@ const Message = require('./message.model');
 const { PageView, ButtonClick, UserSession, Conversion, ChatEngagement } = require('./analytics.model');
 const Order = require('./order.model');
 const yookassaService = require('./yookassa.service');
+const { setLead, getLead, deleteLead } = require('./leadStore');
 
 // Подключение ботов
 const telegramBot = require('./telegram-bot');
@@ -82,6 +83,11 @@ const getDeviceType = (userAgent) => {
 const generateSessionId = () => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 };
+
+// Генератор короткого идентификатора лида (для deep-link в Telegram)
+function generateLeadId() {
+  return Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+}
 
 // API для аналитики
 app.post('/api/analytics/pageview', async (req, res) => {
@@ -1094,6 +1100,52 @@ app.get('/webhook/telegram/delete', async (req, res) => {
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: String(e.message || e) });
+  }
+});
+
+// Приём лидов с фронта и переадресация администратору в Telegram через бота
+app.post('/api/lead', async (req, res) => {
+  try {
+    const {
+      name = '-',
+      term = '-',
+      budget = '-',
+      screen = '-',
+      product = '-',
+      source = '/details',
+      channel = 'telegram'
+    } = req.body || {};
+
+    const adminId = process.env.ADMIN_TELEGRAM_ID;
+    if (!adminId) {
+      return res.status(400).json({ error: 'ADMIN_TELEGRAM_ID not set' });
+    }
+
+    const leadId = generateLeadId();
+    // Сохраняем лид во временное хранилище, чтобы бот мог сопоставить с Telegram-профилем
+    setLead(leadId, { name, term, budget, screen, product, source, channel });
+
+    const botUsername = process.env.TELEGRAM_BOT_NAME || 'feyero_bot';
+    const deepLink = `https://t.me/${botUsername}?start=lead_${leadId}`;
+
+    const lines = [
+      `🆕 Новая заявка (#${leadId})`,
+      `Имя: ${name}`,
+      `Срок/дата: ${term}`,
+      `Бюджет: ${budget}`,
+      `Экран: ${screen}`,
+      `Продукт: ${product}`,
+      `Источник: ${source}`,
+      `Канал клиента: ${channel}`,
+      `\nДля связи: клиент перейдет в бота по ссылке ниже, и мы пришлем его @username:`,
+      deepLink
+    ];
+
+    await telegramBot.sendMessage(adminId, lines.join('\n'));
+    res.json({ ok: true, leadId, deepLink });
+  } catch (e) {
+    console.error('Lead forward error:', e);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
