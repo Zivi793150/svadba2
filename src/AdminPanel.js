@@ -376,6 +376,39 @@ const AdminPanel = () => {
                   <div className="metric-value">{detailsPage.avgTimeSec || 0}s</div>
                 </div>
               </div>
+              <div className="metric-card">
+                <div className="metric-icon">🧪</div>
+                <div className="metric-content">
+                  <h3>Опросник (модал)</h3>
+                  <div className="metric-value">Закрыли: {formatNumber(detailsPage.survey?.closed || 0)}</div>
+                  <div className="metric-subtitle">Причины:</div>
+                  <div className="metric-subtitle">
+                    {(detailsPage.survey?.reasons && Object.keys(detailsPage.survey.reasons).length > 0)
+                      ? Object.entries(detailsPage.survey.reasons).map(([k,v]) => (
+                          <span key={k} style={{marginRight:8}}>{k}: {formatNumber(v)}</span>
+                        ))
+                      : 'нет данных'}
+                  </div>
+                  <div className="metric-subtitle">Обратная связь:</div>
+                  <div className="metric-subtitle">
+                    {(detailsPage.survey?.feedback && Object.keys(detailsPage.survey.feedback).length > 0)
+                      ? Object.entries(detailsPage.survey.feedback).map(([k,v]) => (
+                          <span key={k} style={{marginRight:8}}>{k}: {formatNumber(v)}</span>
+                        ))
+                      : 'нет данных'}
+                  </div>
+                </div>
+              </div>
+              <div className="metric-card">
+                <div className="metric-icon">❓</div>
+                <div className="metric-content">
+                  <h3>Мини-опросы</h3>
+                  <div className="metric-subtitle">Понравилась презентация:</div>
+                  <div className="metric-value">Да {formatNumber(detailsPage.polls?.wouldOrder?.yes || 0)} | Нет {formatNumber(detailsPage.polls?.wouldOrder?.no || 0)}</div>
+                  <div className="metric-subtitle">Хотели бы на свадьбе:</div>
+                  <div className="metric-value">Да {formatNumber(detailsPage.polls?.wouldHave?.yes || 0)} | Подумаю {formatNumber(detailsPage.polls?.wouldHave?.no || 0)}</div>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="no-data">Нет данных</div>

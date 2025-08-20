@@ -767,13 +767,36 @@ app.get('/api/analytics', async (req, res) => {
     const timeEvents = detailsConversions.filter(c => c.action === 'details_time');
     const timeAvg = timeEvents.length ? Math.round((timeEvents.reduce((s, e) => s + (Number(e.metadata?.ms)||0), 0) / timeEvents.length) / 1000) : 0; // сек
 
+    // Опросник: закрытие, причины и мягкая обратная связь
+    const surveyClosed = detailsConversions.filter(c => c.action === 'survey_closed').length;
+    const surveyReasons = detailsConversions
+      .filter(c => c.action === 'survey_reason')
+      .reduce((acc, c) => {
+        const r = (c.metadata?.reason || 'unknown').toString();
+        acc[r] = (acc[r] || 0) + 1; return acc;
+      }, {});
+    const surveyFeedback = detailsConversions
+      .filter(c => c.action === 'survey_feedback')
+      .reduce((acc, c) => {
+        const f = (c.metadata?.feedback || 'other').toString();
+        acc[f] = (acc[f] || 0) + 1; return acc;
+      }, {});
+
+    // Ответы мини-опросов
+    const pollOrderYes = detailsConversions.filter(c => c.action === 'poll_would_order' && c.metadata?.answer === 'yes').length;
+    const pollOrderNo = detailsConversions.filter(c => c.action === 'poll_would_order' && c.metadata?.answer === 'no').length;
+    const pollHaveYes = detailsConversions.filter(c => c.action === 'poll_would_have' && c.metadata?.answer === 'yes').length;
+    const pollHaveNo = detailsConversions.filter(c => c.action === 'poll_would_have' && c.metadata?.answer === 'no').length;
+
     const detailsPage = {
       views: detailsViews,
       ratings: { count: ratingCount, avg: ratingAvg, dist: ratingDist },
       clicks: { telegram: detailsTelegram, whatsapp: detailsWhatsApp, discuss: detailsDiscuss, ctr: messengerCtr },
       orderStarts: detailsOrders,
       ctr: detailsCtr,
-      avgTimeSec: timeAvg
+      avgTimeSec: timeAvg,
+      survey: { closed: surveyClosed, reasons: surveyReasons, feedback: surveyFeedback },
+      polls: { wouldOrder: { yes: pollOrderYes, no: pollOrderNo }, wouldHave: { yes: pollHaveYes, no: pollHaveNo } }
     };
 
     res.json({
@@ -881,6 +904,10 @@ app.post('/internal/daily-digest', async (req, res) => {
       const r = c.metadata?.reason || 'unknown';
       acc[r] = (acc[r] || 0) + 1; return acc;
     }, {});
+    const dFeedback = dConv.filter(c => c.action === 'survey_feedback').reduce((acc, c) => {
+      const f = c.metadata?.feedback || 'other';
+      acc[f] = (acc[f] || 0) + 1; return acc;
+    }, {});
 
     const lines = [
       `📊 *Ежедневная сводка за 24ч*`,
@@ -897,7 +924,8 @@ app.post('/internal/daily-digest', async (req, res) => {
       `⏱️ Среднее время на странице: *${dTimeAvg}s*`,
       `✉️ Клики: TG *${dTg}* | WA *${dWa}*`,
       `🧪 Закрыли опросник: *${dSurveyClosed}*`,
-      `❓ Причины отказа: ${Object.entries(dReasons).map(([k,v])=>`${k}:${v}`).join(' ') || 'нет данных'}`
+      `❓ Причины отказа: ${Object.entries(dReasons).map(([k,v])=>`${k}:${v}`).join(' ') || 'нет данных'}`,
+      `💭 Обратная связь: ${Object.entries(dFeedback).map(([k,v])=>`${k}:${v}`).join(' ') || 'нет данных'}`
     ];
 
     await telegramBot.sendMessage(adminId, lines.join('\n'), { parse_mode: 'Markdown' });

@@ -390,12 +390,13 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
           </div>
           {!ratingSubmitted && (
             <div className="poll" style={{marginTop:12}}>
-              <div className="poll-q">Что смутило больше всего?</div>
+              <div className="poll-q">Подскажите, что нам улучшить, чтобы вам было комфортнее?</div>
               <div className="poll-buttons">
-                <button className="poll-btn" onClick={() => trackConversion('survey_reason', { reason: 'price_high' })}>Цена</button>
-                <button className="poll-btn" onClick={() => trackConversion('survey_reason', { reason: 'not_clear' })}>Непонятно</button>
-                <button className="poll-btn" onClick={() => trackConversion('survey_reason', { reason: 'no_time' })}>Нет времени</button>
-                <button className="poll-btn" onClick={() => trackConversion('survey_reason', { reason: 'other' })}>Другое</button>
+                <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'price' })}>Стоимость</button>
+                <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'clarity' })}>Не всё понятно</button>
+                <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'examples' })}>Хочу больше примеров</button>
+                <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'timing' })}>Сроки</button>
+                <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'other' })}>Другое</button>
               </div>
             </div>
           )}
