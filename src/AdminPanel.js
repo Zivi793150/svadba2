@@ -190,7 +190,8 @@ const AdminPanel = () => {
       browserStats,
       osStats,
       hourlyActivity,
-      weeklyActivity
+      weeklyActivity,
+      detailsPage
     } = analytics;
 
   return (
@@ -326,6 +327,46 @@ const AdminPanel = () => {
               <div className="metric-subtitle">в среднем</div>
             </div>
           </div>
+        </div>
+
+        {/* Детали страницы "Подробнее" */}
+        <div className="analytics-section">
+          <h2>🧩 Детальная страница ("Подробнее") — за период</h2>
+          {detailsPage ? (
+            <div className="metrics-grid secondary">
+              <div className="metric-card">
+                <div className="metric-icon">👁️</div>
+                <div className="metric-content">
+                  <h3>Просмотры</h3>
+                  <div className="metric-value">{formatNumber(detailsPage.views || 0)}</div>
+                </div>
+              </div>
+              <div className="metric-card">
+                <div className="metric-icon">⭐</div>
+                <div className="metric-content">
+                  <h3>Рейтинг</h3>
+                  <div className="metric-value">{detailsPage.ratings?.avg || 0} / 5</div>
+                  <div className="metric-subtitle">оценок: {formatNumber(detailsPage.ratings?.count || 0)}</div>
+                </div>
+              </div>
+              <div className="metric-card">
+                <div className="metric-icon">📩</div>
+                <div className="metric-content">
+                  <h3>Клики мессенджеров</h3>
+                  <div className="metric-value">TG {formatNumber(detailsPage.clicks?.telegram || 0)} | WA {formatNumber(detailsPage.clicks?.whatsapp || 0)}</div>
+                </div>
+              </div>
+              <div className="metric-card">
+                <div className="metric-icon">🛒</div>
+                <div className="metric-content">
+                  <h3>Переходов к оформлению</h3>
+                  <div className="metric-value">{formatNumber(detailsPage.orderStarts || 0)}</div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="no-data">Нет данных</div>
+          )}
         </div>
 
         {/* Устройства */}

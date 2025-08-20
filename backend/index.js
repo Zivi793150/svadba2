@@ -403,7 +403,7 @@ app.get('/api/analytics', async (req, res) => {
     const previousHybridKeys = new Set(previousPageViews.map(v => hybridKey(v.ip, v.userAgent, v.sessionId)));
     const uniqueHybrid = currentHybridKeys.size;
 
-    const uniqueVisitors = uniqueIps; // для обратной совместимости старых полей (by IP)
+    const uniqueVisitors = uniqueIps; // legacy by IP
     const totalSessions = userSessions.length;
     const avgSessionDuration = userSessions.length > 0
       ? userSessions.reduce((sum, session) => sum + (session.duration || 0), 0) / userSessions.length
@@ -724,7 +724,7 @@ app.get('/api/analytics', async (req, res) => {
 
     // Обзор
     const overview = {
-      totalVisitors: uniqueVisitors, // by IP (legacy)
+      totalVisitors: uniqueSessionIds, // переходим на sessionId как основную метрику
       previousVisitors: [...new Set(previousSessions.map(s => s.ip))].length,
       totalPageViews: pageViews.length,
       previousPageViews: previousPageViews.length,
@@ -745,6 +745,23 @@ app.get('/api/analytics', async (req, res) => {
       }
     };
 
+    // Детальная аналитика по странице подробностей (page === '/details')
+    const detailsConversions = conversions.filter(c => c.page === '/details');
+    const detailsViews = detailsConversions.filter(c => c.action === 'product_view').length;
+    const detailsTelegram = detailsConversions.filter(c => c.action === 'telegram_clicked').length;
+    const detailsWhatsApp = detailsConversions.filter(c => c.action === 'whatsapp_clicked').length;
+    const detailsOrders = detailsConversions.filter(c => c.action === 'order_page_visited' || c.action === 'order_page_open').length;
+    const ratingItems = detailsConversions.filter(c => c.action === 'rating_submit');
+    const ratingCount = ratingItems.length;
+    const ratingAvg = ratingCount > 0 ? Math.round((ratingItems.reduce((s, r) => s + Number(r.metadata?.value || 0), 0) / ratingCount) * 10) / 10 : 0;
+
+    const detailsPage = {
+      views: detailsViews,
+      ratings: { count: ratingCount, avg: ratingAvg },
+      clicks: { telegram: detailsTelegram, whatsapp: detailsWhatsApp },
+      orderStarts: detailsOrders
+    };
+
     res.json({
       overview,
       pageViews,
@@ -760,7 +777,7 @@ app.get('/api/analytics', async (req, res) => {
         activeChats
       },
       userSessions: {
-        total: uniqueVisitors, // by IP (legacy)
+        total: uniqueSessionIds,
         totalSessions: totalSessions,
         avgDuration: avgSessionDuration,
         newVisitors: newVisitorsByIp,
@@ -798,7 +815,8 @@ app.get('/api/analytics', async (req, res) => {
       utmStats: marketingData.utmStats,
       pageSpeed: marketingData.pageSpeed,
       coreWebVitals: marketingData.coreWebVitals,
-      performanceIndex: marketingData.performanceIndex
+      performanceIndex: marketingData.performanceIndex,
+      detailsPage
     });
   } catch (error) {
     console.error('Analytics error:', error);
@@ -831,15 +849,30 @@ app.post('/internal/daily-digest', async (req, res) => {
     const waClicks = convs.filter(c => c.action === 'whatsapp_clicked').length;
     const screenSelects = convs.filter(c => c.action === 'screen_select').length;
 
+    // Уникальные по sessionId
+    const uniqueBySession = new Set(sessions.map(s => s.sessionId)).size;
+
+    // Детали страницы
+    const dConv = convs.filter(c => c.page === '/details');
+    const dViews = dConv.filter(c => c.action === 'product_view').length;
+    const dOrders = dConv.filter(c => c.action === 'order_page_visited' || c.action === 'order_page_open').length;
+    const dTg = dConv.filter(c => c.action === 'telegram_clicked').length;
+    const dWa = dConv.filter(c => c.action === 'whatsapp_clicked').length;
+    const dRatings = dConv.filter(c => c.action === 'rating_submit');
+    const dAvg = dRatings.length ? Math.round((dRatings.reduce((s, r) => s + (Number(r.metadata?.value)||0), 0) / dRatings.length) * 10) / 10 : 0;
+
     const lines = [
       `📊 Ежедневная сводка за 24ч:`,
-      `Посетители: ${uniqueVisitors}`,
+      `Посетители (sessionId): ${uniqueBySession}`,
       `Просмотры: ${totalViews}`,
       `Конверсии всего: ${totalConversions}`,
       `Просмотры карточек: ${productViews}`,
       `Переходов к оформлению: ${orderVisits}`,
       `Выбор экрана: ${screenSelects}`,
-      `Клики: TG ${teleClicks} | WA ${waClicks}`
+      `Клики: TG ${teleClicks} | WA ${waClicks}`,
+      `— Детальная страница —`,
+      `Просмотры: ${dViews}, Заказы: ${dOrders}, Рейтинг: ${dAvg} (${dRatings.length})`,
+      `Клики: TG ${dTg} | WA ${dWa}`
     ];
 
     await telegramBot.sendMessage(adminId, lines.join('\n'));
