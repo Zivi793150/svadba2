@@ -1,0 +1,496 @@
+/* === Карусель: контейнер и список === */
+.carousel-outer {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 0 20px;
+  content-visibility: auto;
+  contain: layout style paint;
+}
+
+.carousel-list, .catalog-carousel-list {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 32px !important;
+  padding: 20px 40px !important;
+  background: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  justify-content: flex-start !important;
+  overflow-x: auto !important;
+  scroll-behavior: smooth !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  scroll-snap-type: x mandatory !important;
+  scroll-padding: 0 40px !important;
+  contain: layout paint;
+}
+
+@media (max-width: 900px) {
+  .carousel-list, .catalog-carousel-list {
+    gap: 18px !important;
+    padding: 15px 20px !important;
+    justify-content: flex-start !important;
+    scroll-padding: 0 20px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .carousel-list, .catalog-carousel-list {
+    gap: 16px !important;
+    padding: 10px 15px !important;
+    scroll-padding: 0 15px !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    scroll-behavior: smooth !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .carousel-card {
+    width: 90vw !important;
+    min-width: 90vw !important;
+    max-width: 98vw !important;
+    margin: 0 auto 12px auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding-top: 28px !important;
+    padding-bottom: 28px !important;
+    height: auto !important;
+    min-height: unset !important;
+    max-height: unset !important;
+    padding-bottom: 20px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .carousel-outer {
+    padding: 0 10px !important;
+    overflow: visible !important;
+  }
+}
+
+.carousel-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Дополнительные стили для предотвращения обрезания */
+.carousel-list > * {
+  scroll-snap-align: start !important;
+  flex-shrink: 0 !important;
+}
+
+/* Улучшенная прокрутка для мобильных */
+@media (max-width: 700px) {
+  .carousel-list {
+    scroll-snap-type: x proximity !important;
+    scroll-padding-left: 15px !important;
+    scroll-padding-right: 15px !important;
+  }
+
+  .carousel-card:first-child {
+    margin-left: 0 !important;
+  }
+
+  .carousel-card:last-child {
+    margin-right: 15px !important;
+  }
+}
+
+.carousel-card {
+  background: var(--bg-secondary, #18182a) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 32px 0 var(--shadow-color), 0 2px 8px var(--shadow-color) !important;
+  width: 28vw !important;
+  min-width: 320px !important;
+  max-width: 400px !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  padding: 24px 18px 18px 18px !important;
+  margin: 0 !important;
+  transition: box-shadow 0.18s, transform 0.18s, background 0.18s !important;
+  box-sizing: border-box !important;
+  padding-bottom: 32px !important;
+  padding-top: 40px !important;
+  padding-bottom: 40px !important;
+  min-height: unset !important;
+  max-height: unset !important;
+  flex-shrink: 0 !important;
+  scroll-snap-align: start !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+@media (max-width: 1200px) {
+  .carousel-card {
+    width: 40vw !important;
+    min-width: 240px !important;
+    max-width: 340px !important;
+    padding: 18px 8px 14px 8px !important;
+    border-radius: 12px !important;
+    height: auto !important;
+    min-height: unset !important;
+    max-height: unset !important;
+    padding-bottom: 24px !important;
+    padding-top: 32px !important;
+    padding-bottom: 32px !important;
+  }
+}
+/* Дубликат мобильного блока для .carousel-card удалён. Актуальный блок уже задан выше. */
+.carousel-card:hover {
+  box-shadow: 0 16px 48px 0 var(--shadow-color), 0 2px 8px var(--shadow-color) !important;
+  border: none !important;
+  background: var(--bg-secondary, #18182a) !important;
+  transform: scale(1.045) !important;
+}
+@media (max-width: 700px) {
+  .carousel-card:hover {
+    box-shadow: none !important;
+    background: var(--bg-secondary, #18182a) !important;
+    transform: none !important;
+}
+}
+
+.card-video {
+  width: 100% !important;
+  height: auto !important;
+  min-height: unset !important;
+  max-height: unset !important;
+  border-radius: 10px !important;
+  margin-bottom: 12px !important;
+  box-shadow: 0 4px 24px #BFD7ED33 !important;
+  background: #FAF9F6 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  flex: 1 0 auto !important;
+}
+.card-video video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 10px !important;
+  background: #000 !important;
+}
+@media (max-width: 1200px) {
+  .card-video {
+    height: auto !important;
+    min-height: unset !important;
+    max-height: unset !important;
+  }
+}
+@media (max-width: 700px) {
+  .card-video {
+    flex-grow: 1 !important;
+    height: auto !important;
+    min-height: unset !important;
+    max-height: unset !important;
+    border-radius: 10px !important;
+    margin-bottom: 8px !important;
+    box-shadow: 0 2px 8px #BFD7ED33 !important;
+  }
+}
+
+.carousel-order-btn {
+  width: 70% !important;
+  max-width: 220px !important;
+  min-width: 120px !important;
+  background: #fff !important;
+  color: #111 !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 10px 0 !important;
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 6px #00000022 !important;
+  cursor: pointer !important;
+  transition: background 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s !important;
+  letter-spacing: 0.5px !important;
+  outline: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin: 0px auto 0 auto !important;
+}
+
+/* Специфичные стили для кнопки в новобрачной презентации */
+.wow-catalog .carousel-order-btn {
+  margin-top: 0px !important;
+}
+.carousel-order-btn span {
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
+}
+.carousel-order-btn .firework-emoji {
+  color: #111 !important;
+}
+.carousel-order-btn:hover {
+  background: #111 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px #00000033 !important;
+  transform: scale(1.04) !important;
+}
+.carousel-order-btn:hover span,
+.carousel-order-btn:hover .firework-emoji {
+  color: #fff !important;
+}
+.carousel-order-btn .order-text {
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
+  font-weight: 800;
+}
+.carousel-order-btn:hover .order-text {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+@media (max-width: 700px) {
+  .carousel-order-btn {
+    width: 70% !important;
+    margin-top: 9px !important;
+    font-size: 0.85rem !important;
+    border-radius: 12px !important;
+    padding: 10px 0 !important;
+  }
+  
+  /* Специфичные стили для кнопки в новобрачной презентации на мобильных */
+  .wow-catalog .carousel-order-btn {
+    margin-top: 12px !important;
+  }
+}
+@media (min-width: 701px) {
+  .carousel-order-btn {
+    width: 90% !important;
+    margin-top: 16px !important;
+    margin-bottom: 0 !important;
+    align-self: center !important;
+  }
+  
+  /* Специфичные стили для кнопки в новобрачной презентации на десктопе */
+  .wow-catalog .carousel-order-btn {
+    margin-top: 8px !important;
+  }
+}
+
+.carousel-arrow {
+  background: var(--bg-secondary);
+  border: 2px solid #a18fff;
+  color: #fff;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 2rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin: 0 12px;
+  box-shadow: 0 2px 8px #a18fff33;
+  transition: background 0.18s, color 0.18s, border 0.18s, transform 0.18s;
+  z-index: 2;
+}
+.carousel-arrow:hover {
+  background: #a18fff;
+  color: #18182a;
+  border: 2px solid #5ee7ff;
+  transform: scale(1.12);
+}
+@media (max-width: 900px) {
+  .carousel-arrow {
+    display: none;
+  }
+} 
+
+/* === Стили для карточек "В разработке" в карусели === */
+.carousel-card.development-card {
+  position: relative;
+  opacity: 0.9;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: default;
+  animation: none !important;
+}
+
+.carousel-card.development-card:hover {
+  animation: fireworkGlow 2s ease-in-out infinite !important;
+  transform: translateY(-6px) scale(1.05) !important;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  box-shadow: 0 0 20px rgba(191,215,237,0.3),
+              0 0 40px rgba(191,215,237,0.2),
+              0 0 60px rgba(191,215,237,0.1) !important;
+}
+
+.carousel-card .development-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(10,10,19,0.85) 0%, rgba(24,24,42,0.8) 100%);
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+  border: 2px solid rgba(191,215,237,0.4);
+  box-shadow: inset 0 0 20px rgba(191,215,237,0.1);
+}
+
+.carousel-card .development-text {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #BFD7ED;
+  margin-top: 12px;
+  margin-bottom: 4px;
+  text-align: center;
+  font-family: 'Javanese Text', Arial, sans-serif;
+  text-shadow: 0 2px 8px rgba(191,215,237,0.3);
+}
+
+.carousel-card .development-subtext {
+  font-size: 0.95rem;
+  color: #7CA7CE;
+  text-align: center;
+  opacity: 0.9;
+  font-family: 'Monotype Corsiva', Arial, sans-serif;
+  margin-top: 4px;
+}
+
+.carousel-card .development-preview {
+  position: relative;
+  background: linear-gradient(135deg, #18182a 0%, #0a0a13 100%);
+  border: 2px dashed rgba(191,215,237,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  /* Стабильная высота превью, чтобы карточки не «скукоживались» */
+  aspect-ratio: 16/9;
+  min-height: 160px;
+}
+
+.carousel-card .development-preview video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.carousel-card .development-placeholder {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  background: rgba(10,10,19,0.7);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(191,215,237,0.3);
+}
+
+.carousel-card .placeholder-text {
+  font-size: 0.9rem;
+  color: #7CA7CE;
+  margin-top: 8px;
+  opacity: 0.8;
+  font-family: 'Monotype Corsiva', Arial, sans-serif;
+  font-weight: 500;
+}
+
+/* Убираем все старые анимации */
+@keyframes developmentPulse {
+  0% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 0.95; transform: scale(1.005); }
+  100% { opacity: 0.9; transform: scale(1); }
+}
+
+/* Принудительно отключаем старые анимации */
+.carousel-card.development-card {
+  animation: none !important;
+}
+
+.carousel-card.development-card:hover {
+  animation: fireworkGlow 2s ease-in-out infinite !important;
+}
+
+/* Анимация для иконки */
+@keyframes constructionRotate {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  75% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.carousel-card .development-overlay svg {
+  animation: constructionRotate 3s ease-in-out infinite;
+}
+
+/* Адаптивность для карточек в разработке */
+@media (max-width: 700px) {
+  .carousel-card .development-text {
+    font-size: 1.1rem;
+  }
+  
+  .carousel-card .development-subtext {
+    font-size: 0.85rem;
+  }
+  
+  .carousel-card .placeholder-text {
+    font-size: 0.8rem;
+  }
+  
+  .carousel-card .development-overlay {
+    padding: 10px;
+  }
+} 
+
+/* Анимация свечения фейерверка для карточек в разработке */
+@keyframes fireworkGlow {
+  0% { 
+    box-shadow: 0 0 20px rgba(191,215,237,0.3),
+                0 0 40px rgba(191,215,237,0.2),
+                0 0 60px rgba(191,215,237,0.1);
+  }
+  25% { 
+    box-shadow: 0 0 25px rgba(161,143,255,0.4),
+                0 0 50px rgba(161,143,255,0.3),
+                0 0 75px rgba(161,143,255,0.2);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(94,231,255,0.5),
+                0 0 60px rgba(94,231,255,0.4),
+                0 0 90px rgba(94,231,255,0.3);
+  }
+  75% { 
+    box-shadow: 0 0 25px rgba(255,182,193,0.4),
+                0 0 50px rgba(255,182,193,0.3),
+                0 0 75px rgba(255,182,193,0.2);
+  }
+  100% { 
+    box-shadow: 0 0 20px rgba(191,215,237,0.3),
+                0 0 40px rgba(191,215,237,0.2),
+                0 0 60px rgba(191,215,237,0.1);
+  }
+}
+
+/* Более специфичные стили для hover анимации */
+.carousel-list .carousel-card.development-card:hover,
+.carousel-card.development-card:hover {
+  animation: fireworkGlow 2s ease-in-out infinite !important;
+  transform: translateY(-6px) scale(1.05) !important;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  box-shadow: 0 0 20px rgba(191,215,237,0.3),
+              0 0 40px rgba(191,215,237,0.2),
+              0 0 60px rgba(191,215,237,0.1) !important;
+} 

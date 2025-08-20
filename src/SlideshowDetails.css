@@ -1,0 +1,418 @@
+/* Полноэкранный оверлей */
+.slideshow-details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-primary);
+  z-index: 10000;
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Блокируем скролл основной страницы */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Страница как обычный сайт */
+.slideshow-details-page {
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+/* Заголовок страницы */
+.page-header {
+  background: linear-gradient(90deg, #7CA7CE 0%, #BFD7ED 100%);
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.back-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  transition: all 0.3s;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.page-title {
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Основной контент */
+.page-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 130px 40px 60px 40px;
+}
+
+/* Видео по центру */
+.video-wrapper {
+  text-align: center;
+  margin-bottom: 60px;
+  position: relative;
+  content-visibility: auto;
+  contain: layout style paint;
+}
+
+/* Уменьшаем отступ между видео и текстом на мобильных */
+@media (max-width: 768px) {
+  .video-wrapper {
+    margin-bottom: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .video-wrapper {
+  margin-bottom: 20px;
+  }
+}
+
+.main-video {
+  width: 100%;
+  max-width: 800px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  background: #000;
+  will-change: transform;
+  object-fit: contain;
+}
+
+/* Стили для вертикальных видео */
+.main-video.vertical-video {
+  max-width: 400px;
+  max-height: 600px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Уменьшаем отступ сверху только для вертикальных видео (видео-приглашения) */
+.page-content:has(.vertical-video) {
+  padding-top: 100px !important;
+}
+
+@media (max-width: 768px) {
+  .page-content:has(.vertical-video) {
+    padding-top: 100px !important;
+  }
+  
+  .main-video {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+  
+  .main-video.vertical-video {
+    max-width: 250px;
+    max-height: 350px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-content:has(.vertical-video) {
+    padding-top: 50px !important;
+  }
+  
+  .main-video {
+    max-width: 90%;
+  }
+  
+  .main-video.vertical-video {
+    max-width: 200px;
+    max-height: 280px;
+  }
+}
+
+/* Кастомные контролы для видео */
+.video-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+  z-index: 20;
+}
+
+.video-control-btn {
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.video-control-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+}
+
+.speed-btn {
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 12px;
+  width: auto;
+  padding: 0 12px;
+  min-width: 44px;
+}
+
+/* Текстовый контент */
+.text-content {
+  color: #fff;
+  line-height: 1.6;
+  margin-bottom: 60px;
+}
+
+.text-content h2 {
+  color: #BFD7ED;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.text-content h3 {
+  color: #BFD7ED;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 32px 0 16px 0;
+}
+
+.text-content p {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  color: #d6d6f7;
+  white-space: pre-line;
+}
+
+.text-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.text-content li {
+  background: rgba(191, 215, 237, 0.1);
+  border-left: 4px solid #BFD7ED;
+  padding: 12px 20px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+/* Кнопки действий */
+.action-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 32px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  min-width: 180px;
+  justify-content: center;
+}
+
+.question-btn {
+  background: linear-gradient(135deg, #7CA7CE 0%, #BFD7ED 100%);
+  color: #fff;
+}
+
+.question-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(124, 167, 206, 0.4);
+}
+
+.whatsapp-btn {
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  color: #fff;
+}
+
+.whatsapp-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+}
+
+.order-btn {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #fff;
+  border: 2px solid #7CA7CE;
+  border-radius: 12px;
+  padding: 16px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  min-width: 180px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.order-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(124, 167, 206, 0.4);
+  background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+  border-color: #BFD7ED;
+}
+
+/* Мобильные устройства */
+@media (max-width: 768px) {
+  .page-header {
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  
+  .page-title {
+    font-size: 1.4rem;
+  }
+  
+  .page-content {
+    padding: 100px 20px 40px 20px !important;
+  }
+  
+  .main-video {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+  
+  .main-video.vertical-video {
+    max-width: 250px;
+    max-height: 350px;
+  }
+  
+  .video-controls {
+    bottom: 15px;
+    right: 15px;
+    gap: 8px;
+  }
+  
+  .video-control-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .speed-btn {
+    font-size: 11px;
+    padding: 0 10px;
+    min-width: 40px;
+  }
+  
+  .text-content h2 {
+    font-size: 1.6rem;
+  }
+  
+  .text-content h3 {
+    font-size: 1.2rem;
+  }
+  
+  .text-content p {
+    font-size: 1rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .btn {
+    width: 100%;
+    max-width: 300px;
+    padding: 18px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    padding: 12px 16px;
+  }
+  
+  .page-title {
+    font-size: 1.2rem;
+  }
+  
+  .page-content {
+    padding: 100px 16px 30px 16px !important;
+  }
+  
+  .text-content h2 {
+    font-size: 1.4rem;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 360px) {
+  .page-content {
+    padding: 120px 16px 30px 16px;
+  }
+  
+  .main-video {
+    max-width: 90%;
+  }
+  
+  .main-video.vertical-video {
+    max-width: 200px;
+    max-height: 280px;
+  }
+  
+  .video-controls {
+    bottom: 10px;
+    right: 10px;
+    gap: 6px;
+  }
+  
+  .video-control-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .speed-btn {
+    font-size: 10px;
+    padding: 0 8px;
+    min-width: 36px;
+  }
+}

@@ -11,3 +11,18 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Явно задаём цвет текста и placeholder для input в чате */
+.ChatWidget-input,
+.ChatWidget-input:focus,
+.ChatWidget-input:active {
+  color: #23243a !important;
+  background: #f9f9f9 !important;
+  font-weight: 500;
+  box-shadow: 0 2px 8px #BFD7ED33;
+  caret-color: #23243a !important;
+}
+.ChatWidget-input::placeholder {
+  color: #b0b0b0 !important;
+  opacity: 1;
+}

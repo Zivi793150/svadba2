@@ -1,3 +1,24 @@
 # https://www.robotstxt.org/robotstxt.html
+# Фейеро - Создание слайд-шоу для свадеб и праздников
+# Сайт: https://фейеро.рф
+
 User-agent: *
-Disallow:
+Allow: /
+
+# Разрешаем индексацию всех страниц
+Allow: /services
+Allow: /contact
+Allow: /reviews
+Allow: /portfolio
+
+# Запрещаем индексацию технических файлов
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /static/
+
+# Sitemap
+Sitemap: https://фейеро.рф/sitemap.xml
+
+# Дополнительная информация для поисковых роботов
+# Crawl-delay: 1

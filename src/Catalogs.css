@@ -1,0 +1,1006 @@
+.catalogs {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  margin: 60px 0 64px 0;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 4;
+  animation: fadeInCatalogs 1.1s cubic-bezier(.23,1.01,.32,1);
+  padding: 0 40px;
+}
+/* === Базовые стили для всех карточек каталога === */
+.catalog-window, .wow-catalog {
+  background: var(--bg-secondary);
+  border-radius: 24px;
+  box-shadow: 0 4px 32px 0 var(--shadow-color), 0 2px 8px var(--shadow-color);
+  padding: 32px 24px 24px 24px;
+  min-width: 320px;
+  max-width: 340px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: box-shadow 0.25s, transform 0.22s;
+  position: relative;
+  animation: fadeInCatalog 1.1s cubic-bezier(.23,1.01,.32,1);
+}
+
+/* Бейдж акции запуска */
+.promo-badge {
+  position: absolute !important;
+  top: 6px !important;
+  left: 6px !important;
+  z-index: 20 !important;
+  background: linear-gradient(135deg, #ff8a00, #e52e71) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  font-size: 0.7rem !important;
+  padding: 4px 8px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
+  letter-spacing: 0.2px !important;
+  /* даём возможность наведения, но не мешаем кликам по карточке */
+  pointer-events: auto !important;
+  display: grid !important;
+  place-items: center !important;
+  height: auto !important;
+  width: auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.promo-badge .b-def,
+.promo-badge .b-hov {
+  grid-area: 1 / 1;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.promo-badge .b-def { font-weight: 900; opacity: 1; transform: translateY(0); }
+.promo-badge .b-hov { font-weight: 800; opacity: 0; transform: translateY(4px); }
+/* hover по самой плашке */
+.promo-badge:hover .b-def { opacity: 0; transform: translateY(-4px); }
+.promo-badge:hover .b-hov { opacity: 1; transform: translateY(0); }
+/* и hover по карточке, если плашка пропускает клики */
+.catalog-window:hover .promo-badge .b-def,
+.carousel-card:hover .promo-badge .b-def { opacity: 0; transform: translateY(-4px); }
+.catalog-window:hover .promo-badge .b-hov,
+.carousel-card:hover .promo-badge .b-hov { opacity: 1; transform: translateY(0); }
+/* автосмена текста через класс is-alt */
+.promo-badge.is-alt .b-def { opacity: 0; transform: translateY(-4px); }
+.promo-badge.is-alt .b-hov { opacity: 1; transform: translateY(0); }
+
+/* Вариант размещения внизу, чтобы не перекрывать заголовок/текст */
+.promo-badge.promo-bottom {
+  top: auto !important;
+  left: 8px !important;
+  bottom: 8px !important;
+}
+
+/* Гарантируем корректное позиционирование в карточках и превью */
+.carousel-card,
+.catalog-window,
+.card-video,
+.catalog-video-preview {
+  position: relative !important;
+}
+
+/* Вертикальные карточки: бейдж остаётся в углу контейнера */
+.catalog-section:last-child .carousel-card .promo-badge,
+.catalog-section:last-child .catalog-window .promo-badge {
+  top: 6px !important;
+  left: 6px !important;
+  bottom: auto !important;
+}
+.catalog-window:hover, .wow-catalog:hover {
+  box-shadow: 0 12px 48px 0 #BFD7ED, 0 2px 16px 0 #C7C6E5;
+  transform: translateY(-6px) scale(1.035);
+  z-index: 2;
+}
+
+/* === Уникальные стили для Новобрачной презентации === */
+/* === Презентация новобрачных (WOW-каталог) — 1-в-1 с оригиналом === */
+
+/* Стили для контейнера заголовка */
+.catalog-title-row {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-bottom: 12px !important;
+  z-index: 2 !important;
+  position: relative !important;
+}
+
+/* Стили для заголовка в новобрачной презентации */
+.catalog-title-row .catalog-title {
+  font-size: 1.4rem !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  margin-bottom: 10px !important;
+  margin-top: 8px !important;
+  text-align: center !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  width: 100% !important;
+  letter-spacing: 0.5px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  line-height: 1.25 !important;
+  z-index: 3 !important;
+  position: relative !important;
+}
+
+/* Стили для подзаголовка в новобрачной презентации */
+.catalog-title-row .catalog-under-title {
+  font-size: 1.08rem !important;
+  color: #fff !important;
+  text-align: center !important;
+  margin-bottom: 18px !important;
+  line-height: 1.3 !important;
+  font-weight: 400 !important;
+  opacity: 0.92 !important;
+  width: 100% !important;
+  z-index: 3 !important;
+  position: relative !important;
+}
+.catalogs-multi > .catalog-carousel:first-child .catalog-window.wow-catalog {
+  width: 520px !important;
+  min-width: 320px !important;
+  max-width: 560px !important;
+  padding: 24px 12px 18px 12px !important;
+  border-radius: 24px !important;
+  margin: 32px auto 18px auto !important;
+  min-height: 400px !important;
+  max-height: 480px !important;
+  box-shadow: 0 4px 24px 0 var(--shadow-color), 0 2px 8px var(--shadow-color) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+@media (max-width: 700px) {
+  .catalogs-multi > .catalog-carousel:first-child .catalog-window.wow-catalog {
+    width: 92vw !important;
+    min-width: 92vw !important;
+    max-width: 92vw !important;
+    padding: 8px 2vw 8px 2vw !important;
+    border-radius: 14px !important;
+    margin: 0 auto 10px auto !important;
+    min-height: 580px !important;
+    max-height: 600px !important;
+    margin-top: 32px !important;
+    overflow: visible !important;
+  }
+  
+  .catalog-title-row {
+    margin-bottom: 8px !important;
+  }
+  
+  .catalog-title-row .catalog-title {
+    font-size: 1.2rem !important;
+    line-height: 1.18 !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .catalog-title-row .catalog-under-title {
+    font-size: 1rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 12px !important;
+  }
+}
+.catalogs-multi > .catalog-carousel:first-child .catalog-main-title {
+  font-size: 3.6rem !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  letter-spacing: 2px !important;
+  margin-bottom: 12px !important;
+  margin-top: 0 !important;
+  text-align: center !important;
+  text-shadow: none !important;
+}
+.catalogs-multi > .catalog-carousel:first-child .catalog-title {
+  font-size: 1.5rem !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  margin-bottom: 10px !important;
+  margin-top: 8px !important;
+  text-align: center !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  width: 100% !important;
+  letter-spacing: 1px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  line-height: 1.3 !important;
+}
+@media (max-width: 700px) {
+  .catalogs-multi > .catalog-carousel:first-child .catalog-title {
+    font-size: 1.1rem !important;
+    margin-top: 4px !important;
+    margin-bottom: 6px !important;
+    padding: 0 2vw !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    line-height: 1.2 !important;
+  }
+}
+.catalogs-multi > .catalog-carousel:first-child .catalog-mini-desc {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-align: center;
+  opacity: 1;
+}
+.catalogs-multi > .catalog-carousel:first-child .catalog-video-preview.wow-preview {
+  height: 200px !important;
+  min-height: 180px !important;
+  max-height: 260px !important;
+  border-radius: 14px !important;
+  margin-bottom: 12px !important;
+}
+@media (max-width: 700px) {
+  .catalogs-multi > .catalog-carousel:first-child .catalog-video-preview.wow-preview {
+    height: 200px !important;
+    min-height: 180px !important;
+    max-height: 220px !important;
+    border-radius: 10px !important;
+    margin-bottom: 6px !important;
+  }
+  
+  .catalogs-multi > .catalog-carousel:first-child .catalog-video-preview.wow-preview video {
+    border-radius: 10px !important;
+  }
+}
+
+/* === Стили для заголовка и описания === */
+.catalog-title {
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+  color: var(--accent-primary) !important;
+  margin-bottom: 8px !important;
+  letter-spacing: 0.3px !important;
+  text-align: center !important;
+  line-height: 1.3 !important;
+  text-shadow: none !important;
+  font-family: 'Javanese Text', Arial, sans-serif !important;
+  max-width: 100% !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  padding: 0 10px !important;
+}
+.catalog-main-title {
+  font-size: 3.5rem !important;
+  font-weight: 900 !important;
+  color: var(--accent-primary) !important;
+  margin-bottom: 8px !important;
+  letter-spacing: 1px !important;
+  text-align: center !important;
+  line-height: 1.13 !important;
+  text-shadow: none !important;
+  font-family: 'Javanese Text', Arial, sans-serif !important;
+  width: 100% !important;
+  display: block !important;
+}
+.catalogs-multi > .catalog-carousel:first-child .catalog-title {
+  font-size: 1.5rem !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  margin-bottom: 10px !important;
+  margin-top: 8px !important;
+  text-align: center !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  width: 100% !important;
+  letter-spacing: 1px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+@media (max-width: 700px) {
+  .catalogs-multi > .catalog-carousel:first-child .catalog-title {
+    font-size: 1.1rem !important;
+    margin-top: 4px !important;
+    margin-bottom: 6px !important;
+    padding: 0 2vw !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+}
+.catalog-mini-desc {
+  font-size: 1.8rem;
+  color: var(--accent-primary);
+  margin-bottom: 18px;
+  text-align: center;
+  min-height: 48px;
+  max-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  font-family: 'Monotype Corsiva', 'Javanese Text', Arial, sans-serif !important;
+  width: 100% !important;
+}
+.catalogs-multi > .catalog-carousel:first-child .catalog-mini-desc {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-align: center;
+  opacity: 1;
+}
+
+/* === Видео-превью === */
+.catalog-video-preview, .wow-preview {
+  width: 100%;
+  height: 180px;
+  margin-bottom: 18px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #18182a;
+  box-shadow: 0 2px 16px #BFD7ED33;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Декоративная ленточка для узких (вертикальных) карточек */
+.promo-ribbon {
+  position: absolute !important;
+  top: 8px !important;
+  left: -8px !important;
+  width: 0;
+  height: 0;
+}
+.promo-ribbon .r-def,
+.promo-ribbon .r-hov {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: linear-gradient(135deg, #ff8a00, #e52e71);
+  color: #fff;
+  font-weight: 900;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 6px 12px 6px 24px;
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  z-index: 3;
+}
+.promo-ribbon .r-def,
+.promo-ribbon .r-hov { transition: opacity 200ms ease, transform 200ms ease; }
+.promo-ribbon .r-def { opacity: 1; transform: translateY(0); }
+.promo-ribbon .r-hov { opacity: 0; transform: translateY(4px); }
+.promo-ribbon:hover .r-def { opacity: 0; transform: translateY(-4px); }
+.promo-ribbon:hover .r-hov { opacity: 1; transform: translateY(0); }
+/* на hover карточки тоже переключаем, чтобы работать при pointer-events:none */
+.catalog-window:hover .promo-ribbon .r-def,
+.carousel-card:hover .promo-ribbon .r-def { opacity: 0; transform: translateY(-4px); }
+.catalog-window:hover .promo-ribbon .r-hov,
+.carousel-card:hover .promo-ribbon .r-hov { opacity: 1; transform: translateY(0); }
+/* автосмена текста через класс is-alt */
+.promo-ribbon.is-alt .r-def { opacity: 0; transform: translateY(-4px); }
+.promo-ribbon.is-alt .r-hov { opacity: 1; transform: translateY(0); }
+.promo-ribbon:after {
+  content: '';
+  position: absolute;
+  top: 22px;
+  left: 0;
+  border-left: 8px solid #b3475f;
+  border-top: 8px solid transparent;
+  z-index: 2;
+}
+
+/* Чуть ниже плашка акции для "Свадебной презентации" (wow-catalog) */
+.catalogs-multi > .catalog-carousel:first-child .promo-ribbon {
+  top: 80px !important;
+}
+
+/* === Специальные стили для видео в карточках "Видео-приглашения" === */
+.catalog-video-preview video,
+.wow-preview video {
+  width: 80% !important;
+  height: 80px !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 18px !important;
+  border: 2.5px solid #BFD7ED !important;
+  box-shadow: 0 4px 24px #BFD7ED33 !important;
+  margin-bottom: 10px !important;
+  margin: 0 auto !important;
+}
+
+/* === Специальные стили для видео в "Новобрачной презентации" === */
+.catalogs-multi > .catalog-carousel:first-child .catalog-video-preview.wow-preview video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 14px !important;
+  border: 2.5px solid #BFD7ED !important;
+  box-shadow: 0 4px 24px #BFD7ED33 !important;
+  margin: 0 !important;
+}
+
+/* === Специальные стили для Carousel компонента (Видео-приглашения) === */
+.catalog-section .catalog-video-preview video,
+.catalog-section .wow-preview video {
+  width: 40% !important;
+  height: 30px !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 8px !important;
+  border: 1px solid #BFD7ED !important;
+  box-shadow: 0 2px 12px #BFD7ED33 !important;
+  margin-bottom: 4px !important;
+  margin: 0 auto !important;
+}
+
+/* === Специальные стили ТОЛЬКО для раздела "Видео-приглашения" === */
+.catalog-section:last-child .carousel-card {
+  width: 18vw !important;
+  min-width: 190px !important;
+  max-width: 240px !important;
+  padding: 14px 10px 10px 10px !important;
+  border-radius: 12px !important;
+}
+
+.catalog-section:last-child .card-video {
+  border-radius: 6px !important;
+  margin-bottom: 8px !important;
+}
+
+.catalog-section:last-child .card-video video {
+  border-radius: 8px !important;
+}
+
+/* === Уменьшаем размер контейнера для видео в Carousel === */
+.catalog-section .catalog-video-preview,
+.catalog-section .wow-preview {
+  height: 100px !important;
+  min-height: 80px !important;
+  max-height: 120px !important;
+}
+
+/* === Специально для раздела "Видео-приглашения" === */
+.catalog-section:last-child .catalog-video-preview,
+.catalog-section:last-child .wow-preview {
+  height: 55px !important;
+  min-height: 40px !important;
+  max-height: 70px !important;
+}
+/* Дубликаты размеров wow-preview удалены. Актуальные размеры заданы выше. */
+
+/* === Кнопка заказа === */
+.catalog-order-btn {
+  width: 70%;
+  max-width: 220px;
+  margin-top: 0px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 12px;
+  background: #111;
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 6px #00000022;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.18s;
+  filter: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.catalog-window.wow-catalog .catalog-order-btn,
+.catalogs-multi > .catalog-carousel:first-child .catalog-window.wow-catalog .catalog-order-btn {
+  width: 70% !important;
+  max-width: 220px !important;
+  min-width: 160px;
+  max-width: 320px;
+  background: #fff !important;
+  color: #111 !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 10px 0 !important;
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px #00000022 !important;
+  cursor: pointer !important;
+  transition: background 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s !important;
+  letter-spacing: 0.5px !important;
+  outline: none !important;
+  margin: 0px auto 0 auto !important;
+  position: relative !important;
+  top: 0px !important;
+}
+.catalog-window.wow-catalog .catalog-order-btn .order-text {
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
+  font-weight: 800;
+}
+
+/* --- Универсальный hover для кнопки "Заказать" в wow-catalog --- */
+.catalog-window.wow-catalog .catalog-order-btn:hover,
+.wow-catalog .catalog-order-btn:hover {
+  background: #111 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px #00000033 !important;
+  transform: scale(1.04) !important;
+}
+.catalog-window.wow-catalog .catalog-order-btn:hover .order-text,
+.wow-catalog .catalog-order-btn:hover .order-text {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+
+/* === Кнопка заказа в wow-catalog — как в карусели === */
+.catalogs-multi > .catalog-carousel:first-child .catalog-order-btn {
+  width: 70% !important;
+  max-width: 220px !important;
+  min-width: 120px !important;
+  max-width: 98%;
+  background: #fff !important;
+  color: #111 !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 10px 0 !important;
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 6px #00000022 !important;
+  cursor: pointer !important;
+  transition: background 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s !important;
+  letter-spacing: 0.5px !important;
+  outline: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin: 0px auto 0 auto !important;
+}
+.catalogs-multi > .catalog-carousel:first-child .catalog-order-btn span {
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
+}
+.catalogs-multi > .catalog-carousel:first-child .catalog-order-btn .firework-emoji {
+  color: #111 !important;
+}
+.catalogs-multi > .catalog-carousel:first-child .catalog-order-btn:hover {
+  background: #111 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px #00000033 !important;
+  transform: scale(1.04) !important;
+}
+.catalogs-multi > .catalog-carousel:first-child .catalog-order-btn:hover span,
+.catalogs-multi > .catalog-carousel:first-child .catalog-order-btn:hover .firework-emoji {
+  color: #fff !important;
+}
+.catalogs-multi > .catalog-carousel:first-child .catalog-order-btn .order-text {
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
+  font-weight: 800;
+}
+.catalogs-multi > .catalog-carousel:first-child .catalog-order-btn:hover .order-text {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+@media (max-width: 700px) {
+  .catalogs-multi > .catalog-carousel:first-child .catalog-order-btn {
+    width: 98% !important;
+    margin-top: 18px !important;
+    margin-bottom: 24px !important;
+    font-size: 1.1rem !important;
+    border-radius: 12px !important;
+    padding: 14px 0 !important;
+  }
+}
+@media (min-width: 701px) {
+  .catalogs-multi > .catalog-carousel:first-child .catalog-order-btn {
+    width: 90% !important;
+    margin-top: 16px !important;
+    margin-bottom: 0 !important;
+    align-self: center !important;
+  }
+}
+
+/* === Медиа-запросы для обычных карточек === */
+@media (max-width: 1100px) {
+  .catalogs {
+    gap: 24px;
+  }
+  .wow-catalog {
+    min-width: 280px;
+    max-width: 280px;
+    width: 280px;
+    min-height: 440px;
+    max-height: 440px;
+    padding: 24px 10px 18px 10px;
+  }
+  .wow-preview {
+    height: 110px;
+  }
+}
+@media (max-width: 700px) {
+  .catalogs {
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 0 2vw;
+  }
+  .catalog-window {
+    width: 86vw;
+    min-width: 86vw;
+    max-width: 90vw;
+    margin: 0 auto 12px auto;
+    padding: 10px 6px;
+    border-radius: 16px;
+  }
+  .catalog-title {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    gap: 6px;
+  }
+  .catalog-video-preview {
+    height: 120px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+  }
+  .catalog-video-preview video {
+    border-radius: 10px;
+  }
+  .catalog-main-title {
+    font-size: 1.3rem !important;
+    margin-bottom: 8px !important;
+  }
+  .catalog-mini-desc {
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+  }
+}
+@media (max-width: 700px) {
+  .catalogs-multi > .catalog-carousel:first-child {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  .catalogs-multi > .catalog-carousel:first-child .catalog-window.wow-catalog {
+    width: 90vw !important;
+    min-width: 90vw !important;
+    max-width: 90vw !important;
+    padding: 12px 8px !important;
+    border-radius: 14px !important;
+    margin: 18px 0 12px 0 !important;
+    left: auto !important;
+    right: auto !important;
+    min-height: 300px !important;
+    max-height: 600px !important;
+    box-shadow: 0 6px 24px 0 var(--shadow-color), 0 2px 8px var(--shadow-color) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    position: relative !important;
+  }
+  .catalogs-multi > .catalog-carousel:first-child .catalog-video-preview.wow-preview {
+    width: 100% !important;
+    height: 200px !important;
+    min-height: 180px !important;
+    max-height: 220px !important;
+    border-radius: 10px !important;
+    margin-bottom: 8px !important;
+  }
+  .catalogs-multi > .catalog-carousel:first-child .catalog-order-btn {
+    width: 96% !important;
+    margin: 18px auto 24px auto !important;
+    font-size: 1rem !important;
+    border-radius: 8px !important;
+    padding: 10px 0 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
+
+/* === Стили для карточек "В разработке" === */
+.development-card {
+  position: relative !important;
+  opacity: 0.9 !important;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  cursor: default !important;
+  animation: none !important;
+}
+
+.development-card:hover {
+  animation: fireworkGlow 2s ease-in-out infinite !important;
+  transform: translateY(-6px) scale(1.05) !important;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  box-shadow: 0 0 20px rgba(191,215,237,0.3),
+              0 0 40px rgba(191,215,237,0.2),
+              0 0 60px rgba(191,215,237,0.1) !important;
+}
+
+.development-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(10,10,19,0.85) 0%, rgba(24,24,42,0.8) 100%);
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+  border: 2px solid rgba(191,215,237,0.4);
+  box-shadow: inset 0 0 20px rgba(191,215,237,0.1);
+}
+
+.development-text {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #BFD7ED;
+  margin-top: 12px;
+  margin-bottom: 4px;
+  text-align: center;
+  font-family: 'Javanese Text', Arial, sans-serif;
+  text-shadow: 0 2px 8px rgba(191,215,237,0.3);
+}
+
+.development-subtext {
+  font-size: 0.95rem;
+  color: #7CA7CE;
+  text-align: center;
+  opacity: 0.9;
+  font-family: 'Monotype Corsiva', Arial, sans-serif;
+  margin-top: 4px;
+}
+
+.development-preview {
+  position: relative;
+  background: linear-gradient(135deg, #18182a 0%, #0a0a13 100%);
+  border: 2px dashed rgba(191,215,237,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  /* Стабильная высота превью для крупных карточек */
+  aspect-ratio: 16/9;
+  min-height: 200px;
+}
+
+.development-preview video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.development-placeholder {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  background: rgba(10,10,19,0.7);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(191,215,237,0.3);
+}
+
+.placeholder-text {
+  font-size: 0.9rem;
+  color: #7CA7CE;
+  margin-top: 8px;
+  opacity: 0.8;
+  font-family: 'Monotype Corsiva', Arial, sans-serif;
+  font-weight: 500;
+}
+
+/* Анимация для карточек в разработке */
+@keyframes developmentPulse {
+  0% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 0.9; transform: scale(1); }
+}
+
+.development-card {
+  animation: developmentPulse 4s ease-in-out infinite;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.development-card:hover {
+  animation: fireworkGlow 2s ease-in-out infinite !important;
+  transform: translateY(-6px) scale(1.05) !important;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  box-shadow: 0 0 20px rgba(191,215,237,0.3),
+              0 0 40px rgba(191,215,237,0.2),
+              0 0 60px rgba(191,215,237,0.1) !important;
+}
+
+/* Анимация для иконки */
+@keyframes constructionRotate {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  75% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.development-overlay svg {
+  animation: constructionRotate 3s ease-in-out infinite;
+}
+
+/* Адаптивность для карточек в разработке */
+@media (max-width: 700px) {
+  .development-text {
+    font-size: 1.1rem;
+  }
+  
+  .development-subtext {
+    font-size: 0.85rem;
+  }
+  
+  .placeholder-text {
+    font-size: 0.8rem;
+  }
+  
+  .development-overlay {
+    padding: 10px;
+  }
+}
+
+/* === Анимации и утилиты === */
+@keyframes fadeInCatalog {
+  0% { opacity: 0; transform: scale(0.92) translateY(40px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+} 
+
+/* Убираем конфликтующее правило */ 
+
+.javanese-title {
+  font-family: 'Javanese Text', Arial, sans-serif !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  display: block !important;
+  width: 100% !important;
+  text-align: center !important;
+  color: #fff !important;
+  font-size: 1.5rem !important;
+  font-weight: 900 !important;
+  line-height: 1.3 !important;
+  margin-bottom: 10px !important;
+  margin-top: 8px !important;
+  letter-spacing: 1px !important;
+}
+
+/* Специальные стили для javanese-title в новобрачной презентации */
+.catalogs-multi > .catalog-carousel:first-child .catalog-title-row .javanese-title {
+  font-size: 1.4rem !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  margin-bottom: 10px !important;
+  margin-top: 8px !important;
+  text-align: center !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  width: 100% !important;
+  letter-spacing: 0.5px !important;
+  display: block !important;
+  line-height: 1.28 !important;
+  z-index: 10 !important;
+  position: relative !important;
+  text-wrap: balance;
+  word-break: normal !important;
+  hyphens: none !important;
+}
+
+@media (max-width: 700px) {
+  .catalogs-multi > .catalog-carousel:first-child .catalog-title-row .javanese-title {
+    font-size: 1.2rem !important;
+    line-height: 1.18 !important;
+    margin-bottom: 8px !important;
+    margin-top: 4px !important;
+  }
+} 
+
+.catalog-section {
+  padding-top: 0px !important;
+  padding-bottom: 48px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.catalog-section .carousel-outer {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.catalog-section .carousel-list {
+  justify-content: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+} 
+
+@media (max-width: 700px) {
+  .catalog-section {
+    padding-top: 0px !important;
+    padding-bottom: 48px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+  }
+
+  .catalog-section .carousel-outer {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    padding: 0 10px !important;
+  }
+
+  .catalog-section .carousel-list {
+    justify-content: flex-start !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 10px 5px !important;
+    gap: 12px !important;
+  }
+
+  .catalog-section .carousel-list::-webkit-scrollbar {
+    display: none;
+  }
+} 
+
+/* Анимация свечения фейерверка для карточек в разработке */
+@keyframes fireworkGlow {
+  0% { 
+    box-shadow: 0 0 20px rgba(191,215,237,0.3),
+                0 0 40px rgba(191,215,237,0.2),
+                0 0 60px rgba(191,215,237,0.1);
+  }
+  25% { 
+    box-shadow: 0 0 25px rgba(161,143,255,0.4),
+                0 0 50px rgba(161,143,255,0.3),
+                0 0 75px rgba(161,143,255,0.2);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(94,231,255,0.5),
+                0 0 60px rgba(94,231,255,0.4),
+                0 0 90px rgba(94,231,255,0.3);
+  }
+  75% { 
+    box-shadow: 0 0 25px rgba(255,182,193,0.4),
+                0 0 50px rgba(255,182,193,0.3),
+                0 0 75px rgba(255,182,193,0.2);
+  }
+  100% { 
+    box-shadow: 0 0 20px rgba(191,215,237,0.3),
+                0 0 40px rgba(191,215,237,0.2),
+                0 0 60px rgba(191,215,237,0.1);
+  }
+} 
