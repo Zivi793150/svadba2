@@ -753,13 +753,26 @@ app.get('/api/analytics', async (req, res) => {
     const detailsOrders = detailsConversions.filter(c => c.action === 'order_page_visited' || c.action === 'order_page_open').length;
     const ratingItems = detailsConversions.filter(c => c.action === 'rating_submit');
     const ratingCount = ratingItems.length;
-    const ratingAvg = ratingCount > 0 ? Math.round((ratingItems.reduce((s, r) => s + Number(r.metadata?.value || 0), 0) / ratingCount) * 10) / 10 : 0;
+    const ratingSum = ratingItems.reduce((s, r) => s + Number(r.metadata?.value || 0), 0);
+    const ratingAvg = ratingCount > 0 ? Math.round((ratingSum / ratingCount) * 10) / 10 : 0;
+    const ratingDist = [1,2,3,4,5].reduce((acc, v) => {
+      acc[v] = ratingItems.filter(r => Number(r.metadata?.value) === v).length; return acc;
+    }, {});
+    const detailsCtr = detailsViews > 0 ? Math.round((detailsOrders / detailsViews) * 1000) / 10 : 0; // %
+    const messengerTotal = detailsTelegram + detailsWhatsApp;
+    const messengerCtr = detailsViews > 0 ? Math.round((messengerTotal / detailsViews) * 1000) / 10 : 0;
+
+    // Время на странице «Подробнее»
+    const timeEvents = detailsConversions.filter(c => c.action === 'details_time');
+    const timeAvg = timeEvents.length ? Math.round((timeEvents.reduce((s, e) => s + (Number(e.metadata?.ms)||0), 0) / timeEvents.length) / 1000) : 0; // сек
 
     const detailsPage = {
       views: detailsViews,
-      ratings: { count: ratingCount, avg: ratingAvg },
-      clicks: { telegram: detailsTelegram, whatsapp: detailsWhatsApp },
-      orderStarts: detailsOrders
+      ratings: { count: ratingCount, avg: ratingAvg, dist: ratingDist },
+      clicks: { telegram: detailsTelegram, whatsapp: detailsWhatsApp, ctr: messengerCtr },
+      orderStarts: detailsOrders,
+      ctr: detailsCtr,
+      avgTimeSec: timeAvg
     };
 
     res.json({
@@ -860,22 +873,26 @@ app.post('/internal/daily-digest', async (req, res) => {
     const dWa = dConv.filter(c => c.action === 'whatsapp_clicked').length;
     const dRatings = dConv.filter(c => c.action === 'rating_submit');
     const dAvg = dRatings.length ? Math.round((dRatings.reduce((s, r) => s + (Number(r.metadata?.value)||0), 0) / dRatings.length) * 10) / 10 : 0;
+    const dTime = dConv.filter(c => c.action === 'details_time');
+    const dTimeAvg = dTime.length ? Math.round((dTime.reduce((s, e) => s + (Number(e.metadata?.ms)||0), 0) / dTime.length) / 1000) : 0;
 
     const lines = [
-      `📊 Ежедневная сводка за 24ч:`,
-      `Посетители (sessionId): ${uniqueBySession}`,
-      `Просмотры: ${totalViews}`,
-      `Конверсии всего: ${totalConversions}`,
-      `Просмотры карточек: ${productViews}`,
-      `Переходов к оформлению: ${orderVisits}`,
-      `Выбор экрана: ${screenSelects}`,
-      `Клики: TG ${teleClicks} | WA ${waClicks}`,
-      `— Детальная страница —`,
-      `Просмотры: ${dViews}, Заказы: ${dOrders}, Рейтинг: ${dAvg} (${dRatings.length})`,
-      `Клики: TG ${dTg} | WA ${dWa}`
+      `📊 *Ежедневная сводка за 24ч*`,
+      `👥 *Посетители* (sessionId): *${uniqueBySession}*`,
+      `📄 *Просмотры*: *${totalViews}*`,
+      `🎯 *Конверсии всего*: *${totalConversions}*`,
+      `🧩 *Просмотры карточек*: *${productViews}*`,
+      `🛒 *Переходов к оформлению*: *${orderVisits}*`,
+      `🖥️ *Выбор экрана*: *${screenSelects}*`,
+      `✈️ *Клики*: TG *${teleClicks}* | WA *${waClicks}*`,
+      `\n— *Детальная страница* —`,
+      `👁️ Просмотры: *${dViews}* | 🛒 Заказы: *${dOrders}* | CTR: *${dViews>0?Math.round((dOrders/dViews)*100)+'%':'0%'}*`,
+      `⭐ Рейтинг: *${dAvg}* (оценок: *${dRatings.length}*) 1:${dRatings.filter(r=>r.metadata?.value===1).length} 2:${dRatings.filter(r=>r.metadata?.value===2).length} 3:${dRatings.filter(r=>r.metadata?.value===3).length} 4:${dRatings.filter(r=>r.metadata?.value===4).length} 5:${dRatings.filter(r=>r.metadata?.value===5).length}`,
+      `⏱️ Среднее время на странице: *${dTimeAvg}s*`,
+      `✉️ Клики: TG *${dTg}* | WA *${dWa}*`
     ];
 
-    await telegramBot.sendMessage(adminId, lines.join('\n'));
+    await telegramBot.sendMessage(adminId, lines.join('\n'), { parse_mode: 'Markdown' });
     res.json({ ok: true });
   } catch (error) {
     console.error('Daily digest error:', error);

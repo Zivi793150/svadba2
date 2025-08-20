@@ -49,6 +49,15 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
     }
   }, [videoData]);
 
+  // Измеряем время на странице «Подробнее» и отправляем как конверсию
+  useEffect(() => {
+    const start = Date.now();
+    return () => {
+      const ms = Date.now() - start;
+      trackConversion('details_time', { ms, product: videoData?.title || 'unknown' });
+    };
+  }, []);
+
   // Показать опросник в конце скролла (1 раз за посещение)
   useEffect(() => {
     const node = overlayRef.current;
