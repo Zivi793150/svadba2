@@ -183,13 +183,36 @@ body.modal-open {
 }
 
 .survey-modal {
-  width: min(560px, 92vw);
+  width: min(680px, 96vw);
   background: linear-gradient(180deg, rgba(19, 24, 48, 0.98) 0%, rgba(14, 18, 36, 0.98) 100%);
   border: 1px solid rgba(191, 215, 237, 0.35);
   border-radius: 16px;
-  padding: 22px 20px;
+  padding: 24px 22px;
   box-shadow: 0 40px 90px rgba(0,0,0,0.6);
   position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+/* Лид-форма модал */
+.lead-modal-overlay { composes: survey-modal-overlay; }
+.lead-modal { composes: survey-modal; }
+.lead-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
+.lead-input { width: 100%; padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(191,215,237,0.28); background: rgba(191,215,237,0.08); color: #fff; box-sizing: border-box; }
+.lead-channels { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.lead-radio { background: rgba(191,215,237,0.12); border: 1px solid rgba(191,215,237,0.3); border-radius: 10px; padding: 10px 14px; cursor: pointer; }
+.lead-radio.active { background: rgba(191,215,237,0.22); border-color: #BFD7ED; }
+
+@media (max-width: 768px) {
+  .survey-modal { width: 94vw; padding: 20px; }
+  .lead-input { padding: 12px 14px; }
+}
+
+@media (max-width: 480px) {
+  .survey-modal { width: 94vw; padding: 18px; }
+  .lead-channels { gap: 8px; }
+  .lead-radio { padding: 8px 12px; }
 }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

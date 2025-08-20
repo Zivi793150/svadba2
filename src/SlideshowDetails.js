@@ -11,6 +11,12 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
   const [pollOrderAnswer, setPollOrderAnswer] = useState(null);
   const [pollWeddingAnswer, setPollWeddingAnswer] = useState(null);
   const [showSurveyModal, setShowSurveyModal] = useState(false);
+  const [showLeadModal, setShowLeadModal] = useState(false);
+  const [leadName, setLeadName] = useState('');
+  const [leadTerm, setLeadTerm] = useState('');
+  const [leadBudget, setLeadBudget] = useState('');
+  const [leadChannel, setLeadChannel] = useState('whatsapp');
+  const [leadScreen, setLeadScreen] = useState('need'); // 'need' | 'own'
   const generalInfoWedding = `1. Сначала до заказа необходимо  определиться с экраном, который хотите использовать для демонстрации.
 Для показа подойдут не все экраны, а только с пропорциями 16:9 и 16:10. Уточните пропорции у владельца экрана, а также его размер, и сообщите нам перед заказом.
 Чтобы посмотреть как примерно будет выглядеть  ваше презентация на этом экране – можете скачать наш образец и попросить ее посмотреть на нём.
@@ -216,6 +222,33 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
     trackConversion('discuss_click', { from: 'details' });
   };
 
+  // Лид-форма: открыть/закрыть/отправить
+  const closeLeadModal = () => setShowLeadModal(false);
+  const handleLeadSubmit = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const message = `Заявка с сайта Фейеро\nИмя: ${leadName || '-'}\nСрок/дата: ${leadTerm || '-'}\nБюджет: ${leadBudget || '-'}\nЭкран: ${leadScreen === 'need' ? 'Подобрать' : 'Есть свой'}\nПродукт: ${videoData?.title || '-'}\nЭто первый шаг — поможем все организовать.`;
+    const encoded = encodeURIComponent(message);
+    if (leadChannel === 'whatsapp') {
+      trackConversion('lead_submit_whatsapp', { product: videoData?.title || 'unknown' });
+      window.open(`https://wa.me/79004511777?text=${encoded}`,'_blank');
+    } else {
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      trackConversion('lead_submit_telegram', { product: videoData?.title || 'unknown' });
+      if (isMobile) {
+        // Пытаемся открыть приложение Telegram с заранее заполненным текстом
+        window.location.href = `tg://share?text=${encoded}`;
+        // Фолбэк на веб-версию, если схема tg:// не сработала
+        setTimeout(() => {
+          window.open(`https://t.me/share/url?url=&text=${encoded}`,'_blank');
+        }, 150);
+      } else {
+        // На десктопе открываем веб-версию Telegram с предзаполненным текстом
+        window.open(`https://t.me/share/url?url=&text=${encoded}`,'_blank');
+      }
+    }
+    setShowLeadModal(false);
+  };
+
   return (
     <>
     <div className="slideshow-details-overlay" ref={overlayRef}>
@@ -244,7 +277,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
 
           {/* Текстовый контент, разбитый на секции */}
           <div className="text-content">
-            <h2>{videoData?.description || 'Создайте незабываемое слайд-шоу для вашей свадьбы'}</h2>
+            <h2>{videoData?.description || 'Создайте незабываемое видео-шоу для вашей свадьбы'}</h2>
 
             {/* 1. Описание */}
             <section className="info-section">
@@ -256,7 +289,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
                     ))
                   : (
                     <>
-                      <p>Мы создаём уникальные слайд‑шоу, которые станут прекрасным дополнением к вашему свадебному торжеству.</p>
+                      <p>Мы создаём уникальные видео‑шоу, которые станут прекрасным дополнением к вашему свадебному торжеству.</p>
                       <p>Профессиональный монтаж, красивая музыка и ваши лучшие фотографии — всё это превратится в трогательную историю вашей любви.</p>
                     </>
                   )}
@@ -284,55 +317,26 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
                     <p key={`pr-${idx}`}>{para}</p>
                   ))}
                   <div className="cta-highlight">
-                    <div className="cta-text">Цена кажется высокой? Давайте поговорим — возможно, у нас уже есть для вас сюрприз.</div>
-                    <button className="btn question-btn" onClick={handleQuestionClick}>
+                    <div className="cta-text">Хотите свадебный вау-эффект, но бюджет ограничен? Заходите в чат — подберём идеальное решение</div>
+                    <button className="btn question-btn" onClick={() => { setShowLeadModal(true); trackConversion('lead_modal_open', { from: 'pricing' }); }}>
                       <FaTelegramPlane size={18} />
-                      <span>Обсудить условия</span>
+                      <span>Мы поможем все организовать</span>
                     </button>
-                  </div>
+              </div>
                 </div>
               </section>
             )}
 
-            {/* 4. Выбрать экран перед заказом */}
+            {/* 4. Поможем всё составить — первый шаг */}
             <section className="info-section">
-              <div className="screen-card animate-in glow-silver">
-                <h3>Выбрать экран</h3>
-                <p style={{marginTop: 4}}>Для идеальной подачи нам важно знать, на каком экране вы будете показывать видео. Выберите популярное разрешение или укажите своё.</p>
-                <div className="screen-grid">
-                  {screenOptions.map((opt) => (
-                    <button
-                      key={opt.label}
-                      className={`screen-chip${selectedScreen?.label === opt.label ? ' selected' : ''}`}
-                      onClick={() => {
-                        setSelectedScreen(opt);
-                        trackConversion('screen_option_click', { resolution: opt.label, aspect: opt.aspect, product: videoData?.title || 'unknown' });
-                      }}
-                      title={`Пропорции ${opt.aspect}`}
-                    >
-                      {opt.label} <span className="chip-sub">{opt.aspect}</span>
-                    </button>
-                  ))}
-                </div>
-                <div className="screen-custom-row">
-                  <input
-                    className="screen-input"
-                    type="text"
-                    placeholder="Написать свой (например, 1920x1080)"
-                    value={customScreen}
-                    onChange={(e) => setCustomScreen(e.target.value)}
-                  />
-                  <button
-                    className="btn order-btn"
-                    onClick={proceedWithScreen}
-                    disabled={!selectedScreen && !normalizedCustom}
-                  >
-                    Начать оформление
+              <div className="info-card animate-in glow-silver">
+                <h3>Не переживайте о деталях</h3>
+                <p>Мы подскажем, как лучше. Напишите удобный срок, примерный бюджет и ваше имя — это уже первый шаг к идеальной презентации.</p>
+                <div className="action-buttons" style={{marginTop: 0}}>
+                  <button className="btn order-btn" onClick={() => { setShowLeadModal(true); trackConversion('lead_modal_open', { from: 'first_step_block' }); }}>
+                    <span>Сделать первый шаг</span>
                   </button>
                 </div>
-                {(normalizedCustom && !selectedScreen) && (
-                  <div className="screen-hint">Опознали пропорции: {normalizedCustom.aspect}</div>
-                )}
               </div>
             </section>
 
@@ -417,6 +421,30 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
           <div className="action-buttons" style={{marginTop: 16}}>
             <button className="btn order-btn" onClick={closeSurvey}>Закрыть</button>
           </div>
+        </div>
+      </div>
+    )}
+    {showLeadModal && (
+      <div className="survey-modal-overlay" onClick={closeLeadModal}>
+        <div className="survey-modal" onClick={(e)=>e.stopPropagation()}>
+          <h3>Мы поможем все организовать</h3>
+          <div className="lead-row">
+            <input className="lead-input" placeholder="Ваше имя" value={leadName} onChange={e=>setLeadName(e.target.value)} />
+            <input className="lead-input" placeholder="Срок/дата" value={leadTerm} onChange={e=>setLeadTerm(e.target.value)} />
+            <input className="lead-input" placeholder="Примерный бюджет" value={leadBudget} onChange={e=>setLeadBudget(e.target.value)} />
+          </div>
+          <div className="lead-channels">
+            <button className={`lead-radio${leadScreen==='need' ? ' active' : ''}`} onClick={()=>setLeadScreen('need')}>Подобрать экран</button>
+            <button className={`lead-radio${leadScreen==='own' ? ' active' : ''}`} onClick={()=>setLeadScreen('own')}>Есть свой</button>
+          </div>
+          <div className="lead-channels">
+            <button className={`lead-radio${leadChannel==='whatsapp' ? ' active' : ''}`} onClick={()=>setLeadChannel('whatsapp')}>WhatsApp</button>
+            <button className={`lead-radio${leadChannel==='telegram' ? ' active' : ''}`} onClick={()=>setLeadChannel('telegram')}>Telegram</button>
+          </div>
+          <div className="action-buttons" style={{marginTop: 12}}>
+            <button className="btn order-btn" onClick={handleLeadSubmit}>Отправить заявку</button>
+          </div>
+          <div className="cta-text" style={{marginTop:8, textAlign:'center'}}>Это первый шаг — дальше мы аккуратно всё подскажем.</div>
         </div>
       </div>
     )}
