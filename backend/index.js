@@ -1133,6 +1133,7 @@ app.post('/api/lead', async (req, res) => {
       term = '-',
       budget = '-',
       screen = '-',
+      contact = '-',
       product = '-',
       source = '/details',
       channel = 'telegram'
@@ -1145,9 +1146,9 @@ app.post('/api/lead', async (req, res) => {
 
     const leadId = generateLeadId();
     // Сохраняем лид во временное хранилище, чтобы бот мог сопоставить с Telegram-профилем
-    setLead(leadId, { name, term, budget, screen, product, source, channel });
+    setLead(leadId, { name, term, budget, screen, contact, product, source, channel });
     try {
-      await Lead.create({ leadId, name, term, budget, screen, product, source, channel });
+      await Lead.create({ leadId, name, term, budget, screen, contact, product, source, channel });
     } catch (e) { console.warn('Lead create warn:', e.message); }
 
     const botUsername = process.env.TELEGRAM_BOT_NAME || 'feyero_bot';
@@ -1159,6 +1160,7 @@ app.post('/api/lead', async (req, res) => {
       `Срок/дата: ${term}`,
       `Бюджет: ${budget}`,
       `Экран: ${screen}`,
+      `Контакт: ${contact}`,
       `Продукт: ${product}`,
       `Источник: ${source}`,
       `Канал клиента: ${channel}`,

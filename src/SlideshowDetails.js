@@ -17,6 +17,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
   const [leadBudget, setLeadBudget] = useState('');
   const [leadChannel, setLeadChannel] = useState('whatsapp');
   const [leadScreen, setLeadScreen] = useState('need'); // 'need' | 'own'
+  const [leadContact, setLeadContact] = useState(''); // Контактная информация
   const generalInfoWedding = `1. Сначала до заказа необходимо  определиться с экраном, который хотите использовать для демонстрации.
 Для показа подойдут не все экраны, а только с пропорциями 16:9 и 16:10. Уточните пропорции у владельца экрана, а также его размер, и сообщите нам перед заказом.
 Чтобы посмотреть как примерно будет выглядеть  ваше презентация на этом экране – можете скачать наш образец и попросить ее посмотреть на нём.
@@ -226,7 +227,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
   const closeLeadModal = () => setShowLeadModal(false);
   const handleLeadSubmit = (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    const message = `Здравствуйте! Хочу оформить заявку.\n\nИмя: ${leadName || '-'}\nСрок/дата: ${leadTerm || '-'}\nБюджет: ${leadBudget || '-'}\nЭкран: ${leadScreen === 'need' ? 'Подобрать' : 'Есть свой'}\nПродукт: ${videoData?.title || '-'}`;
+    const message = `Здравствуйте! Хочу оформить заявку.\n\nИмя: ${leadName || '-'}\nСрок/дата: ${leadTerm || '-'}\nБюджет: ${leadBudget || '-'}\nЭкран: ${leadScreen === 'need' ? 'Подобрать' : 'Есть свой'}\nКонтакт: ${leadContact || '-'}\nПродукт: ${videoData?.title || '-'}`;
     const encoded = encodeURIComponent(message);
     if (leadChannel === 'whatsapp') {
       trackConversion('lead_submit_whatsapp', { product: videoData?.title || 'unknown' });
@@ -242,6 +243,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
             term: leadTerm,
             budget: leadBudget,
             screen: leadScreen === 'need' ? 'Подобрать' : 'Есть свой',
+            contact: leadContact,
             product: videoData?.title || '-',
             source: '/details',
             channel: 'telegram'
@@ -465,6 +467,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
             <input className="lead-input" placeholder="Ваше имя" value={leadName} onChange={e=>setLeadName(e.target.value)} />
             <input className="lead-input" placeholder="Срок/дата" value={leadTerm} onChange={e=>setLeadTerm(e.target.value)} />
             <input className="lead-input" placeholder="Примерный бюджет" value={leadBudget} onChange={e=>setLeadBudget(e.target.value)} />
+            <input className="lead-input" placeholder="Контакт (Telegram, WhatsApp, номер телефона)" value={leadContact} onChange={e=>setLeadContact(e.target.value)} />
           </div>
           <div className="lead-channels">
             <button className={`lead-radio${leadScreen==='need' ? ' active' : ''}`} onClick={()=>setLeadScreen('need')}>Подобрать экран</button>

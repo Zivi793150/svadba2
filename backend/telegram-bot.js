@@ -238,6 +238,7 @@ bot.onText(/\/start(?:\s+(.*))?/, async (msg, match) => {
             `Срок/дата: ${lead.term}`,
             `Бюджет: ${lead.budget}`,
             `Экран: ${lead.screen}`,
+            `Контакт: ${lead.contact || '-'}`,
             `Продукт: ${lead.product}`,
             `Источник: ${lead.source}`
           ];
@@ -283,6 +284,7 @@ bot.onText(/\/leads(?:\s+(.*))?/, async (msg, match) => {
         `Срок: ${l.term || '-'}`,
         `Бюджет: ${l.budget || '-'}`,
         `Экран: ${l.screen || '-'}`,
+        `Контакт: ${l.contact || '-'}`,
         `Продукт: ${l.product || '-'}`,
         `Источник: ${l.source || '-'}`,
         `Канал: ${l.channel || '-'}`,

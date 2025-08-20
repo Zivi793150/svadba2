@@ -6,6 +6,7 @@ const LeadSchema = new mongoose.Schema({
   term: String,
   budget: String,
   screen: String,
+  contact: String,
   product: String,
   source: String,
   channel: String,
