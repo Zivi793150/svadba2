@@ -354,6 +354,9 @@ const AdminPanel = () => {
                 <div className="metric-content">
                   <h3>Клики мессенджеров</h3>
                   <div className="metric-value">TG {formatNumber(detailsPage.clicks?.telegram || 0)} | WA {formatNumber(detailsPage.clicks?.whatsapp || 0)}</div>
+                  {typeof detailsPage.clicks?.ctr === 'number' && (
+                    <div className="metric-subtitle">CTR по мессенджерам: {detailsPage.clicks.ctr}%</div>
+                  )}
                 </div>
               </div>
               <div className="metric-card">
@@ -361,6 +364,16 @@ const AdminPanel = () => {
                 <div className="metric-content">
                   <h3>Переходов к оформлению</h3>
                   <div className="metric-value">{formatNumber(detailsPage.orderStarts || 0)}</div>
+                  {typeof detailsPage.ctr === 'number' && (
+                    <div className="metric-subtitle">CTR в оформление: {detailsPage.ctr}%</div>
+                  )}
+                </div>
+              </div>
+              <div className="metric-card">
+                <div className="metric-icon">⏱️</div>
+                <div className="metric-content">
+                  <h3>Время на странице</h3>
+                  <div className="metric-value">{detailsPage.avgTimeSec || 0}s</div>
                 </div>
               </div>
             </div>

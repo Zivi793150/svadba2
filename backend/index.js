@@ -750,6 +750,7 @@ app.get('/api/analytics', async (req, res) => {
     const detailsViews = detailsConversions.filter(c => c.action === 'product_view').length;
     const detailsTelegram = detailsConversions.filter(c => c.action === 'telegram_clicked').length;
     const detailsWhatsApp = detailsConversions.filter(c => c.action === 'whatsapp_clicked').length;
+    const detailsDiscuss = detailsConversions.filter(c => c.action === 'discuss_click').length;
     const detailsOrders = detailsConversions.filter(c => c.action === 'order_page_visited' || c.action === 'order_page_open').length;
     const ratingItems = detailsConversions.filter(c => c.action === 'rating_submit');
     const ratingCount = ratingItems.length;
@@ -769,7 +770,7 @@ app.get('/api/analytics', async (req, res) => {
     const detailsPage = {
       views: detailsViews,
       ratings: { count: ratingCount, avg: ratingAvg, dist: ratingDist },
-      clicks: { telegram: detailsTelegram, whatsapp: detailsWhatsApp, ctr: messengerCtr },
+      clicks: { telegram: detailsTelegram, whatsapp: detailsWhatsApp, discuss: detailsDiscuss, ctr: messengerCtr },
       orderStarts: detailsOrders,
       ctr: detailsCtr,
       avgTimeSec: timeAvg
@@ -875,6 +876,11 @@ app.post('/internal/daily-digest', async (req, res) => {
     const dAvg = dRatings.length ? Math.round((dRatings.reduce((s, r) => s + (Number(r.metadata?.value)||0), 0) / dRatings.length) * 10) / 10 : 0;
     const dTime = dConv.filter(c => c.action === 'details_time');
     const dTimeAvg = dTime.length ? Math.round((dTime.reduce((s, e) => s + (Number(e.metadata?.ms)||0), 0) / dTime.length) / 1000) : 0;
+    const dSurveyClosed = dConv.filter(c => c.action === 'survey_closed').length;
+    const dReasons = dConv.filter(c => c.action === 'survey_reason').reduce((acc, c) => {
+      const r = c.metadata?.reason || 'unknown';
+      acc[r] = (acc[r] || 0) + 1; return acc;
+    }, {});
 
     const lines = [
       `📊 *Ежедневная сводка за 24ч*`,
@@ -889,7 +895,9 @@ app.post('/internal/daily-digest', async (req, res) => {
       `👁️ Просмотры: *${dViews}* | 🛒 Заказы: *${dOrders}* | CTR: *${dViews>0?Math.round((dOrders/dViews)*100)+'%':'0%'}*`,
       `⭐ Рейтинг: *${dAvg}* (оценок: *${dRatings.length}*) 1:${dRatings.filter(r=>r.metadata?.value===1).length} 2:${dRatings.filter(r=>r.metadata?.value===2).length} 3:${dRatings.filter(r=>r.metadata?.value===3).length} 4:${dRatings.filter(r=>r.metadata?.value===4).length} 5:${dRatings.filter(r=>r.metadata?.value===5).length}`,
       `⏱️ Среднее время на странице: *${dTimeAvg}s*`,
-      `✉️ Клики: TG *${dTg}* | WA *${dWa}*`
+      `✉️ Клики: TG *${dTg}* | WA *${dWa}*`,
+      `🧪 Закрыли опросник: *${dSurveyClosed}*`,
+      `❓ Причины отказа: ${Object.entries(dReasons).map(([k,v])=>`${k}:${v}`).join(' ') || 'нет данных'}`
     ];
 
     await telegramBot.sendMessage(adminId, lines.join('\n'), { parse_mode: 'Markdown' });

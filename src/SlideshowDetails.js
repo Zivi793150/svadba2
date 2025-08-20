@@ -46,6 +46,8 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
       const type = videoData.isVertical ? 'invitation' : 'presentation';
       const title = videoData.title || (videoData.isVertical ? 'Видео-приглашения' : 'Свадебная презентация');
       window.trackProductView(type, title);
+      // Детально фиксируем просмотр именно страницы подробностей
+      trackConversion('product_view', { type, title });
     }
   }, [videoData]);
 
@@ -128,6 +130,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
   const closeSurvey = () => {
     try { sessionStorage.setItem('surveyShownV1', '1'); } catch (_) {}
     setShowSurveyModal(false);
+    trackConversion('survey_closed', { where: 'modal' });
   };
 
   // Выбор экрана
@@ -180,6 +183,8 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
     if (window.trackWhatsAppClick) {
       window.trackWhatsAppClick();
     }
+    // Детально для страницы подробностей
+    trackConversion('whatsapp_clicked', { trigger: 'details_button' });
   };
 
   const handleTelegramClick = () => {
@@ -202,10 +207,13 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
     if (window.trackTelegramClick) {
       window.trackTelegramClick();
     }
+    // Детально для страницы подробностей
+    trackConversion('telegram_clicked', { trigger: 'details_button' });
   };
 
   const handleQuestionClick = () => {
     onContactClick();
+    trackConversion('discuss_click', { from: 'details' });
   };
 
   return (
@@ -353,6 +361,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
               if (window.trackOrderPage) {
                 window.trackOrderPage();
               }
+              trackConversion('order_page_open', { from: 'details' });
             }}>
             <span>Заказать</span>
           </button>
@@ -379,6 +388,17 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
               </button>
             ))}
           </div>
+          {!ratingSubmitted && (
+            <div className="poll" style={{marginTop:12}}>
+              <div className="poll-q">Что смутило больше всего?</div>
+              <div className="poll-buttons">
+                <button className="poll-btn" onClick={() => trackConversion('survey_reason', { reason: 'price_high' })}>Цена</button>
+                <button className="poll-btn" onClick={() => trackConversion('survey_reason', { reason: 'not_clear' })}>Непонятно</button>
+                <button className="poll-btn" onClick={() => trackConversion('survey_reason', { reason: 'no_time' })}>Нет времени</button>
+                <button className="poll-btn" onClick={() => trackConversion('survey_reason', { reason: 'other' })}>Другое</button>
+              </div>
+            </div>
+          )}
           <div className="poll" style={{marginTop:12}}>
             <div className="poll-q">Понравилась презентация?</div>
             <div className="poll-buttons">
