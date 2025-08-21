@@ -886,9 +886,20 @@ app.post('/internal/daily-digest', async (req, res) => {
     if (!adminIds.length) {
       return res.status(400).json({ error: 'ADMIN_TELEGRAM_ID(S) not set' });
     }
-    // Используем текущую аналитическую выборку за сутки
+    // Используем данные с 00:00 по МСК (Europe/Moscow)
     const now = new Date();
-    const since = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const mskDateParts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Moscow',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(now).reduce((acc, p) => {
+      if (p.type === 'year') acc.year = p.value;
+      if (p.type === 'month') acc.month = p.value;
+      if (p.type === 'day') acc.day = p.value;
+      return acc;
+    }, {});
+    const since = new Date(`${mskDateParts.year}-${mskDateParts.month}-${mskDateParts.day}T00:00:00+03:00`);
     const views = await PageView.find({ timestamp: { $gte: since } });
     const convs = await Conversion.find({ timestamp: { $gte: since } });
     const chats = await ChatEngagement.find({ timestamp: { $gte: since } });
@@ -928,7 +939,7 @@ app.post('/internal/daily-digest', async (req, res) => {
     }, {});
 
     const lines = [
-      `📊 *Ежедневная сводка за 24ч*`,
+      `📊 *Ежедневная сводка за сегодня (МСК)*`,
       `👥 *Посетители* (sessionId): *${uniqueBySession}*`,
       `📄 *Просмотры*: *${totalViews}*`,
       `🎯 *Конверсии всего*: *${totalConversions}*`,
