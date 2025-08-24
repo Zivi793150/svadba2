@@ -257,6 +257,24 @@ app.get('/api/analytics', async (req, res) => {
     let previousStartDate;
     
     switch (period) {
+      case 'day':
+        // С 00:00 по МСК (Europe/Moscow)
+        const mskDateParts = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Europe/Moscow',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).formatToParts(now).reduce((acc, p) => {
+          if (p.type === 'year') acc.year = p.value;
+          if (p.type === 'month') acc.month = p.value;
+          if (p.type === 'day') acc.day = p.value;
+          return acc;
+        }, {});
+        startDate = new Date(`${mskDateParts.year}-${mskDateParts.month}-${mskDateParts.day}T00:00:00+03:00`);
+        // Предыдущий день
+        const yesterday = new Date(startDate.getTime() - 24 * 60 * 60 * 1000);
+        previousStartDate = new Date(yesterday.getTime());
+        break;
       case 'week':
         startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         previousStartDate = new Date(startDate.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -421,7 +439,7 @@ app.get('/api/analytics', async (req, res) => {
     const previousHybridKeys = new Set(previousPageViews.map(v => hybridKey(v.ip, v.userAgent, v.sessionId)));
     const uniqueHybrid = currentHybridKeys.size;
 
-    const uniqueVisitors = uniqueIps; // legacy by IP
+    const uniqueVisitors = uniqueSessionIds; // используем sessionId как основную метрику
     const totalSessions = userSessions.length;
     const avgSessionDuration = userSessions.length > 0
       ? userSessions.reduce((sum, session) => sum + (session.duration || 0), 0) / userSessions.length
@@ -690,10 +708,9 @@ app.get('/api/analytics', async (req, res) => {
     });
 
     // Вычисляем общий индекс производительности
-    const totalPageViews = pageViews.length;
-    if (totalPageViews > 0) {
-      const fastPercentage = (technicalMetrics.pageSpeed.fast / totalPageViews) * 100;
-      const mediumPercentage = (technicalMetrics.pageSpeed.medium / totalPageViews) * 50;
+    if (pageViews.length > 0) {
+      const fastPercentage = (technicalMetrics.pageSpeed.fast / pageViews.length) * 100;
+      const mediumPercentage = (technicalMetrics.pageSpeed.medium / pageViews.length) * 50;
       technicalMetrics.performanceIndex = Math.round(fastPercentage + mediumPercentage);
     }
 
@@ -743,7 +760,7 @@ app.get('/api/analytics', async (req, res) => {
     // Обзор
     const overview = {
       totalVisitors: uniqueSessionIds, // переходим на sessionId как основную метрику
-      previousVisitors: [...new Set(previousSessions.map(s => s.ip))].length,
+      previousVisitors: [...new Set(previousSessions.map(s => s.sessionId))].length,
       totalPageViews: pageViews.length,
       previousPageViews: previousPageViews.length,
       totalChats: activeChats,
@@ -908,7 +925,7 @@ app.post('/internal/daily-digest', async (req, res) => {
     const totalViews = views.length;
     const totalConversions = convs.length;
     const totalChats = chats.length;
-    const uniqueVisitors = new Set(sessions.map(s => s.ip)).size;
+    const uniqueVisitorsByIp = new Set(sessions.map(s => s.ip)).size;
     const productViews = convs.filter(c => c.action === 'product_view').length;
     const orderVisits = convs.filter(c => c.action === 'order_page_visited' || c.action === 'order_page_open').length;
     const teleClicks = convs.filter(c => c.action === 'telegram_clicked').length;

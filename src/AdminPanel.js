@@ -91,6 +91,8 @@ const AdminPanel = () => {
     }
   };
 
+
+
   const fetchChatMessages = async (chatId) => {
     try {
       const response = await fetch(`https://svadba2.onrender.com/api/messages/${chatId}`);
@@ -159,11 +161,18 @@ const AdminPanel = () => {
 
   const getPeriodLabel = () => {
     switch (selectedPeriod) {
-      case 'week': return 'последняя неделя';
-      case 'month': return 'последний месяц';
-      case 'year': return 'последний год';
-      case 'all': return 'все время';
-      default: return 'последняя неделя';
+      case 'day':
+        return 'Последние сутки (с 00:00 МСК)';
+      case 'week': 
+        return 'Последняя неделя';
+      case 'month': 
+        return 'Последний месяц';
+      case 'year': 
+        return 'Последний год';
+      case 'all': 
+        return 'Все время';
+      default: 
+        return 'Последняя неделя';
     }
   };
 
@@ -176,22 +185,22 @@ const AdminPanel = () => {
     if (!analytics) return <div className="loading">Загрузка аналитики...</div>;
 
     const {
-      overview,
-      pageViews,
-      devices,
-      popularPages,
-      buttonClicks,
-      conversions,
-      productViews,
-      chatEngagement,
-      userSessions,
-      trends,
-      topReferrers,
-      browserStats,
-      osStats,
-      hourlyActivity,
-      weeklyActivity,
-      detailsPage
+      overview = {},
+      pageViews = [],
+      devices = [],
+      popularPages = [],
+      buttonClicks = [],
+      conversions = [],
+      productViews = [],
+      chatEngagement = {},
+      userSessions = {},
+      trends = [],
+      topReferrers = [],
+      browserStats = [],
+      osStats = [],
+      hourlyActivity = [],
+      weeklyActivity = [],
+      detailsPage = {}
     } = analytics;
 
   return (
@@ -204,6 +213,7 @@ const AdminPanel = () => {
               setSelectedPeriod(e.target.value);
               setTimeout(fetchAnalytics, 100);
             }}>
+              <option value="day">Последние сутки (с 00:00 МСК)</option>
               <option value="week">Последняя неделя</option>
               <option value="month">Последний месяц</option>
               <option value="year">Последний год</option>
@@ -234,13 +244,13 @@ const AdminPanel = () => {
               <h3>Посетители</h3>
               <div className="metric-value">
                 {formatNumber(
-                  visitorMetric === 'ip' ? (overview.visitorsBreakdown?.byIp || overview.totalVisitors) :
-                  visitorMetric === 'session' ? (overview.visitorsBreakdown?.bySession || overview.totalVisitors) :
-                  (overview.visitorsBreakdown?.hybrid || overview.totalVisitors)
+                  visitorMetric === 'ip' ? (overview.visitorsBreakdown?.byIp || overview.totalVisitors || 0) :
+                  visitorMetric === 'session' ? (overview.visitorsBreakdown?.bySession || overview.totalVisitors || 0) :
+                  (overview.visitorsBreakdown?.hybrid || overview.totalVisitors || 0)
                 )}
               </div>
               <div className="metric-change positive">
-                +{calculateGrowth(overview.totalVisitors, overview.previousVisitors)}% vs предыдущий период
+                +{calculateGrowth(overview.totalVisitors || 0, overview.previousVisitors || 0)}% vs предыдущий период
               </div>
             </div>
           </div>
@@ -249,9 +259,9 @@ const AdminPanel = () => {
             <div className="metric-icon">📄</div>
             <div className="metric-content">
               <h3>Просмотры</h3>
-              <div className="metric-value">{formatNumber(overview.totalPageViews)}</div>
+              <div className="metric-value">{formatNumber(overview.totalPageViews || 0)}</div>
               <div className="metric-change positive">
-                +{calculateGrowth(overview.totalPageViews, overview.previousPageViews)}% vs предыдущий период
+                +{calculateGrowth(overview.totalPageViews || 0, overview.previousPageViews || 0)}% vs предыдущий период
               </div>
             </div>
           </div>
@@ -260,9 +270,9 @@ const AdminPanel = () => {
             <div className="metric-icon">💬</div>
             <div className="metric-content">
               <h3>Чаты</h3>
-              <div className="metric-value">{formatNumber(overview.totalChats)}</div>
+              <div className="metric-value">{formatNumber(overview.totalChats || 0)}</div>
               <div className="metric-change positive">
-                +{calculateGrowth(overview.totalChats, overview.previousChats)}% vs предыдущий период
+                +{calculateGrowth(overview.totalChats || 0, overview.previousChats || 0)}% vs предыдущий период
               </div>
             </div>
           </div>
@@ -271,9 +281,9 @@ const AdminPanel = () => {
             <div className="metric-icon">🎯</div>
             <div className="metric-content">
               <h3>Конверсии</h3>
-              <div className="metric-value">{formatNumber(overview.totalConversions)}</div>
+              <div className="metric-value">{formatNumber(overview.totalConversions || 0)}</div>
               <div className="metric-change positive">
-                +{calculateGrowth(overview.totalConversions, overview.previousConversions)}% vs предыдущий период
+                +{calculateGrowth(overview.totalConversions || 0, overview.previousConversions || 0)}% vs предыдущий период
               </div>
             </div>
           </div>
@@ -285,7 +295,7 @@ const AdminPanel = () => {
             <div className="metric-icon">⏱️</div>
             <div className="metric-content">
               <h3>Время на сайте</h3>
-              <div className="metric-value">{formatDuration(overview.avgSessionDuration)}</div>
+              <div className="metric-value">{formatDuration(overview.avgSessionDuration || 0)}</div>
               <div className="metric-subtitle">в среднем</div>
             </div>
           </div>
@@ -294,7 +304,7 @@ const AdminPanel = () => {
             <div className="metric-icon">📱</div>
             <div className="metric-content">
               <h3>Мобильные</h3>
-              <div className="metric-value">{overview.mobilePercentage}%</div>
+              <div className="metric-value">{overview.mobilePercentage || 0}%</div>
               <div className="metric-subtitle">от всех посетителей</div>
             </div>
           </div>
@@ -303,7 +313,7 @@ const AdminPanel = () => {
             <div className="metric-icon">🔄</div>
             <div className="metric-content">
               <h3>Возвраты</h3>
-              <div className="metric-value">{overview.bounceRate}%</div>
+              <div className="metric-value">{overview.bounceRate || 0}%</div>
               <div className="metric-subtitle">процент отказов</div>
             </div>
           </div>
@@ -312,7 +322,7 @@ const AdminPanel = () => {
             <div className="metric-icon">📈</div>
             <div className="metric-content">
               <h3>Страниц/сессия</h3>
-              <div className="metric-value">{overview.pagesPerSession}</div>
+              <div className="metric-value">{overview.pagesPerSession || 0}</div>
               <div className="metric-subtitle">в среднем</div>
             </div>
           </div>
@@ -322,7 +332,7 @@ const AdminPanel = () => {
             <div className="metric-content">
               <h3>Сессий/посетитель</h3>
               <div className="metric-value">
-                {userSessions.total > 0 ? (userSessions.totalSessions / userSessions.total).toFixed(1) : 0}
+                {(userSessions.total || 0) > 0 ? ((userSessions.totalSessions || 0) / (userSessions.total || 1)).toFixed(1) : 0}
               </div>
               <div className="metric-subtitle">в среднем</div>
             </div>
@@ -900,23 +910,23 @@ const AdminPanel = () => {
               <h3>Уникальные посетители</h3>
               <div className="session-value">
                 {formatNumber(
-                  visitorMetric === 'ip' ? (analytics.visitors?.byIp?.total || userSessions.total) :
-                  visitorMetric === 'session' ? (analytics.visitors?.bySession?.total || userSessions.total) :
-                  (analytics.visitors?.hybrid?.total || userSessions.total)
+                                  visitorMetric === 'ip' ? (analytics.visitors?.byIp?.total || userSessions.total || 0) :
+                visitorMetric === 'session' ? (analytics.visitors?.bySession?.total || userSessions.total || 0) :
+                (analytics.visitors?.hybrid?.total || userSessions.total || 0)
                 )}
               </div>
             </div>
             <div className="session-stat">
               <h3>Всего сессий</h3>
-              <div className="session-value">{formatNumber(userSessions.totalSessions)}</div>
+              <div className="session-value">{formatNumber(userSessions.totalSessions || 0)}</div>
             </div>
             <div className="session-stat">
               <h3>Новые посетители</h3>
               <div className="session-value">
                 {formatNumber(
-                  visitorMetric === 'ip' ? (analytics.visitors?.byIp?.new ?? userSessions.newVisitors) :
-                  visitorMetric === 'session' ? (analytics.visitors?.bySession?.new ?? userSessions.newVisitors) :
-                  (analytics.visitors?.hybrid?.new ?? userSessions.newVisitors)
+                  visitorMetric === 'ip' ? (analytics.visitors?.byIp?.new ?? userSessions.newVisitors ?? 0) :
+                  visitorMetric === 'session' ? (analytics.visitors?.bySession?.new ?? userSessions.newVisitors ?? 0) :
+                  (analytics.visitors?.hybrid?.new ?? userSessions.newVisitors ?? 0)
                 )}
               </div>
             </div>
@@ -924,15 +934,15 @@ const AdminPanel = () => {
               <h3>Возвращающиеся</h3>
               <div className="session-value">
                 {formatNumber(
-                  visitorMetric === 'ip' ? (analytics.visitors?.byIp?.returning ?? userSessions.returningVisitors) :
-                  visitorMetric === 'session' ? (analytics.visitors?.bySession?.returning ?? userSessions.returningVisitors) :
-                  (analytics.visitors?.hybrid?.returning ?? userSessions.returningVisitors)
+                  visitorMetric === 'ip' ? (analytics.visitors?.byIp?.returning ?? userSessions.returningVisitors ?? 0) :
+                  visitorMetric === 'session' ? (analytics.visitors?.bySession?.returning ?? userSessions.returningVisitors ?? 0) :
+                  (analytics.visitors?.hybrid?.returning ?? userSessions.returningVisitors ?? 0)
                 )}
               </div>
             </div>
             <div className="session-stat">
               <h3>Средняя длительность</h3>
-              <div className="session-value">{formatDuration(userSessions.avgDuration)}</div>
+              <div className="session-value">{formatDuration(userSessions.avgDuration || 0)}</div>
             </div>
           </div>
         </div>
