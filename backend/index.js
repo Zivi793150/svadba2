@@ -835,6 +835,21 @@ app.get('/api/analytics', async (req, res) => {
       });
     }
 
+    // Общая статистика по оценкам (все страницы)
+    const allRatingItems = conversions.filter(c => c.action === 'rating_submit');
+    const allRatingCount = allRatingItems.length;
+    const allRatingSum = allRatingItems.reduce((s, r) => s + Number(r.metadata?.value || 0), 0);
+    const allRatingAvg = allRatingCount > 0 ? Math.round((allRatingSum / allRatingCount) * 10) / 10 : 0;
+    const allRatingDist = [1,2,3,4,5].reduce((acc, v) => {
+      acc[v] = allRatingItems.filter(r => Number(r.metadata?.value) === v).length; return acc;
+    }, {});
+
+    // Статистика по оценкам за предыдущий период
+    const previousRatingItems = previousConversions.filter(c => c.action === 'rating_submit');
+    const previousRatingCount = previousRatingItems.length;
+    const previousRatingSum = previousRatingItems.reduce((s, r) => s + Number(r.metadata?.value || 0), 0);
+    const previousRatingAvg = previousRatingCount > 0 ? Math.round((previousRatingSum / previousRatingCount) * 10) / 10 : 0;
+
     // Обзор
     const overview = {
       totalVisitors: uniqueSessionIds, // переходим на sessionId как основную метрику
@@ -845,6 +860,10 @@ app.get('/api/analytics', async (req, res) => {
       previousChats: previousChatEngagement.length,
       totalConversions: conversions.length,
       previousConversions: previousConversions.length,
+      totalRatings: allRatingCount,
+      previousRatings: previousRatingCount,
+      avgRating: allRatingAvg,
+      previousAvgRating: previousRatingAvg,
       avgSessionDuration,
       mobilePercentage: devices.find(d => d.type === 'mobile')?.percentage || 0,
       bounceRate: 35, // Упрощенная версия

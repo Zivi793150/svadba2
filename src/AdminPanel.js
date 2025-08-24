@@ -22,9 +22,6 @@ const AdminPanel = () => {
     e.preventDefault();
     if (password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
-      fetchChats();
-      fetchAnalytics();
-      fetchOrders();
     } else {
       alert('Неверный пароль!');
     }
@@ -181,6 +178,22 @@ const AdminPanel = () => {
     return ((current - previous) / previous * 100).toFixed(1);
   };
 
+  // Автоматически загружаем аналитику при изменении периода или метрики посетителей
+  useEffect(() => {
+    if (isAuthenticated && selectedPeriod) {
+      fetchAnalytics();
+    }
+  }, [selectedPeriod, visitorMetric, isAuthenticated]);
+
+  // Автоматически загружаем данные при первом входе
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchChats();
+      fetchAnalytics();
+      fetchOrders();
+    }
+  }, [isAuthenticated]);
+
   const renderAnalytics = () => {
     if (!analytics) return <div className="loading">Загрузка аналитики...</div>;
 
@@ -209,10 +222,7 @@ const AdminPanel = () => {
         <div className="analytics-header">
           <div className="period-selector">
             <label>Период:</label>
-            <select value={selectedPeriod} onChange={(e) => {
-              setSelectedPeriod(e.target.value);
-              setTimeout(fetchAnalytics, 100);
-            }}>
+            <select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)}>
               <option value="day">Последние сутки (с 00:00 МСК)</option>
               <option value="week">Последняя неделя</option>
               <option value="month">Последний месяц</option>
@@ -285,6 +295,29 @@ const AdminPanel = () => {
               <div className="metric-change positive">
                 +{calculateGrowth(overview.totalConversions || 0, overview.previousConversions || 0)}% vs предыдущий период
               </div>
+            </div>
+          </div>
+          
+          <div className="metric-card primary">
+            <div className="metric-icon">⭐</div>
+            <div className="metric-content">
+              <h3>Оценки</h3>
+              <div className="metric-value">
+                {analytics?.overview?.avgRating || 0} / 5
+              </div>
+              <div className="metric-change positive">
+                +{calculateGrowth(analytics?.overview?.totalRatings || 0, analytics?.overview?.previousRatings || 0)}% vs предыдущий период
+              </div>
+              <div className="metric-subtitle">
+                Всего оценок: {formatNumber(analytics?.overview?.totalRatings || 0)}
+              </div>
+              {analytics?.detailsPage?.ratings?.dist && (
+                <div className="metric-subtitle">
+                  Распределение: {Object.entries(analytics.detailsPage.ratings.dist)
+                    .map(([rating, count]) => `${rating}⭐: ${count}`)
+                    .join(' | ')}
+                </div>
+              )}
             </div>
           </div>
         </div>
