@@ -5,6 +5,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const multer = require('multer');
 const path = require('path');
+const cron = require('node-cron');
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -1406,6 +1407,86 @@ process.on('unhandledRejection', (reason, p) => {
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
 });
+
+// Автоматическая отправка ежедневного отчета в 12:00 по МСК
+if (cron) {
+  cron.schedule('0 12 * * *', async () => {
+    try {
+      console.log('🕛 Автоматическая отправка ежедневного отчета в 12:00 МСК...');
+      
+      // Получаем данные за последние сутки (с 00:00 МСК)
+      const now = new Date();
+      const mskDateParts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/Moscow',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(now).reduce((acc, p) => {
+        if (p.type === 'year') acc.year = p.value;
+        if (p.type === 'month') acc.month = p.value;
+        if (p.type === 'day') acc.day = p.value;
+        return acc;
+      }, {});
+      
+      const startDate = new Date(`${mskDateParts.year}-${mskDateParts.month}-${mskDateParts.day}T00:00:00+03:00`);
+      const yesterday = new Date(startDate.getTime() - 24 * 60 * 60 * 1000);
+      
+      // Получаем данные
+      const views = await PageView.find({ timestamp: { $gte: startDate } });
+      const conversions = await Conversion.find({ timestamp: { $gte: startDate } });
+      const sessions = await UserSession.find({ startTime: { $gte: startDate } });
+      
+      // Формируем отчет
+      const uniqueVisitors = new Set(sessions.map(s => s.sessionId)).size;
+      const totalPageViews = views.length;
+      const totalConversions = conversions.length;
+      
+      // Оценки
+      const ratings = conversions.filter(c => c.action === 'rating_submit');
+      const ratingCount = ratings.length;
+      const ratingAvg = ratingCount > 0 
+        ? Math.round((ratings.reduce((s, r) => s + Number(r.metadata?.value || 0), 0) / ratingCount) * 10) / 10 
+        : 0;
+      
+      // Чаты
+      const chatEngagement = await ChatEngagement.find({ timestamp: { $gte: startDate } });
+      const activeChats = chatEngagement.length;
+      
+      const report = `📊 *Ежедневный отчет (${new Date().toLocaleDateString('ru-RU', { timeZone: 'Europe/Moscow' })})*
+      
+👥 Посетители: *${uniqueVisitors}*
+📄 Просмотры: *${totalPageViews}*
+🎯 Конверсии: *${totalConversions}*
+⭐ Оценки: *${ratingAvg}/5* (${ratingCount} шт.)
+💬 Активные чаты: *${activeChats}*
+
+Отчет отправлен автоматически в 12:00 МСК`;
+      
+      // Отправляем в Telegram
+      const adminIds = parseAdminIds();
+      if (adminIds.length > 0 && telegramBot) {
+        for (const adminId of adminIds) {
+          try {
+            await telegramBot.sendMessage(adminId, report, { parse_mode: 'Markdown' });
+            console.log(`✅ Отчет отправлен администратору ${adminId}`);
+          } catch (error) {
+            console.error(`❌ Ошибка отправки отчета администратору ${adminId}:`, error.message);
+          }
+        }
+      }
+      
+      console.log('✅ Ежедневный отчет отправлен автоматически');
+    } catch (error) {
+      console.error('❌ Ошибка автоматической отправки отчета:', error);
+    }
+  }, {
+    timezone: 'Europe/Moscow'
+  });
+  
+  console.log('⏰ Cron-задача для ежедневного отчета в 12:00 МСК настроена');
+} else {
+  console.log('⚠️ Пакет node-cron не установлен, автоматическая отправка отчета отключена');
+}
 
 server.listen(PORT, () => {
   console.log(`Server + WebSocket started on http://localhost:${PORT}`);

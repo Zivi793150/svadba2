@@ -178,6 +178,30 @@ const AdminPanel = () => {
     return ((current - previous) / previous * 100).toFixed(1);
   };
 
+  // Функции для перевода ключей опросников в читаемый вид
+  const getReasonLabel = (reason) => {
+    const labels = {
+      'price': 'Стоимость',
+      'clarity': 'Не всё понятно',
+      'examples': 'Хочу больше примеров',
+      'timing': 'Сроки',
+      'other': 'Другое',
+      'unknown': 'Не указано'
+    };
+    return labels[reason] || reason;
+  };
+
+  const getFeedbackLabel = (feedback) => {
+    const labels = {
+      'price': 'Стоимость',
+      'clarity': 'Не всё понятно',
+      'examples': 'Хочу больше примеров',
+      'timing': 'Сроки',
+      'other': 'Другое'
+    };
+    return labels[feedback] || feedback;
+  };
+
   // Автоматически загружаем аналитику при изменении периода или метрики посетителей
   useEffect(() => {
     if (isAuthenticated && selectedPeriod) {
@@ -419,44 +443,126 @@ const AdminPanel = () => {
                   <div className="metric-value">{detailsPage.avgTimeSec || 0}s</div>
                 </div>
               </div>
-              <div className="metric-card">
-                <div className="metric-icon">🧪</div>
-                <div className="metric-content">
-                  <h3>Опросник (модал)</h3>
-                  <div className="metric-value">Закрыли: {formatNumber(detailsPage.survey?.closed || 0)}</div>
-                  <div className="metric-subtitle">Причины:</div>
-                  <div className="metric-subtitle">
-                    {(detailsPage.survey?.reasons && Object.keys(detailsPage.survey.reasons).length > 0)
-                      ? Object.entries(detailsPage.survey.reasons).map(([k,v]) => (
-                          <span key={k} style={{marginRight:8}}>{k}: {formatNumber(v)}</span>
-                        ))
-                      : 'нет данных'}
+                                <div className="metric-card">
+                    <div className="metric-icon">🧪</div>
+                    <div className="metric-content">
+                      <h3>Опросник (модал)</h3>
+                      <div className="metric-value">Закрыли: {formatNumber(detailsPage.survey?.closed || 0)}</div>
+                      
+                      {/* Причины закрытия опросника */}
+                      <div className="metric-subtitle">Причины закрытия:</div>
+                      <div className="metric-subtitle">
+                        {(detailsPage.survey?.reasons && Object.keys(detailsPage.survey.reasons).length > 0)
+                          ? Object.entries(detailsPage.survey.reasons)
+                              .sort(([,a], [,b]) => b - a) // Сортируем по убыванию
+                              .map(([k,v]) => (
+                                <div key={k} style={{marginBottom: 4, padding: '2px 6px', backgroundColor: '#f0f0f0', borderRadius: 4, display: 'inline-block', marginRight: 8}}>
+                                  {getReasonLabel(k)}: {formatNumber(v)}
+                                </div>
+                              ))
+                          : <span style={{color: '#999'}}>нет данных</span>}
+                      </div>
+                      
+                      {/* Обратная связь */}
+                      <div className="metric-subtitle">Обратная связь:</div>
+                      <div className="metric-subtitle">
+                        {(detailsPage.survey?.feedback && Object.keys(detailsPage.survey.feedback).length > 0)
+                          ? Object.entries(detailsPage.survey.feedback)
+                              .sort(([,a], [,b]) => b - a) // Сортируем по убыванию
+                              .map(([k,v]) => (
+                                <div key={k} style={{marginBottom: 4, padding: '2px 6px', backgroundColor: '#e8f4fd', borderRadius: 4, display: 'inline-block', marginRight: 8}}>
+                                  {getFeedbackLabel(k)}: {formatNumber(v)}
+                                </div>
+                              ))
+                          : <span style={{color: '#999'}}>нет данных</span>}
+                      </div>
+                    </div>
                   </div>
-                  <div className="metric-subtitle">Обратная связь:</div>
-                  <div className="metric-subtitle">
-                    {(detailsPage.survey?.feedback && Object.keys(detailsPage.survey.feedback).length > 0)
-                      ? Object.entries(detailsPage.survey.feedback).map(([k,v]) => (
-                          <span key={k} style={{marginRight:8}}>{k}: {formatNumber(v)}</span>
-                        ))
-                      : 'нет данных'}
+                                <div className="metric-card">
+                    <div className="metric-icon">❓</div>
+                    <div className="metric-content">
+                      <h3>Мини-опросы</h3>
+                      
+                      {/* Понравилась презентация */}
+                      <div className="metric-subtitle">Понравилась презентация:</div>
+                      <div className="metric-value">
+                        <span style={{color: '#28a745', fontWeight: 'bold'}}>Да: {formatNumber(detailsPage.polls?.wouldOrder?.yes || 0)}</span>
+                        <span style={{margin: '0 8px'}}>|</span>
+                        <span style={{color: '#dc3545', fontWeight: 'bold'}}>Нет: {formatNumber(detailsPage.polls?.wouldOrder?.no || 0)}</span>
+                      </div>
+                      {detailsPage.polls?.wouldOrder && (
+                        <div className="metric-subtitle">
+                          Всего ответов: {formatNumber((detailsPage.polls.wouldOrder.yes || 0) + (detailsPage.polls.wouldOrder.no || 0))}
+                        </div>
+                      )}
+                      
+                      {/* Хотели бы на свадьбе */}
+                      <div className="metric-subtitle">Хотели бы на свадьбе:</div>
+                      <div className="metric-value">
+                        <span style={{color: '#28a745', fontWeight: 'bold'}}>Да: {formatNumber(detailsPage.polls?.wouldHave?.yes || 0)}</span>
+                        <span style={{margin: '0 8px'}}>|</span>
+                        <span style={{color: '#ffc107', fontWeight: 'bold'}}>Подумаю: {formatNumber(detailsPage.polls?.wouldHave?.no || 0)}</span>
+                      </div>
+                      {detailsPage.polls?.wouldHave && (
+                        <div className="metric-subtitle">
+                          Всего ответов: {formatNumber((detailsPage.polls.wouldHave.yes || 0) + (detailsPage.polls.wouldHave.no || 0))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div className="metric-card">
-                <div className="metric-icon">❓</div>
-                <div className="metric-content">
-                  <h3>Мини-опросы</h3>
-                  <div className="metric-subtitle">Понравилась презентация:</div>
-                  <div className="metric-value">Да {formatNumber(detailsPage.polls?.wouldOrder?.yes || 0)} | Нет {formatNumber(detailsPage.polls?.wouldOrder?.no || 0)}</div>
-                  <div className="metric-subtitle">Хотели бы на свадьбе:</div>
-                  <div className="metric-value">Да {formatNumber(detailsPage.polls?.wouldHave?.yes || 0)} | Подумаю {formatNumber(detailsPage.polls?.wouldHave?.no || 0)}</div>
-                </div>
-              </div>
             </div>
           ) : (
             <div className="no-data">Нет данных</div>
           )}
         </div>
+
+        {/* Детальный анализ оценок */}
+        {analytics?.detailsPage?.ratings && (
+          <div className="analytics-section">
+            <h2>⭐ Детальный анализ оценок ({getPeriodLabel()})</h2>
+            <div className="ratings-grid">
+              <div className="rating-card">
+                <div className="rating-header">
+                  <h3>Общая статистика</h3>
+                </div>
+                <div className="rating-stats">
+                  <div className="rating-stat">
+                    <span className="stat-label">Средняя оценка:</span>
+                    <span className="stat-value">{analytics.detailsPage.ratings.avg} / 5</span>
+                  </div>
+                  <div className="rating-stat">
+                    <span className="stat-label">Всего оценок:</span>
+                    <span className="stat-value">{formatNumber(analytics.detailsPage.ratings.count)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="rating-card">
+                <div className="rating-header">
+                  <h3>Распределение по звездам</h3>
+                </div>
+                <div className="rating-distribution">
+                  {[5, 4, 3, 2, 1].map(rating => (
+                    <div key={rating} className="rating-bar">
+                      <span className="rating-label">{rating}⭐</span>
+                      <div className="rating-bar-container">
+                        <div 
+                          className="rating-bar-fill" 
+                          style={{ 
+                            width: `${analytics.detailsPage.ratings.count > 0 
+                              ? (analytics.detailsPage.ratings.dist[rating] || 0) / analytics.detailsPage.ratings.count * 100 
+                              : 0}%` 
+                          }}
+                        ></div>
+                      </div>
+                      <span className="rating-count">{analytics.detailsPage.ratings.dist[rating] || 0}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Устройства */}
         <div className="analytics-section">

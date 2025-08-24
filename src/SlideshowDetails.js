@@ -465,18 +465,16 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
               </button>
             ))}
           </div>
-          {!ratingSubmitted && (
-            <div className="poll" style={{marginTop:12}}>
-              <div className="poll-q">Подскажите, что нам улучшить, чтобы вам было комфортнее?</div>
-              <div className="poll-buttons">
-                <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'price' })}>Стоимость</button>
-                <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'clarity' })}>Не всё понятно</button>
-                <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'examples' })}>Хочу больше примеров</button>
-                <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'timing' })}>Сроки</button>
-                <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'other' })}>Другое</button>
-              </div>
+          <div className="poll" style={{marginTop:12}}>
+            <div className="poll-q">Подскажите, что нам улучшить, чтобы вам было комфортнее?</div>
+            <div className="poll-buttons">
+              <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'price' })}>Стоимость</button>
+              <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'clarity' })}>Не всё понятно</button>
+              <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'examples' })}>Хочу больше примеров</button>
+              <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'timing' })}>Сроки</button>
+              <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'other' })}>Другое</button>
             </div>
-          )}
+          </div>
           <div className="poll" style={{marginTop:12}}>
             <div className="poll-q">Понравилась презентация?</div>
             <div className="poll-buttons">
