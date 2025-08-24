@@ -276,24 +276,102 @@ app.get('/api/analytics', async (req, res) => {
         previousStartDate = new Date(yesterday.getTime());
         break;
       case 'week':
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        previousStartDate = new Date(startDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+        // Последние 7 дней, НЕ включая текущие сутки
+        // Начинаем с 7 дней назад от начала предыдущих суток
+        const yesterdayMsk = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const yesterdayMskParts = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Europe/Moscow',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).formatToParts(yesterdayMsk).reduce((acc, p) => {
+          if (p.type === 'year') acc.year = p.value;
+          if (p.type === 'month') acc.month = p.value;
+          if (p.type === 'day') acc.day = p.value;
+          return acc;
+        }, {});
+        
+        const weekEnd = new Date(`${yesterdayMskParts.year}-${yesterdayMskParts.month}-${yesterdayMskParts.day}T00:00:00+03:00`);
+        const weekStart = new Date(weekEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+        startDate = weekStart;
+        previousStartDate = new Date(weekStart.getTime() - 7 * 24 * 60 * 60 * 1000);
         break;
       case 'month':
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        previousStartDate = new Date(startDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+        // Последние 30 дней, НЕ включая текущие сутки
+        // Месяц заканчивается в начале недели (чтобы не пересекаться)
+        const monthYesterdayMsk = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const monthYesterdayMskParts = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Europe/Moscow',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).formatToParts(monthYesterdayMsk).reduce((acc, p) => {
+          if (p.type === 'year') acc.year = p.value;
+          if (p.type === 'month') acc.month = p.value;
+          if (p.type === 'day') acc.day = p.value;
+          return acc;
+        }, {});
+        
+        // Вычисляем начало недели для месяца
+        const monthWeekEnd = new Date(`${monthYesterdayMskParts.year}-${monthYesterdayMskParts.month}-${monthYesterdayMskParts.day}T00:00:00+03:00`);
+        const monthWeekStart = new Date(monthWeekEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+        
+        // Месяц заканчивается в начале недели
+        const monthEnd = new Date(monthWeekStart.getTime());
+        const monthStart = new Date(monthEnd.getTime() - 30 * 24 * 60 * 60 * 1000);
+        startDate = monthStart;
+        previousStartDate = new Date(monthStart.getTime() - 30 * 24 * 60 * 60 * 1000);
         break;
       case 'year':
-        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-        previousStartDate = new Date(startDate.getTime() - 365 * 24 * 60 * 60 * 1000);
+        // Последние 365 дней, НЕ включая текущие сутки
+        // Год заканчивается в начале месяца (чтобы не пересекаться)
+        const yearYesterdayMsk = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const yearYesterdayMskParts = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Europe/Moscow',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).formatToParts(yearYesterdayMsk).reduce((acc, p) => {
+          if (p.type === 'year') acc.year = p.value;
+          if (p.type === 'month') acc.month = p.value;
+          if (p.type === 'day') acc.day = p.value;
+          return acc;
+        }, {});
+        
+        // Вычисляем начало месяца для года
+        const yearMonthEnd = new Date(`${yearYesterdayMskParts.year}-${yearYesterdayMskParts.month}-${yearYesterdayMskParts.day}T00:00:00+03:00`);
+        const yearMonthStart = new Date(yearMonthEnd.getTime() - 30 * 24 * 60 * 60 * 1000);
+        
+        // Год заканчивается в начале месяца
+        const yearEnd = new Date(yearMonthStart.getTime());
+        const yearStart = new Date(yearEnd.getTime() - 365 * 24 * 60 * 60 * 1000);
+        startDate = yearStart;
+        previousStartDate = new Date(yearStart.getTime() - 365 * 24 * 60 * 60 * 1000);
         break;
       case 'all':
         startDate = new Date(0);
         previousStartDate = new Date(0);
         break;
       default:
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        previousStartDate = new Date(startDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+        // По умолчанию - последняя неделя, НЕ включая текущие сутки
+        // Начинаем с 7 дней назад от начала предыдущих суток
+        const defaultYesterdayMsk = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const defaultYesterdayMskParts = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Europe/Moscow',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).formatToParts(defaultYesterdayMsk).reduce((acc, p) => {
+          if (p.type === 'year') acc.year = p.value;
+          if (p.type === 'month') acc.month = p.value;
+          if (p.type === 'day') acc.day = p.value;
+          return acc;
+        }, {});
+        
+        const defaultEnd = new Date(`${defaultYesterdayMskParts.year}-${defaultYesterdayMskParts.month}-${defaultYesterdayMskParts.day}T00:00:00+03:00`);
+        const defaultStart = new Date(defaultEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+        startDate = defaultStart;
+        previousStartDate = new Date(defaultStart.getTime() - 7 * 24 * 60 * 60 * 1000);
     }
 
     // Получаем данные за текущий период (исключаем админку)
