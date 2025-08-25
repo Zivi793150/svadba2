@@ -456,11 +456,22 @@ const AdminPanel = () => {
                           ? Object.entries(detailsPage.survey.reasons)
                               .sort(([,a], [,b]) => b - a) // Сортируем по убыванию
                               .map(([k,v]) => (
-                                <div key={k} style={{marginBottom: 4, padding: '2px 6px', backgroundColor: '#f0f0f0', borderRadius: 4, display: 'inline-block', marginRight: 8}}>
+                                <div key={k} style={{
+                                  marginBottom: 4, 
+                                  padding: '6px 12px', 
+                                  backgroundColor: 'transparent', 
+                                  borderRadius: 6, 
+                                  display: 'inline-block', 
+                                  marginRight: 12,
+                                  color: '#ffffff',
+                                  fontWeight: '600',
+                                  fontSize: '13px',
+                                  border: '1px solid #ffffff'
+                                }}>
                                   {getReasonLabel(k)}: {formatNumber(v)}
                                 </div>
                               ))
-                          : <span style={{color: '#999'}}>нет данных</span>}
+                          : <span style={{color: '#999', fontStyle: 'italic'}}>нет данных</span>}
                       </div>
                       
                       {/* Обратная связь */}
@@ -470,11 +481,22 @@ const AdminPanel = () => {
                           ? Object.entries(detailsPage.survey.feedback)
                               .sort(([,a], [,b]) => b - a) // Сортируем по убыванию
                               .map(([k,v]) => (
-                                <div key={k} style={{marginBottom: 4, padding: '2px 6px', backgroundColor: '#e8f4fd', borderRadius: 4, display: 'inline-block', marginRight: 8}}>
+                                <div key={k} style={{
+                                  marginBottom: 4, 
+                                  padding: '6px 12px', 
+                                  backgroundColor: 'transparent', 
+                                  borderRadius: 6, 
+                                  display: 'inline-block', 
+                                  marginRight: 12,
+                                  color: '#ffffff',
+                                  fontWeight: '600',
+                                  fontSize: '13px',
+                                  border: '1px solid #ffffff'
+                                }}>
                                   {getFeedbackLabel(k)}: {formatNumber(v)}
                                 </div>
                               ))
-                          : <span style={{color: '#999'}}>нет данных</span>}
+                          : <span style={{color: '#999', fontStyle: 'italic'}}>нет данных</span>}
                       </div>
                     </div>
                   </div>
@@ -486,12 +508,28 @@ const AdminPanel = () => {
                       {/* Понравилась презентация */}
                       <div className="metric-subtitle">Понравилась презентация:</div>
                       <div className="metric-value">
-                        <span style={{color: '#28a745', fontWeight: 'bold'}}>Да: {formatNumber(detailsPage.polls?.wouldOrder?.yes || 0)}</span>
-                        <span style={{margin: '0 8px'}}>|</span>
-                        <span style={{color: '#dc3545', fontWeight: 'bold'}}>Нет: {formatNumber(detailsPage.polls?.wouldOrder?.no || 0)}</span>
+                        <span style={{
+                          color: '#28a745', 
+                          fontWeight: 'bold',
+                          backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          marginRight: '8px'
+                        }}>
+                          Да: {formatNumber(detailsPage.polls?.wouldOrder?.yes || 0)}
+                        </span>
+                        <span style={{
+                          color: '#dc3545', 
+                          fontWeight: 'bold',
+                          backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                          padding: '4px 8px',
+                          borderRadius: '4px'
+                        }}>
+                          Нет: {formatNumber(detailsPage.polls?.wouldOrder?.no || 0)}
+                        </span>
                       </div>
                       {detailsPage.polls?.wouldOrder && (
-                        <div className="metric-subtitle">
+                        <div className="metric-subtitle" style={{marginTop: '8px', color: '#666'}}>
                           Всего ответов: {formatNumber((detailsPage.polls.wouldOrder.yes || 0) + (detailsPage.polls.wouldOrder.no || 0))}
                         </div>
                       )}
@@ -499,12 +537,28 @@ const AdminPanel = () => {
                       {/* Хотели бы на свадьбе */}
                       <div className="metric-subtitle">Хотели бы на свадьбе:</div>
                       <div className="metric-value">
-                        <span style={{color: '#28a745', fontWeight: 'bold'}}>Да: {formatNumber(detailsPage.polls?.wouldHave?.yes || 0)}</span>
-                        <span style={{margin: '0 8px'}}>|</span>
-                        <span style={{color: '#ffc107', fontWeight: 'bold'}}>Подумаю: {formatNumber(detailsPage.polls?.wouldHave?.no || 0)}</span>
+                        <span style={{
+                          color: '#28a745', 
+                          fontWeight: 'bold',
+                          backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          marginRight: '8px'
+                        }}>
+                          Да: {formatNumber(detailsPage.polls?.wouldHave?.yes || 0)}
+                        </span>
+                        <span style={{
+                          color: '#ffc107', 
+                          fontWeight: 'bold',
+                          backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                          padding: '4px 8px',
+                          borderRadius: '4px'
+                        }}>
+                          Подумаю: {formatNumber(detailsPage.polls?.wouldHave?.no || 0)}
+                        </span>
                       </div>
                       {detailsPage.polls?.wouldHave && (
-                        <div className="metric-subtitle">
+                        <div className="metric-subtitle" style={{marginTop: '8px', color: '#666'}}>
                           Всего ответов: {formatNumber((detailsPage.polls.wouldHave.yes || 0) + (detailsPage.polls.wouldHave.no || 0))}
                         </div>
                       )}

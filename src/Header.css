@@ -57,6 +57,7 @@
   font-weight: 700;
   letter-spacing: 0.2px;
   line-height: 1;
+  font-family: 'Monotype-Corsiva-Regular', 'Monotype Corsiva', cursive, serif;
   background: linear-gradient(90deg, #ffe066, #a18fff, #5ee7ff);
   -webkit-background-clip: text;
   background-clip: text;

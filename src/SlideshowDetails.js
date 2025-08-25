@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo, useState } from 'react';
+import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import { FaArrowLeft, FaWhatsapp } from 'react-icons/fa';
 import { FaTelegramPlane } from 'react-icons/fa';
 import './SlideshowDetails.css';
@@ -10,6 +10,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
   const [pollOrderAnswer, setPollOrderAnswer] = useState(null);
   const [pollWeddingAnswer, setPollWeddingAnswer] = useState(null);
+  const [pollFeedbackAnswer, setPollFeedbackAnswer] = useState(null); // Добавляем состояние для первого вопроса
   const [showSurveyModal, setShowSurveyModal] = useState(false);
   const [showLeadModal, setShowLeadModal] = useState(false);
   const [leadName, setLeadName] = useState('');
@@ -18,26 +19,6 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
   const [leadChannel, setLeadChannel] = useState('whatsapp');
   const [leadScreen, setLeadScreen] = useState('need'); // 'need' | 'own'
   const [leadContact, setLeadContact] = useState(''); // Контактная информация
-  const generalInfoWedding = `1. Сначала до заказа необходимо  определиться с экраном, который хотите использовать для демонстрации.
-Для показа подойдут не все экраны, а только с пропорциями 16:9 и 16:10. Уточните пропорции у владельца экрана, а также его размер, и сообщите нам перед заказом.
-Чтобы посмотреть как примерно будет выглядеть  ваше презентация на этом экране – можете скачать наш образец и попросить ее посмотреть на нём.
-
-2. Длительность видео зависит от количества  фото и разворотов альбома.
-В нашем видео-образце 16 фотографий и 4 разворота. Возможно добавить в  презентацию дополнительные развороты (каждый разворот – 4 фото).
-Цена каждого дополнительного разворота  + 500- 1000 руб.
-Также длительность видео зависит от объема текста в описании фото.
-В шаблоне в описании к фото не больше 300 символов. Рекомендуем оставлять не делать  описание к одному фото больше. Это будет выглядеть затянуто и занудно.. Только главное.
-Чтобы сделать описание (например биографию мамы) больше - лучше добавлять фото и развороты.. Будет выглядеть интересно!
-
-3. В шаблоне презентации все фото «оживлены». Можно заказать презентацию и без оживления. Оживление стоит + 2000 (16 фотографий). И добавляет к сроку изготовления 1-2 дня.
-
-4. Пока музыкальное оформление презентации тоже возможно только в одном варианте.
-В дальнейшем будут добавлены и другие аудио-подложки на выбор.
-
-5. После того как определитесь с экраном, для заказа через форму «заказать», нужно сделать предоплату в размере 30% (в случае отказа от заказа предоплата не возвращается). После чего вам будет выслана форма для заполнения фото и текста. Очень тщательно  подойдите к подбору фотографий. выберите ваши любимые фото из вашего детства, школьных лет, студенчества и конечно же ваши лучшие совместные фото.
-после оформления заказа мы вышлем вам форму для заполнения фото и описания. заполните туда все фото и текст.
-После получения материалов мы приступаем к производству.
-После окончания мы предоставляем вам видео на согласование. Допускается только 1 правка в тексте. Так что фото подбирайте очень обдуманно. После правки и окончательного согласования вашей презентации вам нужно доплатить 70 % стоимости и мы  пришлем вам вашу свадебную презентацию на почту.`;
 
   // Блокируем скролл основной страницы при открытии модального окна
   useEffect(() => {
@@ -101,81 +82,91 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
     } catch (_) {}
   };
 
-  const { descriptionText, pricingText } = useMemo(() => {
+  const { descriptionText, generalInfoText, pricingText } = useMemo(() => {
     const raw = (videoData?.content || '').trim();
-    if (!raw) return { descriptionText: '', pricingText: '' };
-    const idx = raw.indexOf('Стоимость');
-    if (idx === -1) return { descriptionText: raw, pricingText: '' };
-    return { descriptionText: raw.slice(0, idx).trim(), pricingText: raw.slice(idx).trim() };
+    if (!raw) return { descriptionText: '', generalInfoText: '', pricingText: '' };
+    
+    // Ищем начало "Общей информации"
+    const generalInfoIdx = raw.indexOf('Общая информация');
+    if (generalInfoIdx === -1) {
+      // Если нет "Общей информации", ищем "Стоимость"
+      const pricingIdx = raw.indexOf('Стоимость');
+      if (pricingIdx === -1) return { descriptionText: raw, generalInfoText: '', pricingText: '' };
+      return { descriptionText: raw.slice(0, pricingIdx).trim(), generalInfoText: '', pricingText: raw.slice(pricingIdx).trim() };
+    }
+    
+    // Ищем начало "Стоимость"
+    const pricingIdx = raw.indexOf('Стоимость');
+    if (pricingIdx === -1) {
+      return { descriptionText: raw.slice(0, generalInfoIdx).trim(), generalInfoText: raw.slice(generalInfoIdx).trim(), pricingText: '' };
+    }
+    
+    // Разбиваем на три части
+    return {
+      descriptionText: raw.slice(0, generalInfoIdx).trim(),
+      generalInfoText: raw.slice(generalInfoIdx, pricingIdx).trim(),
+      pricingText: raw.slice(pricingIdx).trim()
+    };
   }, [videoData?.content]);
 
-  const condensedInfo = useMemo(() => ([
-    'Экран: пропорции 16:9 или 16:10. Сообщите точный размер — мы адаптируем видео.',
-    'Длительность зависит от количества фото и разворотов. Базово: 16 фото и 4 разворота; можно добавить.',
-    'Описания к фото — до ~300 символов. Если нужно больше, лучше добавить фото/развороты, чтобы не перегружать.',
-    'Оживление фото — опционально (+2000 ₽ за 16 фото) и +1–2 дня к сроку.',
-    'Музыка пока в одном варианте; со временем добавим выбор.',
-    'Процесс: предоплата 30% → получаете форму → заполняете фото и тексты → 1 правка по тексту → финал и доплата 70% → отправка готового видео.'
-  ]), []);
+  const condensedInfo = useMemo(() => {
+    if (!generalInfoText) return [];
+    
+    // Парсим "Общую информацию" по пунктам
+    const lines = generalInfoText.split('\n').filter(line => line.trim());
+    const info = [];
+    let currentItem = '';
+    
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed.match(/^\d+\./)) {
+        if (currentItem) info.push(currentItem.trim());
+        currentItem = trimmed.replace(/^\d+\.\s*/, '');
+      } else if (trimmed) {
+        currentItem += ' ' + trimmed;
+      }
+    });
+    
+    if (currentItem) info.push(currentItem.trim());
+    
+    return info.length > 0 ? info : [
+      'Экран: пропорции 16:9 или 16:10. Сообщите точный размер — мы адаптируем видео.',
+      'Длительность зависит от количества фото и разворотов. Базово: 16 фото и 4 разворота; можно добавить.',
+      'Описания к фото — до ~300 символов. Если нужно больше, лучше добавить фото/развороты, чтобы не перегружать.',
+      'Оживление фото — опционально (+2000 ₽ за 16 фото) и +1–2 дня к сроку.',
+      'Музыка пока в одном варианте; со временем добавим выбор.',
+      'Процесс: предоплата 30% → получаете форму → заполняете фото и тексты → 1 правка по тексту → финал и доплата 70% → отправка готового видео.'
+    ];
+  }, [generalInfoText]);
 
-  const handleSubmitRating = (value) => {
+  const handleSubmitRating = useCallback((value) => {
     setRatingValue(value);
     setRatingSubmitted(true);
     trackConversion('rating_submit', { value, product: videoData?.title || 'unknown' });
-  };
+  }, [videoData?.title]);
 
-  const handlePollOrder = (answer) => {
+  const handlePollFeedback = useCallback((feedback) => {
+    setPollFeedbackAnswer(feedback);
+    trackConversion('survey_feedback', { feedback, product: videoData?.title || 'unknown' });
+  }, [videoData?.title]);
+
+  const handlePollOrder = useCallback((answer) => {
     setPollOrderAnswer(answer);
     trackConversion('poll_would_order', { answer, product: videoData?.title || 'unknown' });
-  };
+  }, [videoData?.title]);
 
-  const handlePollWedding = (answer) => {
+  const handlePollWedding = useCallback((answer) => {
     setPollWeddingAnswer(answer);
     trackConversion('poll_would_have', { answer, product: videoData?.title || 'unknown' });
-  };
+  }, [videoData?.title]);
 
-  const closeSurvey = () => {
+  const closeSurvey = useCallback(() => {
     try { sessionStorage.setItem('surveyShownV1', '1'); } catch (_) {}
     setShowSurveyModal(false);
     trackConversion('survey_closed', { where: 'modal' });
-  };
+  }, []);
 
-  // Выбор экрана
-  const screenOptions = useMemo(() => ([
-    { label: '1920×1080', aspect: '16:9' },
-    { label: '1280×720', aspect: '16:9' },
-    { label: '1366×768', aspect: '16:9' },
-    { label: '2560×1440', aspect: '16:9' },
-    { label: '1920×1200', aspect: '16:10' },
-    { label: '1280×800', aspect: '16:10' }
-  ]), []);
-  const [selectedScreen, setSelectedScreen] = useState(null);
-  const [customScreen, setCustomScreen] = useState('');
-  const normalizedCustom = useMemo(() => {
-    const m = (customScreen || '').replace(/\s+/g, '').match(/^(\d{3,5})[x×](\d{3,5})$/i);
-    if (!m) return null;
-    const w = parseInt(m[1], 10);
-    const h = parseInt(m[2], 10);
-    if (!w || !h) return null;
-    const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
-    const g = gcd(w, h);
-    const arW = Math.round(w / g);
-    const arH = Math.round(h / g);
-    return { label: `${w}×${h}`, aspect: `${arW}:${arH}` };
-  }, [customScreen]);
-
-  const proceedWithScreen = () => {
-    const sel = selectedScreen || normalizedCustom;
-    if (!sel) return;
-    try {
-      localStorage.setItem('screenSelection', JSON.stringify(sel));
-    } catch (_) {}
-    trackConversion('screen_select', { resolution: sel.label, aspect: sel.aspect, product: videoData?.title || 'unknown' });
-    if (onOrder) onOrder();
-    if (window.trackOrderPage) window.trackOrderPage();
-  };
-
-  const handleWhatsAppClick = () => {
+  const handleWhatsAppClick = useCallback(() => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const botPhone = '79004511777'; // Номер WhatsApp бота
     const message = encodeURIComponent('/start');
@@ -192,9 +183,9 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
     }
     // Детально для страницы подробностей
     trackConversion('whatsapp_clicked', { trigger: 'details_button' });
-  };
+  }, []);
 
-  const handleTelegramClick = () => {
+  const handleTelegramClick = useCallback(() => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const managerUsername = 'feiero'; // Username менеджера
 
@@ -216,16 +207,16 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
     }
     // Детально для страницы подробностей
     trackConversion('telegram_clicked', { trigger: 'details_button' });
-  };
+  }, []);
 
-  const handleQuestionClick = () => {
+  const handleQuestionClick = useCallback(() => {
     onContactClick();
     trackConversion('discuss_click', { from: 'details' });
-  };
+  }, [onContactClick]);
 
   // Лид-форма: открыть/закрыть/отправить
-  const closeLeadModal = () => setShowLeadModal(false);
-  const handleLeadSubmit = (e) => {
+  const closeLeadModal = useCallback(() => setShowLeadModal(false), []);
+  const handleLeadSubmit = useCallback((e) => {
     if (e && e.preventDefault) e.preventDefault();
     const message = `Здравствуйте! Хочу оформить заявку.\n\nИмя: ${leadName || '-'}\nСрок/дата: ${leadTerm || '-'}\nБюджет: ${leadBudget || '-'}\nЭкран: ${leadScreen === 'need' ? 'Подобрать' : 'Есть свой'}\nКонтакт: ${leadContact || '-'}\nПродукт: ${videoData?.title || '-'}`;
     const encoded = encodeURIComponent(message);
@@ -306,7 +297,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
       try { alert('Заявка отправлена боту в Telegram. Откройте диалог с @feyero_bot, чтобы продолжить.'); } catch (_) {}
     }
     setShowLeadModal(false);
-  };
+  }, [leadName, leadTerm, leadBudget, leadScreen, leadContact, leadChannel, videoData?.title]);
 
   return (
     <>
@@ -343,7 +334,7 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
               <div className="info-card animate-in glow-silver">
                 <h3>Описание</h3>
                 {descriptionText
-                  ? descriptionText.split(/\n\s*\n/).filter(Boolean).slice(0, 2).map((para, idx) => (
+                  ? descriptionText.split('\n').filter(Boolean).map((para, idx) => (
                       <p key={`desc-${idx}`}>{para}</p>
                     ))
                   : (
@@ -355,28 +346,38 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
                 </div>
             </section>
 
-            {/* 2. Общая информация (сокращённо) */}
-            <section className="info-section">
-              <div className="info-card animate-in glow-silver">
-                <h3>Общая информация</h3>
-                <ol className="gi-list">
-                  {condensedInfo.map((p, i) => (
-                    <li key={`gi-cond-${i}`}>{p}</li>
-                  ))}
-                </ol>
-              </div>
-            </section>
+            {/* 2. Общая информация (сокращённо) - только для презентаций */}
+            {!videoData?.isVertical && generalInfoText && (
+              <section className="info-section">
+                <div className="info-card animate-in glow-silver">
+                  <h3>Общая информация</h3>
+                  <ol className="gi-list">
+                    {condensedInfo.map((p, i) => (
+                      <li key={`gi-cond-${i}`}>{p}</li>
+                    ))}
+                  </ol>
+                </div>
+              </section>
+            )}
 
             {/* 3. Цены и сроки */}
             {pricingText && (
               <section className="info-section">
                 <div className="pricing-card animate-in glow-silver">
                   <h3>Цены и сроки</h3>
-                  {pricingText.split(/\n\s*\n/).filter(Boolean).map((para, idx) => (
-                    <p key={`pr-${idx}`}>{para}</p>
-                  ))}
+                  {pricingText.split('\n').filter(Boolean).map((line, idx) => {
+                    // Определяем, является ли строка заголовком или ценой
+                    const isHeading = line.includes('без оживления') || line.includes('с оживлением');
+                    const isPrice = (line.includes('разворота') || line.includes('разворотов')) && line.includes('р');
+                    
+                    return (
+                      <div key={`pr-${idx}`} className={isHeading ? 'pricing-title' : isPrice ? 'pricing-line' : ''}>
+                        {line}
+                      </div>
+                    );
+                  })}
                   <div className="cta-highlight">
-                    <div className="cta-text">Хотите свадебный вау-эффект, но бюджет ограничен? Заходите в чат — подберём идеальное решение</div>
+                    <div className="cta-text">Нет экрана или какие-то вопросы? - мы поможем все организовать</div>
                     <button className="btn question-btn" onClick={() => { 
                       setShowLeadModal(true); 
                       trackConversion('lead_modal_open', { 
@@ -386,9 +387,9 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
                       }); 
                     }}>
                       <FaTelegramPlane size={18} />
-                      <span>Мы поможем все организовать</span>
+                      <span>Сделать первый шаг</span>
                     </button>
-              </div>
+                  </div>
                 </div>
               </section>
             )}
@@ -412,8 +413,6 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
                 </div>
               </div>
             </section>
-
-            
 
             
           </div>
@@ -468,11 +467,11 @@ export default function SlideshowDetails({ onClose, onContactClick, videoData, o
           <div className="poll" style={{marginTop:12}}>
             <div className="poll-q">Подскажите, что нам улучшить, чтобы вам было комфортнее?</div>
             <div className="poll-buttons">
-              <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'price' })}>Стоимость</button>
-              <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'clarity' })}>Не всё понятно</button>
-              <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'examples' })}>Хочу больше примеров</button>
-              <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'timing' })}>Сроки</button>
-              <button className="poll-btn" onClick={() => trackConversion('survey_feedback', { feedback: 'other' })}>Другое</button>
+              <button className={`poll-btn${pollFeedbackAnswer==='price' ? ' active' : ''}`} onClick={() => handlePollFeedback('price')}>Стоимость</button>
+              <button className={`poll-btn${pollFeedbackAnswer==='clarity' ? ' active' : ''}`} onClick={() => handlePollFeedback('clarity')}>Не всё понятно</button>
+              <button className={`poll-btn${pollFeedbackAnswer==='examples' ? ' active' : ''}`} onClick={() => handlePollFeedback('examples')}>Хочу больше примеров</button>
+              <button className={`poll-btn${pollFeedbackAnswer==='timing' ? ' active' : ''}`} onClick={() => handlePollFeedback('timing')}>Сроки</button>
+              <button className={`poll-btn${pollFeedbackAnswer==='other' ? ' active' : ''}`} onClick={() => handlePollFeedback('other')}>Другое</button>
             </div>
           </div>
           <div className="poll" style={{marginTop:12}}>

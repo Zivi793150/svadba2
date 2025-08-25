@@ -401,6 +401,21 @@
   font-size: 14px;
   opacity: 0.7;
   font-weight: 500;
+  margin-bottom: 8px;
+}
+
+/* Улучшения для опросников */
+.metric-subtitle:last-child {
+  margin-bottom: 0;
+}
+
+/* Стили для блоков с данными опросников */
+.survey-data-block {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Analytics Sections */

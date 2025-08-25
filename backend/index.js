@@ -1436,38 +1436,59 @@ if (cron) {
       const conversions = await Conversion.find({ timestamp: { $gte: startDate } });
       const sessions = await UserSession.find({ startTime: { $gte: startDate } });
       
-      // Формируем отчет
-      const uniqueVisitors = new Set(sessions.map(s => s.sessionId)).size;
-      const totalPageViews = views.length;
+      // Формируем подробный отчёт в том же формате, что и ручной дневной дайджест
+      const totalViews = views.length;
       const totalConversions = conversions.length;
-      
-      // Оценки
-      const ratings = conversions.filter(c => c.action === 'rating_submit');
-      const ratingCount = ratings.length;
-      const ratingAvg = ratingCount > 0 
-        ? Math.round((ratings.reduce((s, r) => s + Number(r.metadata?.value || 0), 0) / ratingCount) * 10) / 10 
-        : 0;
-      
-      // Чаты
-      const chatEngagement = await ChatEngagement.find({ timestamp: { $gte: startDate } });
-      const activeChats = chatEngagement.length;
-      
-      const report = `📊 *Ежедневный отчет (${new Date().toLocaleDateString('ru-RU', { timeZone: 'Europe/Moscow' })})*
-      
-👥 Посетители: *${uniqueVisitors}*
-📄 Просмотры: *${totalPageViews}*
-🎯 Конверсии: *${totalConversions}*
-⭐ Оценки: *${ratingAvg}/5* (${ratingCount} шт.)
-💬 Активные чаты: *${activeChats}*
+      const productViews = conversions.filter(c => c.action === 'product_view').length;
+      const orderVisits = conversions.filter(c => c.action === 'order_page_visited' || c.action === 'order_page_open').length;
+      const teleClicks = conversions.filter(c => c.action === 'telegram_clicked').length;
+      const waClicks = conversions.filter(c => c.action === 'whatsapp_clicked').length;
+      const screenSelects = conversions.filter(c => c.action === 'screen_select').length;
 
-Отчет отправлен автоматически в 12:00 МСК`;
-      
-      // Отправляем в Telegram
+      // Уникальные по sessionId
+      const uniqueBySession = new Set(sessions.map(s => s.sessionId)).size;
+
+      // Детальная страница
+      const dConv = conversions.filter(c => c.page === '/details');
+      const dViews = dConv.filter(c => c.action === 'product_view').length;
+      const dOrders = dConv.filter(c => c.action === 'order_page_visited' || c.action === 'order_page_open').length;
+      const dTg = dConv.filter(c => c.action === 'telegram_clicked').length;
+      const dWa = dConv.filter(c => c.action === 'whatsapp_clicked').length;
+      const dRatings = dConv.filter(c => c.action === 'rating_submit');
+      const dAvg = dRatings.length ? Math.round((dRatings.reduce((s, r) => s + (Number(r.metadata?.value)||0), 0) / dRatings.length) * 10) / 10 : 0;
+      const dTime = dConv.filter(c => c.action === 'details_time');
+      const dTimeAvg = dTime.length ? Math.round((dTime.reduce((s, e) => s + (Number(e.metadata?.ms)||0), 0) / dTime.length) / 1000) : 0;
+      const dSurveyClosed = dConv.filter(c => c.action === 'survey_closed').length;
+      const dReasons = dConv.filter(c => c.action === 'survey_reason').reduce((acc, c) => { const r = c.metadata?.reason || 'unknown'; acc[r] = (acc[r] || 0) + 1; return acc; }, {});
+      const dFeedback = dConv.filter(c => c.action === 'survey_feedback').reduce((acc, c) => { const f = c.metadata?.feedback || 'other'; acc[f] = (acc[f] || 0) + 1; return acc; }, {});
+
+      const lines = [
+        `📊 *Ежедневная сводка за сегодня (МСК)*`,
+        `👥 *Посетители* (sessionId): *${uniqueBySession}*`,
+        `📄 *Просмотры*: *${totalViews}*`,
+        `🎯 *Конверсии всего*: *${totalConversions}*`,
+        `🧩 *Просмотры карточек*: *${productViews}*`,
+        `🛒 *Переходов к оформлению*: *${orderVisits}*`,
+        `🖥️ *Выбор экрана*: *${screenSelects}*`,
+        `✈️ *Клики*: TG *${teleClicks}* | WA *${waClicks}*`,
+        `\n— *Детальная страница* —`,
+        `👁️ Просмотры: *${dViews}* | 🛒 Заказы: *${dOrders}* | CTR: *${dViews>0?Math.round((dOrders/dViews)*100)+'%':'0%'}*`,
+        `⭐ Рейтинг: *${dAvg}* (оценок: *${dRatings.length}*) 1:${dRatings.filter(r=>r.metadata?.value===1).length} 2:${dRatings.filter(r=>r.metadata?.value===2).length} 3:${dRatings.filter(r=>r.metadata?.value===3).length} 4:${dRatings.filter(r=>r.metadata?.value===4).length} 5:${dRatings.filter(r=>r.metadata?.value===5).length}`,
+        `⏱️ Среднее время на странице: *${dTimeAvg}s*`,
+        `✉️ Клики: TG *${dTg}* | WA *${dWa}*`,
+        `🧪 Закрыли опросник: *${dSurveyClosed}*`,
+        `❓ Причины отказа: ${Object.entries(dReasons).map(([k,v])=>`${k}:${v}`).join(' ') || 'нет данных'}`,
+        `💭 Обратная связь: ${Object.entries(dFeedback).map(([k,v])=>`${k}:${v}`).join(' ') || 'нет данных'}`
+      ];
+
+      const text = lines.join('\n');
+
+      // Отправляем в Telegram тем же способом
       const adminIds = parseAdminIds();
       if (adminIds.length > 0 && telegramBot) {
         for (const adminId of adminIds) {
           try {
-            await telegramBot.sendMessage(adminId, report, { parse_mode: 'Markdown' });
+            await telegramBot.sendMessage(adminId, text, { parse_mode: 'Markdown' });
             console.log(`✅ Отчет отправлен администратору ${adminId}`);
           } catch (error) {
             console.error(`❌ Ошибка отправки отчета администратору ${adminId}:`, error.message);
